@@ -1,3 +1,4 @@
+#[cfg(feature = "cli")]
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
@@ -78,6 +79,7 @@ impl Default for Level {
     }
 }
 
+#[cfg(feature = "cli")]
 impl std::str::FromStr for Level {
     type Err = clap::Error;
 
@@ -93,18 +95,19 @@ impl std::str::FromStr for Level {
     }
 }
 
-#[derive(Parser, Debug, Default, Serialize)]
+#[cfg_attr(feature = "cli", derive(Parser))]
+#[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CheckRequest {
-    #[clap(short = 'c', long)]
+    #[cfg_attr(feature = "cli", clap(short = 'c', long))]
     text: Option<String>,
-    //#[clap(short = 'd', long, conflicts_with = "text")]
+    //#[cfg_attr(feature = "cli", clap(short = 'd', long, conflicts_with = "text"))]
     //data: ,
-    #[clap(short = 'l', long, required = true)]
+    #[cfg_attr(feature = "cli", clap(short = 'l', long, required = true))]
     language: String,
-    #[clap(short = 'u', long)]
+    #[cfg_attr(feature = "cli", clap(short = 'u', long))]
     username: Option<String>,
-    #[clap(short = 'k', long)]
+    #[cfg_attr(feature = "cli", clap(short = 'k', long))]
     api_key: Option<String>,
     /*
     dicts: Option<Vec<String>>,
@@ -114,9 +117,9 @@ pub struct CheckRequest {
     disabled_rules: Option<Vec<isize>>,
     enabled_categories: Option<Vec<isize>>,
     disabled_categories: Option<Vec<isize>>,*/
-    #[clap(long, takes_value = false)]
+    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
     enabled_only: bool,
-    #[clap(long, default_value = "default")]
+    #[cfg_attr(feature = "cli", clap(long, default_value = "default"))]
     level: Level,
 }
 

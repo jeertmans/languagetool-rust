@@ -35,7 +35,7 @@ This software is not production-ready. Many changes are expected before I consid
 
 ### TODO List
 
-- [ ] Use Cargo features to enable Clap and others only in bin.rs
+- [x] Use Cargo features to enable Clap and others only in bin.rs
 - [ ] Construct a good cli
 - [ ] Handle all possible responses from LT
 - [ ] Document installation procedure

@@ -4,6 +4,7 @@ pub mod words;
 
 pub use crate::check::{CheckRequest, CheckResponse};
 pub use crate::languages::LanguagesResponse;
+#[cfg(feature = "cli")]
 use clap::Parser;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -113,26 +114,26 @@ impl Default for ConfigFile {
     }
 }
 
-#[derive(Debug, Deserialize, Parser, Serialize)]
-#[clap(author = "jeertmans")]
+#[cfg_attr(feature = "cli", derive(Parser))]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ServerParameters {
-    #[clap(long)]
+    #[cfg_attr(feature = "cli", clap(long))]
     config: Option<PathBuf>,
-    #[clap(short = 'p', long, name = "PRT", default_value = "8081", validator = is_port)]
+    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "8081", validator = is_port))]
     port: String,
-    #[clap(long, takes_value = false)]
+    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
     public: bool,
-    #[clap(long, name = "ORIGIN")]
+    #[cfg_attr(feature = "cli", clap(long, name = "ORIGIN"))]
     allow_origin: Option<String>,
-    #[clap(short = 'v', long, takes_value = false)]
+    #[cfg_attr(feature = "cli", clap(short = 'v', long, takes_value = false))]
     verbose: bool,
-    #[clap(long, takes_value = false)]
+    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
     #[serde(rename = "languageModel")]
     language_model: Option<PathBuf>,
-    #[clap(long, takes_value = false)]
+    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
     #[serde(rename = "word2vecModel")]
     word2vec_model: Option<PathBuf>,
-    #[clap(long, takes_value = false)]
+    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
     #[serde(rename = "premiumAlways")]
     premium_always: bool,
 }
@@ -151,12 +152,12 @@ impl Default for ServerParameters {
         }
     }
 }
-
-#[derive(Debug, Parser)]
+#[cfg_attr(feature = "cli", derive(Parser))]
+#[derive(Debug)]
 pub struct ServerCli {
-    #[clap(long, default_value = "http://localhost")]
+    #[cfg_attr(feature = "cli", clap(long, default_value = "http://localhost"))]
     hostname: String,
-    #[clap(short = 'p', long, name = "PRT", default_value = "8081", validator = is_port)]
+    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "8081", validator = is_port))]
     port: String,
 }
 
@@ -173,6 +174,7 @@ impl Server {
         Self { api, client }
     }
 
+    #[cfg(feature = "cli")]
     pub fn from_cli() -> Self {
         let server = ServerCli::parse();
         Self::new(server.hostname, server.port)
@@ -187,7 +189,6 @@ impl Server {
             .await
         {
             Ok(resp) => resp.json::<CheckResponse>().await,
-            //Ok(resp) => Ok(resp.text().await.unwrap()),
             Err(e) => Err(e),
         }
     }
