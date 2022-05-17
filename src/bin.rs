@@ -29,6 +29,11 @@ async fn main() {
                 .subcommand(WordsAddRequest::command().name("add"))
                 .subcommand(WordsDeleteRequest::command().name("delete")),
         )
+        .subcommand(
+            clap::Command::new("ping")
+                .author(clap::crate_authors!())
+                .about("Ping the LanguageTool server and return time elapsed in ms if success"),
+        )
         .get_matches();
 
     let server = Server::from_cli(ServerCli::from_arg_matches(&matches).unwrap());
@@ -53,6 +58,13 @@ async fn main() {
             _ => {
                 let req = WordsRequest::from_arg_matches(sub_matches).unwrap();
                 println!("{:?}", server.words(&req).await);
+            }
+        },
+        Some(("ping", _sub_matches)) => match server.ping().await {
+            Ok(delay) => println!("PONG! Delay: {} ms", delay),
+            Err(_) => {
+                eprintln!("Could not connect to server");
+                std::process::exit(exitcode::UNAVAILABLE);
             }
         },
         _ => unreachable!(),

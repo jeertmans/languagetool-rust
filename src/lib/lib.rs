@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::io;
 use std::path::PathBuf;
+use std::time::Instant;
 
 type RequestResult<T> = Result<T, reqwest::Error>;
 
@@ -243,6 +244,14 @@ impl Server {
             .await
         {
             Ok(resp) => resp.json::<WordsDeleteResponse>().await,
+            Err(e) => Err(e),
+        }
+    }
+
+    pub async fn ping(&self) -> RequestResult<u128> {
+        let start = Instant::now();
+        match self.client.get(&self.api).send().await {
+            Ok(_) => Ok((Instant::now() - start).as_millis()),
             Err(e) => Err(e),
         }
     }
