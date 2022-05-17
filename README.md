@@ -43,7 +43,7 @@ This software is not production-ready. Many changes are expected before I consid
 - [ ] Test commands that need API keys
 - [ ] Build test for lib
 - [ ] Build automated testing with LT server (GitHub action?)
-- [ ] Parser "data" as input to check command
+- [x] Parse "data" as input to check command
 - [ ] ...
 
 ## Contributing
