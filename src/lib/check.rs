@@ -2,67 +2,112 @@
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct DataAnnotation {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub markup: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub interpret_as: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Data {
+    pub annotation: Vec<DataAnnotation>,
+}
+
+impl Serialize for Data {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut map = std::collections::HashMap::new();
+        map.insert("annotation", &self.annotation);
+
+        serializer.serialize_str(&serde_json::to_string(&map).unwrap())
+    }
+}
+
+#[cfg(feature = "cli")]
+impl std::str::FromStr for Data {
+    type Err = clap::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        serde_json::from_str(s)
+            .map_err(|e| clap::Command::new("").error(clap::ErrorKind::InvalidValue, e.to_string()))
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Software {
-    name: String,
-    version: String,
-    build_date: String,
-    api_version: isize,
-    status: String,
-    premium: bool,
+    pub name: String,
+    pub version: String,
+    pub build_date: String,
+    pub api_version: isize,
+    pub status: String,
+    pub premium: bool,
 }
+
 #[derive(Debug, Deserialize)]
 pub struct DetectedLanguage {
-    name: String,
-    code: String,
+    pub name: String,
+    pub code: String,
 }
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LanguageCheck {
-    name: String,
-    code: String,
-    detected_language: DetectedLanguage,
+    pub name: String,
+    pub code: String,
+    pub detected_language: DetectedLanguage,
 }
+
 #[derive(Debug, Deserialize)]
 pub struct Replacement {
-    value: String,
+    pub value: String,
 }
+
 #[derive(Debug, Deserialize)]
 pub struct Context {
-    text: String,
-    offset: isize,
-    length: isize,
+    pub text: String,
+    pub offset: isize,
+    pub length: isize,
 }
+
 #[derive(Debug, Deserialize)]
 pub struct Url {
-    value: String,
+    pub value: String,
 }
+
 #[derive(Debug, Deserialize)]
 pub struct Category {
-    id: String,
-    name: String,
+    pub id: String,
+    pub name: String,
 }
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Rule {
-    id: String,
-    sub_id: String,
-    description: String,
-    urls: Vec<Url>,
-    issue_type: String,
-    category: Category,
+    pub id: String,
+    pub sub_id: String,
+    pub description: String,
+    pub urls: Vec<Url>,
+    pub issue_type: String,
+    pub category: Category,
 }
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Match {
-    message: String,
-    short_message: String,
-    offset: isize,
-    length: isize,
-    replacements: Vec<Replacement>,
-    context: Context,
-    sentence: String,
+    pub message: String,
+    pub short_message: String,
+    pub offset: isize,
+    pub length: isize,
+    pub replacements: Vec<Replacement>,
+    pub context: Context,
+    pub sentence: String,
     // rule: Rule, // Seems to cause problems with missing fields
 }
 
@@ -94,6 +139,7 @@ impl std::str::FromStr for Level {
         }
     }
 }
+
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -124,6 +170,7 @@ pub struct CheckRequest {
             conflicts_with = "text"
         )
     )]
+    //#[serde(serialize_with = "serde_qs::serialize_struct")]
     /// The text to be checked, given as a JSON document that specifies what's text and what's markup. This or 'text' is required. Markup will be ignored when looking for errors. Example text:
     /// ```
     /// A <b>test</b>
@@ -143,7 +190,7 @@ pub struct CheckRequest {
     /// {"markup": "<p>", "interpretAs": "\n\n"}
     /// ```
     /// The 'data' feature is not limited to HTML or XML, it can be used for any kind of markup. Entities will need to be expanded in this input.
-    pub data: Option<String>,
+    pub data: Option<Data>,
     #[cfg_attr(feature = "cli", clap(short = 'l', long, required = true))]
     /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the language automatically (see `preferredVariants` below). For languages with variants (English, German, Portuguese) spell checking will only be activated when you specify the variant, e.g. `en-GB` instead of just `en`.
     pub language: String,
