@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.3] - 2022-05-17
+
+### Features
+
+- Create a nice cli
+
+### Misc
+
+- Add new todos
+
 ## [0.0.2] - 2022-05-16
 
 ### Bug Fixes
@@ -11,6 +21,10 @@ All notable changes to this project will be documented in this file.
 ### Features
 
 - Now Clap is a feature required for bin
+
+### Misc
+
+- Update version & changelog
 
 ## [0.0.1] - 2022-05-16
 
