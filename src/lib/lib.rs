@@ -2,8 +2,9 @@ pub mod check;
 pub mod languages;
 pub mod words;
 
-pub use crate::check::{CheckRequest, CheckResponse};
-pub use crate::languages::LanguagesResponse;
+pub use crate::check::*;
+pub use crate::languages::*;
+pub use crate::words::*;
 #[cfg(feature = "cli")]
 use clap::Parser;
 use reqwest::Client;
@@ -175,8 +176,7 @@ impl Server {
     }
 
     #[cfg(feature = "cli")]
-    pub fn from_cli() -> Self {
-        let server = ServerCli::parse();
+    pub fn from_cli(server: ServerCli) -> Self {
         Self::new(server.hostname, server.port)
     }
 
@@ -204,9 +204,48 @@ impl Server {
             Err(e) => Err(e),
         }
     }
-    pub fn words(&self) {}
-    pub fn add_words(&self) {}
-    pub fn delete_words(&self) {}
+
+    pub async fn words(&self, request: &WordsRequest) -> RequestResult<WordsResponse> {
+        match self
+            .client
+            .get(format!("{}/words", self.api))
+            .query(request)
+            .send()
+            .await
+        {
+            Ok(resp) => resp.json::<WordsResponse>().await,
+            Err(e) => Err(e),
+        }
+    }
+
+    pub async fn words_add(&self, request: &WordsAddRequest) -> RequestResult<WordsAddResponse> {
+        match self
+            .client
+            .post(format!("{}/words/add", self.api))
+            .query(request)
+            .send()
+            .await
+        {
+            Ok(resp) => resp.json::<WordsAddResponse>().await,
+            Err(e) => Err(e),
+        }
+    }
+
+    pub async fn words_delete(
+        &self,
+        request: &WordsDeleteRequest,
+    ) -> RequestResult<WordsDeleteResponse> {
+        match self
+            .client
+            .post(format!("{}/words/delete", self.api))
+            .query(request)
+            .send()
+            .await
+        {
+            Ok(resp) => resp.json::<WordsDeleteResponse>().await,
+            Err(e) => Err(e),
+        }
+    }
 }
 
 #[cfg(test)]
