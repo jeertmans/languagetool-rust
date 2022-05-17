@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.5] - 2022-05-17
+
+### Features
+
+- Add ping command
+
 ## [0.0.4] - 2022-05-17
 
 ### Features
@@ -11,6 +17,7 @@ All notable changes to this project will be documented in this file.
 ### Misc
 
 - Update todos
+- Update version & changelog
 
 ## [0.0.3] - 2022-05-17
 
