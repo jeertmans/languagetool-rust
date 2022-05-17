@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4] - 2022-05-17
+
+### Features
+
+- Now correctly uses `data` field + pub fields
+
+### Misc
+
+- Update todos
+
 ## [0.0.3] - 2022-05-17
 
 ### Features
@@ -11,6 +21,8 @@ All notable changes to this project will be documented in this file.
 ### Misc
 
 - Add new todos
+- Update version & changelog
+- Update version in Cargo.lock
 
 ## [0.0.2] - 2022-05-16
 
