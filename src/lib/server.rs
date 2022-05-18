@@ -200,7 +200,7 @@ impl ServerClient {
 
     #[cfg(feature = "cli")]
     pub fn from_arg_matches(matches: &clap::ArgMatches) -> clap::Result<Self, clap::Error> {
-        let params = ServerCli::from_arg_matches(&matches)?;
+        let params = ServerCli::from_arg_matches(matches)?;
         Ok(Self::from_cli(params))
     }
 
