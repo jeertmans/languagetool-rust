@@ -41,11 +41,21 @@ async fn main() {
     match matches.subcommand() {
         Some(("check", sub_matches)) => {
             let req = CheckRequest::from_arg_matches(sub_matches).unwrap();
-            println!("{:?}", server.check(&req).await);
+            match server.check(&req).await {
+                Ok(value) => println!("{}", serde_json::to_string_pretty(&value).unwrap()),
+                Err(e) => {
+                    eprintln!("An error occured: {}", e);
+                    std::process::exit(exitcode::UNAVAILABLE);
+                }
+            }
         }
-        Some(("languages", _sub_matches)) => {
-            println!("{:?}", server.languages().await);
-        }
+        Some(("languages", _sub_matches)) => match server.languages().await {
+            Ok(value) => println!("{}", serde_json::to_string_pretty(&value).unwrap()),
+            Err(_) => {
+                eprintln!("Could not connect to server");
+                std::process::exit(exitcode::UNAVAILABLE);
+            }
+        },
         Some(("words", sub_matches)) => match sub_matches.subcommand() {
             Some(("add", sub_matches)) => {
                 let req = WordsAddRequest::from_arg_matches(sub_matches).unwrap();
