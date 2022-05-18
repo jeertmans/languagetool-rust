@@ -15,7 +15,11 @@ cargo install languagetool-rust
 ##### Usage
 
 ```
-ltrs --help
+ltrs ping # to check if the server is alive
+ltrs languages # to list all languages
+ltrs check --text "Some phrase with a smal mistake"
+
+ltrs --help # for more details
 ```
 
 #### Library
@@ -36,8 +40,8 @@ This software is not production-ready. Many changes are expected before I consid
 ### TODO List
 
 - [x] Use Cargo features to enable Clap and others only in bin.rs
-- [ ] Construct a good cli
-- [ ] Handle all possible responses from LT
+- [x] Construct a good cli
+- [x] Handle all possible responses from LT
 - [ ] Document installation procedure
 - [ ] Document functions
 - [ ] Test commands that need API keys
