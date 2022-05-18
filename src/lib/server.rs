@@ -226,7 +226,7 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => resp.json::<CheckResponse>().await,
+            Ok(resp) => resp.error_for_status()?.json::<CheckResponse>().await,
             Err(e) => Err(e),
         }
     }
@@ -238,7 +238,7 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => resp.json::<LanguagesResponse>().await,
+            Ok(resp) => resp.error_for_status()?.json::<LanguagesResponse>().await,
             Err(e) => Err(e),
         }
     }
@@ -251,7 +251,7 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => resp.json::<WordsResponse>().await,
+            Ok(resp) => resp.error_for_status()?.json::<WordsResponse>().await,
             Err(e) => Err(e),
         }
     }
@@ -264,7 +264,7 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => resp.json::<WordsAddResponse>().await,
+            Ok(resp) => resp.error_for_status()?.json::<WordsAddResponse>().await,
             Err(e) => Err(e),
         }
     }
@@ -280,7 +280,7 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => resp.json::<WordsDeleteResponse>().await,
+            Ok(resp) => resp.error_for_status()?.json::<WordsDeleteResponse>().await,
             Err(e) => Err(e),
         }
     }
