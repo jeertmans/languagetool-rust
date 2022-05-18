@@ -1,4 +1,4 @@
-use serde::Deserialize;
+//! Structures for `languages` requests and responses.
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]

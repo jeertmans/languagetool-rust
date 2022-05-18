@@ -1,3 +1,5 @@
+//! Structures for `check` requests and responses.
+
 #[cfg(feature = "cli")]
 use clap::Parser;
 use serde::{Deserialize, Serialize};
@@ -113,6 +115,10 @@ pub struct Match {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "lowercase")]
+/// Possible levels for additional rules.
+///
+/// Currently, `Level::Picky` adds additional rules
+/// with respect to `Level::Default`
 pub enum Level {
     Default,
     Picky,
@@ -143,7 +149,7 @@ impl std::str::FromStr for Level {
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
-/// LanguageTool [POST] check request.
+/// LanguageTool POST check request.
 ///
 /// The main feature - check a text with LanguageTool for possible style and grammar issues.
 ///
@@ -170,13 +176,12 @@ pub struct CheckRequest {
             conflicts_with = "text"
         )
     )]
-    //#[serde(serialize_with = "serde_qs::serialize_struct")]
     /// The text to be checked, given as a JSON document that specifies what's text and what's markup. This or 'text' is required. Markup will be ignored when looking for errors. Example text:
-    /// ```
+    /// ```html
     /// A <b>test</b>
     /// ```
     /// JSON for the example text:
-    /// ```
+    /// ```json
     /// {"annotation":[
     ///  {"text": "A "},
     ///  {"markup": "<b>"},
@@ -186,7 +191,7 @@ pub struct CheckRequest {
     /// ```
     /// If you have markup that should be interpreted as whitespace, like <p> in HTML, you can have it interpreted like this:
     ///
-    /// ```
+    /// ```json
     /// {"markup": "<p>", "interpretAs": "\n\n"}
     /// ```
     /// The 'data' feature is not limited to HTML or XML, it can be used for any kind of markup. Entities will need to be expanded in this input.

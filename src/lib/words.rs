@@ -1,3 +1,5 @@
+//! Structures for `words` requests and responses.
+
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
@@ -24,7 +26,7 @@ pub struct LoginArgs {
 
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Debug, Default, Serialize)]
-/// LanguageTool [GET] words request.
+/// LanguageTool GET words request.
 ///
 /// List words in the user's personal dictionaries.
 pub struct WordsRequest {
@@ -43,7 +45,7 @@ pub struct WordsRequest {
 
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Debug, Default, Serialize)]
-/// LanguageTool [POST] words add request.
+/// LanguageTool POST words add request.
 ///
 /// Add a word to one of the user's personal dictionaries. Please note that this feature is considered to be used for personal dictionaries which must not contain more than 500 words. If this is an issue for you, please contact us.
 pub struct WordsAddRequest {
@@ -60,7 +62,7 @@ pub struct WordsAddRequest {
 
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Debug, Default, Serialize)]
-/// LanguageTool [POST] words delete request.
+/// LanguageTool POST words delete request.
 ///
 /// Remove a word from one of the user's personal dictionaries.
 pub struct WordsDeleteRequest {
