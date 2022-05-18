@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7] - 2022-05-18
+
+### Features
+
+- Response errors are now used
+- Changed language to `auto`
+
+### Miscellaneous Tasks
+
+- Fixed typo in docstring
+- Split docs for `-h` and `--help`
+- Update todos & usage
+
+### Ci
+
+- Rustfmt
+
+### Misc
+
+- Now exits as usage error for two commands
+
 ## [0.0.6] - 2022-05-18
 
 ### Features
@@ -20,6 +41,7 @@ All notable changes to this project will be documented in this file.
 ### Misc
 
 - Change default hostname api
+- Update version & changelog
 
 ## [0.0.5] - 2022-05-17
 
