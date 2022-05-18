@@ -45,7 +45,7 @@ async fn main() {
                 Ok(value) => println!("{}", serde_json::to_string_pretty(&value).unwrap()),
                 Err(e) => {
                     eprintln!("An error occured: {}", e);
-                    std::process::exit(exitcode::UNAVAILABLE);
+                    std::process::exit(exitcode::USAGE);
                 }
             }
         }
@@ -53,7 +53,7 @@ async fn main() {
             Ok(value) => println!("{}", serde_json::to_string_pretty(&value).unwrap()),
             Err(_) => {
                 eprintln!("Could not connect to server");
-                std::process::exit(exitcode::UNAVAILABLE);
+                std::process::exit(exitcode::USAGE);
             }
         },
         Some(("words", sub_matches)) => match sub_matches.subcommand() {
