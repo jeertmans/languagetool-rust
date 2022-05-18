@@ -165,7 +165,7 @@ impl Default for ServerParameters {
 ///
 /// To use your local server instead of online api, set:
 /// - `hostname` to "http://localhost"
-/// - `port' to "8081"
+/// - `port` to "8081"
 /// if you used the default configuration to start the server.
 pub struct ServerCli {
     #[cfg_attr(
