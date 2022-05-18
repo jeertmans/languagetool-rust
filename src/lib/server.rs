@@ -161,10 +161,16 @@ impl Default for ServerParameters {
 
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Debug)]
+/// Hostname and (optional) port to connect to a LanguageTool server.
+///
+/// To use your local server instead of online api, set:
+/// - `hostname` to "http://localhost"
+/// - `port' to "8081"
+/// if you used the default configuration to start the server.
 pub struct ServerCli {
-    #[cfg_attr(feature = "cli", clap(long, default_value = "http://localhost"))]
+    #[cfg_attr(feature = "cli", clap(long, default_value = "https://api.languagetoolplus.com"))]
     pub hostname: String,
-    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "8081", validator = is_port))]
+    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", validator = is_port))]
     pub port: String,
 }
 
