@@ -168,7 +168,10 @@ impl Default for ServerParameters {
 /// - `port' to "8081"
 /// if you used the default configuration to start the server.
 pub struct ServerCli {
-    #[cfg_attr(feature = "cli", clap(long, default_value = "https://api.languagetoolplus.com"))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(long, default_value = "https://api.languagetoolplus.com")
+    )]
     pub hostname: String,
     #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", validator = is_port))]
     pub port: String,
