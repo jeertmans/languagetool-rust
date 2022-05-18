@@ -2,11 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.6] - 2022-05-18
+
+### Features
+
+- Pretty print json output
+
+### Miscellaneous Tasks
+
+- Improve docs
+- Server mod and tests
+
+### Ci
+
+- Removed useless ref.
+
+### Misc
+
+- Change default hostname api
+
 ## [0.0.5] - 2022-05-17
 
 ### Features
 
 - Add ping command
+
+### Misc
+
+- Update version & changelog
 
 ## [0.0.4] - 2022-05-17
 
