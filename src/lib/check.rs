@@ -4,17 +4,21 @@
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
+/// Requests
+
 #[derive(Debug, Deserialize, Serialize)]
+/// A portion of text to be checked.
 pub struct DataAnnotation {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub text: Option<String>,
+    pub interpret_as: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub markup: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub interpret_as: Option<String>,
+    pub text: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
+/// Alternative text to be checked.
 pub struct Data {
     pub annotation: Vec<DataAnnotation>,
 }
@@ -39,78 +43,6 @@ impl std::str::FromStr for Data {
         serde_json::from_str(s)
             .map_err(|e| clap::Command::new("").error(clap::ErrorKind::InvalidValue, e.to_string()))
     }
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Software {
-    pub name: String,
-    pub version: String,
-    pub build_date: String,
-    pub api_version: isize,
-    pub status: String,
-    pub premium: bool,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct DetectedLanguage {
-    pub name: String,
-    pub code: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct LanguageCheck {
-    pub name: String,
-    pub code: String,
-    pub detected_language: DetectedLanguage,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Replacement {
-    pub value: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Context {
-    pub text: String,
-    pub offset: isize,
-    pub length: isize,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Url {
-    pub value: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Category {
-    pub id: String,
-    pub name: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Rule {
-    pub id: String,
-    pub sub_id: String,
-    pub description: String,
-    pub urls: Vec<Url>,
-    pub issue_type: String,
-    pub category: Category,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Match {
-    pub message: String,
-    pub short_message: String,
-    pub offset: isize,
-    pub length: isize,
-    pub replacements: Vec<Replacement>,
-    pub context: Context,
-    pub sentence: String,
-    // rule: Rule, // Seems to cause problems with missing fields
 }
 
 #[derive(Debug, Serialize)]
@@ -237,8 +169,14 @@ pub struct CheckRequest {
 impl CheckRequest {
     pub fn with_text(mut self, text: &str) -> Self {
         self.text = Some(text.to_string());
-        //self.data = None;
+        self.data = None;
         self
+    }
+
+    pub fn with_data(mut self, data: &str) -> serde_json::Result<Self> {
+        self.data = Some(serde_json::from_str(data)?);
+        self.text = None;
+        Ok(self)
     }
 
     pub fn with_language(mut self, language: &str) -> Self {
@@ -247,10 +185,114 @@ impl CheckRequest {
     }
 }
 
-#[derive(Debug, Deserialize)]
+/// Reponses
+
+#[derive(Debug, Deserialize, Serialize)]
+/// Detected language from check request.
+pub struct DetectedLanguage {
+    pub code: String,
+    pub confidence: Option<f64>,
+    pub name: String,
+    pub source: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+/// Language information in check response.
+pub struct LanguageResponse {
+    pub code: String,
+    pub detected_language: DetectedLanguage,
+    pub name: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Context {
+    pub length: usize,
+    pub offset: usize,
+    pub text: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Replacement {
+    pub value: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+/// A rule category.
+pub struct Category {
+    pub id: String,
+    pub name: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Url {
+    pub value: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+/// The rule that was not satisfied in a given match.
+pub struct Rule {
+    pub category: Category,
+    pub description: String,
+    pub id: String,
+    pub is_premium: Option<bool>,
+    pub issue_type: String,
+    pub source_file: Option<String>,
+    pub sub_id: Option<String>,
+    pub urls: Option<Vec<Url>>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Type {
+    pub type_name: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+/// Grammatical error match.
+pub struct Match {
+    pub context: Context,
+    pub context_for_sure_match: isize,
+    pub ignore_for_incomplete_sentence: bool,
+    pub length: usize,
+    pub message: String,
+    pub offset: usize,
+    pub replacements: Vec<Replacement>,
+    pub rule: Rule,
+    pub sentence: String,
+    pub short_message: String,
+    #[serde(rename = "type")]
+    pub type_: Type,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+/// LanguageTool software details.
+pub struct Software {
+    pub api_version: usize,
+    pub build_date: String,
+    pub name: String,
+    pub premium: bool,
+    pub premium_hint: Option<String>,
+    pub status: String,
+    pub version: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+/// Warnings about incomplete results.
+pub struct Warnings {
+    pub incomplete_results: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CheckResponse {
-    software: Software,
-    language: LanguageCheck,
+    language: LanguageResponse,
     matches: Vec<Match>,
+    sentence_ranges: Option<Vec<[usize; 2]>>,
+    software: Software,
+    warnings: Option<Warnings>,
 }

@@ -3,7 +3,7 @@ use languagetool_rust::*;
 
 #[tokio::main]
 async fn main() {
-    let matches = ServerCli::command()
+    let matches = ServerClient::command()
         .author(clap::crate_authors!())
         .about(clap::crate_description!())
         .name(clap::crate_name!())
@@ -19,7 +19,7 @@ async fn main() {
         .subcommand(
             clap::Command::new("languages")
                 .author(clap::crate_authors!())
-                .about("LanguageTool [GET] languages request"),
+                .about("LanguageTool GET languages request"),
         )
         .subcommand(
             WordsRequest::command()
@@ -36,7 +36,7 @@ async fn main() {
         )
         .get_matches();
 
-    let server = Server::from_cli(ServerCli::from_arg_matches(&matches).unwrap());
+    let server = ServerClient::from_arg_matches(&matches).unwrap();
 
     match matches.subcommand() {
         Some(("check", sub_matches)) => {
