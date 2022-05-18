@@ -128,7 +128,7 @@ pub struct CheckRequest {
     /// ```
     /// The 'data' feature is not limited to HTML or XML, it can be used for any kind of markup. Entities will need to be expanded in this input.
     pub data: Option<Data>,
-    #[cfg_attr(feature = "cli", clap(short = 'l', long, required = true))]
+    #[cfg_attr(feature = "cli", clap(short = 'l', long, default_value = "auto"))]
     /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the language automatically (see `preferredVariants` below). For languages with variants (English, German, Portuguese) spell checking will only be activated when you specify the variant, e.g. `en-GB` instead of just `en`.
     pub language: String,
     #[cfg_attr(feature = "cli", clap(short = 'u', long))]
