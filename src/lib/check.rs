@@ -154,16 +154,16 @@ pub struct CheckRequest {
     pub preferred_variants: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
     /// IDs of rules to be enabled, comma-separated
-    pub enabled_rules: Option<Vec<isize>>,
+    pub enabled_rules: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
     /// IDs of rules to be disabled, comma-separated
-    pub disabled_rules: Option<Vec<isize>>,
+    pub disabled_rules: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
     /// IDs of categories to be enabled, comma-separated
-    pub enabled_categories: Option<Vec<isize>>,
+    pub enabled_categories: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
     /// IDs of categories to be disabled, comma-separated
-    pub disabled_categories: Option<Vec<isize>>,
+    pub disabled_categories: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
     /// If true, only the rules and categories whose IDs are specified with `enabledRules` or `enabledCategories` are enabled.
     pub enabled_only: bool,
