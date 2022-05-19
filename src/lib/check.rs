@@ -91,7 +91,7 @@ pub struct CheckRequest {
     #[cfg_attr(
         feature = "cli",
         clap(
-            short = 'c',
+            short = 't',
             long,
             required_unless_present = "data",
             conflicts_with = "data"
