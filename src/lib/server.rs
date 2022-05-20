@@ -1,4 +1,5 @@
 use crate::check::{CheckRequest, CheckResponse};
+use crate::error::{Error, Result};
 use crate::languages::LanguagesResponse;
 use crate::words::{
     WordsAddRequest, WordsAddResponse, WordsDeleteRequest, WordsDeleteResponse, WordsRequest,
@@ -13,20 +14,20 @@ use std::io;
 use std::path::PathBuf;
 use std::time::Instant;
 
-type RequestResult<T> = Result<T, reqwest::Error>;
+//type RequestResult<T> = Result<T, reqwest::Error>;
 
 /// Check if `v` is a valid port.
 ///
 /// A valid port is either
 /// - an empty string
 /// - a 4 chars long string with each char in [0-9]
-pub fn is_port(v: &str) -> Result<(), String> {
+pub fn is_port(v: &str) -> Result<()> {
     if v.is_empty() || (v.len() == 4 && v.chars().all(char::is_numeric)) {
         return Ok(());
     }
-    Err(String::from(
-        "The value should be a 4 characters long string with digits only",
-    ))
+    Err(Error::InvalidValue {
+        body: "The value should be a 4 characters long string with digits only".to_string(),
+    })
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -208,7 +209,7 @@ impl ServerClient {
     }
 
     #[cfg(feature = "cli")]
-    pub fn from_arg_matches(matches: &clap::ArgMatches) -> clap::Result<Self, clap::Error> {
+    pub fn from_arg_matches(matches: &clap::ArgMatches) -> Result<Self> {
         let params = ServerCli::from_arg_matches(matches)?;
         Ok(Self::from_cli(params))
     }
@@ -218,7 +219,7 @@ impl ServerClient {
         ServerCli::command()
     }
 
-    pub async fn check(&self, request: &CheckRequest) -> RequestResult<CheckResponse> {
+    pub async fn check(&self, request: &CheckRequest) -> Result<CheckResponse> {
         match self
             .client
             .post(format!("{}/check", self.api))
@@ -226,24 +227,40 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => resp.error_for_status()?.json::<CheckResponse>().await,
-            Err(e) => Err(e),
+            Ok(resp) => match resp.error_for_status_ref() {
+                Ok(_) => resp
+                    .json::<CheckResponse>()
+                    .await
+                    .map_err(|e| Error::ResponseDecode { source: e }),
+                Err(_) => Err(Error::InvalidRequest {
+                    body: resp.text().await?,
+                }),
+            },
+            Err(e) => Err(Error::RequestEncode { source: e }),
         }
     }
 
-    pub async fn languages(&self) -> RequestResult<LanguagesResponse> {
+    pub async fn languages(&self) -> Result<LanguagesResponse> {
         match self
             .client
             .get(format!("{}/languages", self.api))
             .send()
             .await
         {
-            Ok(resp) => resp.error_for_status()?.json::<LanguagesResponse>().await,
-            Err(e) => Err(e),
+            Ok(resp) => match resp.error_for_status_ref() {
+                Ok(_) => resp
+                    .json::<LanguagesResponse>()
+                    .await
+                    .map_err(|e| Error::ResponseDecode { source: e }),
+                Err(_) => Err(Error::InvalidRequest {
+                    body: resp.text().await?,
+                }),
+            },
+            Err(e) => Err(Error::RequestEncode { source: e }),
         }
     }
 
-    pub async fn words(&self, request: &WordsRequest) -> RequestResult<WordsResponse> {
+    pub async fn words(&self, request: &WordsRequest) -> Result<WordsResponse> {
         match self
             .client
             .get(format!("{}/words", self.api))
@@ -251,12 +268,20 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => resp.error_for_status()?.json::<WordsResponse>().await,
-            Err(e) => Err(e),
+            Ok(resp) => match resp.error_for_status_ref() {
+                Ok(_) => resp
+                    .json::<WordsResponse>()
+                    .await
+                    .map_err(|e| Error::ResponseDecode { source: e }),
+                Err(_) => Err(Error::InvalidRequest {
+                    body: resp.text().await?,
+                }),
+            },
+            Err(e) => Err(Error::RequestEncode { source: e }),
         }
     }
 
-    pub async fn words_add(&self, request: &WordsAddRequest) -> RequestResult<WordsAddResponse> {
+    pub async fn words_add(&self, request: &WordsAddRequest) -> Result<WordsAddResponse> {
         match self
             .client
             .post(format!("{}/words/add", self.api))
@@ -264,15 +289,20 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => resp.error_for_status()?.json::<WordsAddResponse>().await,
-            Err(e) => Err(e),
+            Ok(resp) => match resp.error_for_status_ref() {
+                Ok(_) => resp
+                    .json::<WordsAddResponse>()
+                    .await
+                    .map_err(|e| Error::ResponseDecode { source: e }),
+                Err(_) => Err(Error::InvalidRequest {
+                    body: resp.text().await?,
+                }),
+            },
+            Err(e) => Err(Error::RequestEncode { source: e }),
         }
     }
 
-    pub async fn words_delete(
-        &self,
-        request: &WordsDeleteRequest,
-    ) -> RequestResult<WordsDeleteResponse> {
+    pub async fn words_delete(&self, request: &WordsDeleteRequest) -> Result<WordsDeleteResponse> {
         match self
             .client
             .post(format!("{}/words/delete", self.api))
@@ -280,17 +310,23 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => resp.error_for_status()?.json::<WordsDeleteResponse>().await,
-            Err(e) => Err(e),
+            Ok(resp) => match resp.error_for_status_ref() {
+                Ok(_) => resp
+                    .json::<WordsDeleteResponse>()
+                    .await
+                    .map_err(|e| Error::ResponseDecode { source: e }),
+                Err(_) => Err(Error::InvalidRequest {
+                    body: resp.text().await?,
+                }),
+            },
+            Err(e) => Err(Error::RequestEncode { source: e }),
         }
     }
 
-    pub async fn ping(&self) -> RequestResult<u128> {
+    pub async fn ping(&self) -> Result<u128> {
         let start = Instant::now();
-        match self.client.get(&self.api).send().await {
-            Ok(_) => Ok((Instant::now() - start).as_millis()),
-            Err(e) => Err(e),
-        }
+        self.client.get(&self.api).send().await?;
+        Ok((Instant::now() - start).as_millis())
     }
 }
 

@@ -108,7 +108,7 @@ pub struct CheckRequest {
             conflicts_with = "text"
         )
     )]
-    /// The text to be checked, given as a JSON document that specifies what's text and what's markup. This or 'text' is required. 
+    /// The text to be checked, given as a JSON document that specifies what's text and what's markup. This or 'text' is required.
     ///
     /// Markup will be ignored when looking for errors. Example text:
     /// ```html
@@ -131,7 +131,7 @@ pub struct CheckRequest {
     /// The 'data' feature is not limited to HTML or XML, it can be used for any kind of markup. Entities will need to be expanded in this input.
     pub data: Option<Data>,
     #[cfg_attr(feature = "cli", clap(short = 'l', long, default_value = "auto"))]
-    /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the language automatically (see `preferredVariants` below). 
+    /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the language automatically (see `preferredVariants` below).
     ///
     /// For languages with variants (English, German, Portuguese) spell checking will only be activated when you specify the variant, e.g. `en-GB` instead of just `en`.
     pub language: String,
@@ -148,7 +148,7 @@ pub struct CheckRequest {
     /// A language code of the user's native language, enabling false friends checks for some language pairs.
     pub mother_tongue: Option<String>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
-    /// Comma-separated list of preferred language variants. 
+    /// Comma-separated list of preferred language variants.
     ///
     /// The language detector used with `language=auto` can detect e.g. English, but it cannot decide whether British English or American English is used. Thus this parameter can be used to specify the preferred variants like `en-GB` and `de-AT`. Only available with `language=auto`. You should set variants for at least German and English, as otherwise the spell checking will not work for those, as no spelling dictionary can be selected for just `en` or `de`.
     pub preferred_variants: Option<Vec<String>>,
