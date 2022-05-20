@@ -77,17 +77,17 @@ pub struct WordsDeleteRequest {
     dict: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct WordsResponse {
     words: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct WordsAddResponse {
     added: bool,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct WordsDeleteResponse {
     deleted: bool,
 }
