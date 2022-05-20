@@ -1,6 +1,6 @@
 [package]
 name = "languagetool-rust"
-version = "0.0.9-alpha"
+version = "0.0.9-beta"
 authors = ["Jérome Eertmans <jeertmans@icloud.com>"]
 edition = "2021"
 description = "LanguageTool API bindings in Rust."
