@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.9] - 2022-05-20
+
+### Miscellaneous Tasks
+
+- Auto-doc for "feature"-only commands
+
+## [0.0.9-beta] - 2022-05-20
+
+### Bug Fixes
+
+- Now publish with cli feature
+
+### Misc
+
+- Update version & changelog
+
+## [0.0.9-alpha] - 2022-05-20
+
+### Miscellaneous Tasks
+
+- Add some doctests
+- Remove default features
+
+### Misc
+
+- Update version & changelog
+
 ## [0.0.8] - 2022-05-20
 
 ### Bug Fixes
@@ -19,6 +46,10 @@ All notable changes to this project will be documented in this file.
 - Refactor lib. exposed functions
 - Update description
 - Remove unused crate and add thiserror crate
+
+### Misc
+
+- Update version & changelog
 
 ## [0.0.7] - 2022-05-18
 
