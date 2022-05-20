@@ -1,3 +1,5 @@
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+
 pub mod check;
 pub mod error;
 pub mod languages;
