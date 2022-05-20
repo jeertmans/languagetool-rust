@@ -1,5 +1,6 @@
 //! Structures for `words` requests and responses.
 
+#[cfg(feature = "cli")]
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
@@ -36,7 +37,7 @@ pub struct WordsRequest {
     #[cfg_attr(feature = "cli", clap(long, default_value = "10"))]
     /// Maximum number of words to return.
     limit: isize,
-    #[clap(flatten)]
+    #[cfg_attr(feature = "cli", clap(flatten))]
     login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
     /// Comma-separated list of dictionaries to include words from; uses special default dictionary if this is unset
@@ -52,7 +53,7 @@ pub struct WordsAddRequest {
     #[cfg_attr(feature = "cli", clap(required = true, validator = is_word))]
     /// The word to be added. Must not be a phrase, i.e. cannot contain white space. The word is added to a global dictionary that applies to all languages.
     word: String,
-    #[clap(flatten)]
+    #[cfg_attr(feature = "cli", clap(flatten))]
     login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
     /// Name of the dictionary to add the word to; non-existent dictionaries are created after
@@ -69,7 +70,7 @@ pub struct WordsDeleteRequest {
     #[cfg_attr(feature = "cli", clap(required = true, validator = is_word))]
     /// The word to be removed.
     word: String,
-    #[clap(flatten)]
+    #[cfg_attr(feature = "cli", clap(flatten))]
     login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
     /// Name of the dictionary to add the word to; non-existent dictionaries are created after

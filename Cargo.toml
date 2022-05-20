@@ -19,7 +19,6 @@ tokio = { version = "1.18.2", features = ["full"] }
 
 [features]
 cli = ["clap"]
-default = ["cli"]
 
 [lib]
 name = "languagetool_rust"
