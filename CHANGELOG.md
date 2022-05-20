@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.8] - 2022-05-20
+
+### Bug Fixes
+
+- Text takes now 't' as short flag
+- IDs and categories are String
+
+### Features
+
+- Derive serialize for words' responses
+- New errors system
+
+### Miscellaneous Tasks
+
+- Refactor lib. exposed functions
+- Update description
+- Remove unused crate and add thiserror crate
+
 ## [0.0.7] - 2022-05-18
 
 ### Features
@@ -22,6 +40,7 @@ All notable changes to this project will be documented in this file.
 ### Misc
 
 - Now exits as usage error for two commands
+- Update version & changelog
 
 ## [0.0.6] - 2022-05-18
 
