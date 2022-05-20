@@ -3,7 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/languagetool-rust)](https://crates.io/crates/languagetool-rust)
 [![docs.rs](https://img.shields.io/docsrs/languagetool-rust)](https://docs.rs/languagetool-rust)
 
-Rust API to connect with LanguageTool servers.
+Rust bindings to connect with LanguageTool server API.
 
 #### Executable
 
