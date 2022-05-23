@@ -14,8 +14,6 @@ use std::io;
 use std::path::PathBuf;
 use std::time::Instant;
 
-//type RequestResult<T> = Result<T, reqwest::Error>;
-
 /// Check if `v` is a valid port.
 ///
 /// A valid port is either
