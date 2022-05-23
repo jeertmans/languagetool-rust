@@ -95,6 +95,15 @@ pub struct ConfigFile {
     pub pipeline_caching: Option<bool>,
     /// Cache size if 'pipelineCaching' is set
     pub max_pipeline_pool_size: Option<isize>,
+    /// Time after which pipeline cache items expire
+    pub pipeline_expire_time_in_seconds: Option<isize>,
+    /// Set to 'true' to fill pipeline cache on start (can slow down start a lot)
+    pub pipeline_prewarming: Option<bool>,
+    /// Spellcheck-only languages: You can add simple spellcheck-only support for languages that LT
+    /// doesn't support by defining two optional properties:
+    ///     'lang-xx' - set name of the language, use language code instead of 'xx', e.g. lang-tr=Turkish
+    ///     'lang-xx-dictPath' - absolute path to the hunspell .dic file, use language code instead of 'xx', e.g. lang-tr-dictPath=/path/to/tr.dic. Note that the same directory also needs to
+    pub spellcheck_only: Option<std::collections::HashMap<String, String>>,
 }
 
 impl ConfigFile {
@@ -112,6 +121,11 @@ impl ConfigFile {
                     key,
                     a.iter().map(|v| v.as_str().unwrap()).collect::<Vec<_>>()
                 )?,
+                Value::Object(o) => {
+                    for (key, value) in o.iter() {
+                        writeln!(w, "{}=\"{}\"", key, value)?
+                    }
+                }
                 Value::Null => writeln!(w, "# {}=", key)?,
                 _ => unreachable!(), // Cannot be a Value::Object
             }
@@ -150,6 +164,7 @@ impl Default for ConfigFile {
             max_pipeline_pool_size: None,
             pipeline_expire_time_in_seconds: None,
             pipeline_prewarming: None,
+            spellcheck_only: None,
         }
     }
 }
