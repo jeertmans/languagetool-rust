@@ -41,36 +41,60 @@ pub fn is_port(v: &str) -> Result<()> {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+/// A Java property file (one key=value entry per line) with values listed below.
 pub struct ConfigFile {
-    max_text_length: Option<isize>,
-    max_text_hard_length: Option<isize>,
-    secret_token_key: Option<isize>,
-    max_check_time_millis: Option<isize>,
-    max_errors_per_word_rate: Option<isize>,
-    max_spelling_suggestions: Option<isize>,
-    max_check_threads: Option<isize>,
-    cache_size: Option<isize>,
-    cache_ttl_seconds: Option<isize>,
-    request_limit: Option<isize>,
-    request_limit_in_bytes: Option<isize>,
-    timeout_request_limit: Option<isize>,
-    request_limit_period_in_seconds: Option<isize>,
-    language_model: Option<PathBuf>,
-    word2vec_model: Option<PathBuf>,
-    fasttext_model: Option<PathBuf>,
-    fasttext_binary: Option<PathBuf>,
-    max_work_queue_size: Option<PathBuf>,
-    rules_file: Option<PathBuf>,
-    warm_up: Option<bool>,
-    blocked_referrers: Option<Vec<String>>,
-    premium_only: Option<bool>,
-    disable_rule_ids: Option<Vec<String>>,
-    pipeline_caching: Option<bool>,
-    max_pipeline_pool_size: Option<isize>,
-    pipeline_expire_time_in_seconds: Option<isize>,
-    pipeline_prewarming: Option<bool>,
-    // TODO:
-    // support lang-xx, lang-xx-dictPath
+    /// Maximum text length, longer texts will cause an error (optional)
+    pub max_text_length: Option<isize>,
+    /// Maximum text length, applies even to users with a special secret 'token' parameter (optional)
+    pub max_text_hard_length: Option<isize>,
+    /// Secret JWT token key, if set by user and valid, maxTextLength can be increased by the user (optional)
+    pub secret_token_key: Option<isize>,
+    /// Maximum time in milliseconds allowed per check (optional)
+    pub max_check_time_millis: Option<isize>,
+    /// Checking will stop with error if there are more rules matches per word (optional)
+    pub max_errors_per_word_rate: Option<isize>,
+    /// Only this many spelling errors will have suggestions for performance reasons (optional, affects Hunspell-based languages only)
+    pub max_spelling_suggestions: Option<isize>,
+    /// Maximum number of threads working in parallel (optional)
+    pub max_check_threads: Option<isize>,
+    /// Size of internal cache in number of sentences (optional, default: 0)
+    pub cache_size: Option<isize>,
+    /// How many seconds sentences are kept in cache (optional, default: 300 if 'cacheSize' is set)
+    pub cache_ttl_seconds: Option<isize>,
+    /// Maximum number of requests per requestLimitPeriodInSeconds (optional)
+    pub request_limit: Option<isize>,
+    /// Maximum aggregated size of requests per requestLimitPeriodInSeconds (optional)
+    pub request_limit_in_bytes: Option<isize>,
+    /// Maximum number of timeout request (optional)
+    pub timeout_request_limit: Option<isize>,
+    /// Time period to which requestLimit and timeoutRequestLimit applies (optional)
+    pub request_limit_period_in_seconds: Option<isize>,
+    /// A directory with '1grams', '2grams', '3grams' sub directories which contain a Lucene index each with ngram occurrence counts; activates the confusion rule if supported (optional)
+    pub language_model: Option<PathBuf>,
+    /// A directory with word2vec data (optional), see https://github.com/languagetool-org/languagetool/blob/master/languagetool-standalone/CHANGES.md#word2vec
+    pub word2vec_model: Option<PathBuf>,
+    /// A model file for better language detection (optional), see
+    /// https://fasttext.cc/docs/en/language-identification.html
+    pub fasttext_model: Option<PathBuf>,
+    /// Compiled fasttext executable for language detection (optional), see
+    /// https://fasttext.cc/docs/en/support.html
+    pub fasttext_binary: Option<PathBuf>,
+    /// Reject request if request queue gets larger than this (optional)
+    pub max_work_queue_size: Option<isize>,
+    /// A file containing rules configuration, such as .langugagetool.cfg (optional)
+    pub rules_file: Option<PathBuf>,
+    /// Set to 'true' to warm up server at start, i.e. run a short check with all languages (optional)
+    pub warm_up: Option<bool>,
+    /// A comma-separated list of HTTP referrers (and 'Origin' headers) that are blocked and will not be served (optional)
+    pub blocked_referrers: Option<Vec<String>>,
+    /// Activate only the premium rules (optional)
+    pub premium_only: Option<bool>,
+    /// A comma-separated list of rule ids that are turned off for this server (optional)
+    pub disable_rule_ids: Option<Vec<String>>,
+    /// Set to 'true' to enable caching of internal pipelines to improve performance
+    pub pipeline_caching: Option<bool>,
+    /// Cache size if 'pipelineCaching' is set
+    pub max_pipeline_pool_size: Option<isize>,
 }
 
 impl ConfigFile {
