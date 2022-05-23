@@ -24,11 +24,11 @@ use std::time::Instant;
 ///
 /// ```
 /// # use languagetool_rust::server::is_port;
-/// assert!(is_port("8081").is_ok())
+/// assert!(is_port("8081").is_ok());
 ///
-/// assert!(is_port("").is_ok())  # No port specified, which is accepted
+/// assert!(is_port("").is_ok());  // No port specified, which is accepted
 ///
-/// assert!(is_port("abcd").is_err())
+/// assert!(is_port("abcd").is_err());
 /// ```
 pub fn is_port(v: &str) -> Result<()> {
     if v.is_empty() || (v.len() == 4 && v.chars().all(char::is_numeric)) {
