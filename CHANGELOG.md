@@ -2,11 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.10] - 2022-05-23
+
+### Bug Fixes
+
+- Now correctly writes arrays in config file
+
+### Features
+
+- Add (basic) support for add. languages
+
+### Miscellaneous Tasks
+
+- Remove useless comments in code
+- Document config file struct
+
 ## [0.0.9] - 2022-05-20
 
 ### Miscellaneous Tasks
 
 - Auto-doc for "feature"-only commands
+
+### Misc
+
+- Update version & changelog
 
 ## [0.0.9-beta] - 2022-05-20
 
