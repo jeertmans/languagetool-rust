@@ -117,9 +117,12 @@ impl ConfigFile {
                 Value::String(s) => writeln!(w, "{}=\"{}\"", key, s)?,
                 Value::Array(a) => writeln!(
                     w,
-                    "{}={:?}",
+                    "{}=\"{}\"",
                     key,
-                    a.iter().map(|v| v.as_str().unwrap()).collect::<Vec<_>>()
+                    a.iter()
+                        .map(|v| v.to_string())
+                        .collect::<Vec<String>>()
+                        .join(",")
                 )?,
                 Value::Object(o) => {
                     for (key, value) in o.iter() {
@@ -127,7 +130,6 @@ impl ConfigFile {
                     }
                 }
                 Value::Null => writeln!(w, "# {}=", key)?,
-                _ => unreachable!(), // Cannot be a Value::Object
             }
         }
         Ok(())
