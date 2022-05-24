@@ -2,11 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.11] - 2022-05-24
+
+### Bug Fixes
+
+- Automatic links in docstrings
+
+### Miscellaneous Tasks
+
+- Refactor readme and include it in lib.rs' doc
+
+### Misc
+
+- Renamed server variables to client
+
 ## [0.0.10] - 2022-05-23
 
 ### Bug Fixes
 
 - Now correctly writes arrays in config file
+- Fixing doctest
 
 ### Features
 
@@ -16,6 +31,10 @@ All notable changes to this project will be documented in this file.
 
 - Remove useless comments in code
 - Document config file struct
+
+### Misc
+
+- Update version & changelog
 
 ## [0.0.9] - 2022-05-20
 
