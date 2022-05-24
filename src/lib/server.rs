@@ -71,13 +71,13 @@ pub struct ConfigFile {
     pub request_limit_period_in_seconds: Option<isize>,
     /// A directory with '1grams', '2grams', '3grams' sub directories which contain a Lucene index each with ngram occurrence counts; activates the confusion rule if supported (optional)
     pub language_model: Option<PathBuf>,
-    /// A directory with word2vec data (optional), see https://github.com/languagetool-org/languagetool/blob/master/languagetool-standalone/CHANGES.md#word2vec
+    /// A directory with word2vec data (optional), see <https://github.com/languagetool-org/languagetool/blob/master/languagetool-standalone/CHANGES.md#word2vec>
     pub word2vec_model: Option<PathBuf>,
     /// A model file for better language detection (optional), see
-    /// https://fasttext.cc/docs/en/language-identification.html
+    /// <https://fasttext.cc/docs/en/language-identification.html>
     pub fasttext_model: Option<PathBuf>,
     /// Compiled fasttext executable for language detection (optional), see
-    /// https://fasttext.cc/docs/en/support.html
+    /// <https://fasttext.cc/docs/en/support.html>
     pub fasttext_binary: Option<PathBuf>,
     /// Reject request if request queue gets larger than this (optional)
     pub max_work_queue_size: Option<isize>,
