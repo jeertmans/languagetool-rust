@@ -5,31 +5,105 @@
 
 Rust bindings to connect with LanguageTool server API.
 
+## Usage
+
+LanguageTool-Rust (LTRS) can be both used as an executable or a Rust library.
+
 #### Executable
 
-If you wish to use the executable, you can install it with Cargo:
+By default, LTRS uses LanguageTool public API.
+
+```bash
+> ltrs ping # to check if the server is alive
+PONG! Delay: 110 ms
+> ltrs languages # to list all languages
+[
+  {
+    "name": "Arabic",
+    "code": "ar",
+    "longCode": "ar"
+  },
+  {
+    "name": "Asturian",
+    "code": "ast",
+    "longCode": "ast-ES"
+  },
+  # ...
+]
+> ltrs check --text "Some phrase with a smal mistake"
+{
+  "language": {
+    "code": "en-US",
+    "detectedLanguage": {
+      "code": "en-US",
+      "confidence": 0.99,
+      "name": "English (US)",
+      "source": "ngram"
+    },
+    "name": "English (US)"
+  },
+  "matches": [
+    {
+      "context": {
+        "length": 4,
+        "offset": 19,
+        "text": "Some phrase with a smal mistake"
+      },
+      "contextForSureMatch": 0,
+      "ignoreForIncompleteSentence": false,
+      "length": 4,
+      "message": "Possible spelling mistake found.",
+      "offset": 19,
+      "replacements": [
+        {
+          "value": "small"
+        },
+        {
+          "value": "seal"
+        },
+        # ...
+      }
+      # ...
+    ]
+  # ...
+}
+> ltrs --help # for more details
 ```
+
+#### Rust Library
+
+```rust
+use languagetool_rust::{check::CheckRequest, server::ServerClient};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let client = ServerClient::default();
+
+    let req = CheckRequest::default()
+        .with_language("auto")
+        .with_text("Some phrase with a smal mistake");
+
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&client.check(&req).await?)?
+    );
+    Ok(())
+}
+```
+
+## Installation
+
+If you wish to use the executable, you can install it with Cargo:
+```bash
 cargo install languagetool-rust
 ```
-
-##### Usage
-
-```
-ltrs ping # to check if the server is alive
-ltrs languages # to list all languages
-ltrs check --text "Some phrase with a smal mistake"
-
-ltrs --help # for more details
-```
-
-#### Library
 
 You can use LanguageTool-Rust in your Rust project by adding to your `Cargo.toml`:
 ```toml
 languagetool_rust = "version"
 ```
 
-##### Documentation
+## Documentation
 
 Automatically generated documentation can found found [here](https://docs.rs/languagetool-rust). Many functions are missing docs, but it's on the TODO list!
 
