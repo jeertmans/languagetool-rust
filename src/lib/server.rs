@@ -393,32 +393,32 @@ mod tests {
 
     #[tokio::test]
     async fn test_server_ping() {
-        let server = ServerClient::default();
-        assert!(server.ping().await.is_ok());
+        let client = ServerClient::default();
+        assert!(client.ping().await.is_ok());
     }
 
     #[tokio::test]
     async fn test_server_check_text() {
-        let server = ServerClient::default();
+        let client = ServerClient::default();
         let req = CheckRequest::default()
             .with_language("auto")
             .with_text("je suis une poupee");
-        assert!(server.check(&req).await.is_ok());
+        assert!(client.check(&req).await.is_ok());
     }
 
     #[tokio::test]
     async fn test_server_check_data() {
-        let server = ServerClient::default();
+        let client = ServerClient::default();
         let req = CheckRequest::default()
             .with_language("auto")
             .with_data("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
             .unwrap();
-        assert!(server.check(&req).await.is_ok());
+        assert!(client.check(&req).await.is_ok());
     }
 
     #[tokio::test]
     async fn test_server_languages() {
-        let server = ServerClient::default();
-        assert!(server.languages().await.is_ok());
+        let client = ServerClient::default();
+        assert!(client.languages().await.is_ok());
     }
 }

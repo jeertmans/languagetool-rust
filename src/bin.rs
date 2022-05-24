@@ -45,7 +45,7 @@ async fn try_main() -> Result<()> {
         )
         .get_matches();
 
-    let server = ServerClient::from_arg_matches(&matches)?;
+    let client = ServerClient::from_arg_matches(&matches)?;
     let stdout = std::io::stdout();
 
     match matches.subcommand() {
@@ -54,7 +54,7 @@ async fn try_main() -> Result<()> {
                 &stdout,
                 "{}",
                 serde_json::to_string_pretty(
-                    &server
+                    &client
                         .check(&CheckRequest::from_arg_matches(sub_matches)?)
                         .await?
                 )?
@@ -64,7 +64,7 @@ async fn try_main() -> Result<()> {
             writeln!(
                 &stdout,
                 "{}",
-                serde_json::to_string_pretty(&server.languages().await?)?
+                serde_json::to_string_pretty(&client.languages().await?)?
             )?;
         } // TODO: `words` requests are not tested yet
         Some(("words", sub_matches)) => match sub_matches.subcommand() {
@@ -73,7 +73,7 @@ async fn try_main() -> Result<()> {
                     &stdout,
                     "{}",
                     serde_json::to_string_pretty(
-                        &server
+                        &client
                             .words_add(&WordsAddRequest::from_arg_matches(sub_matches)?)
                             .await?
                     )?
@@ -84,7 +84,7 @@ async fn try_main() -> Result<()> {
                     &stdout,
                     "{}",
                     serde_json::to_string_pretty(
-                        &server
+                        &client
                             .words_delete(&WordsDeleteRequest::from_arg_matches(sub_matches)?)
                             .await?
                     )?
@@ -95,7 +95,7 @@ async fn try_main() -> Result<()> {
                     &stdout,
                     "{}",
                     serde_json::to_string_pretty(
-                        &server
+                        &client
                             .words(&WordsRequest::from_arg_matches(sub_matches)?)
                             .await?
                     )?
@@ -103,7 +103,7 @@ async fn try_main() -> Result<()> {
             }
         },
         Some(("ping", _sub_matches)) => {
-            writeln!(&stdout, "PONG! Delay: {} ms", server.ping().await?)?
+            writeln!(&stdout, "PONG! Delay: {} ms", client.ping().await?)?
         }
         _ => unreachable!(), // Can't be None since subcommand is required
     }
