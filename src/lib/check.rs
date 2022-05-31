@@ -197,8 +197,10 @@ impl CheckRequest {
 /// Detected language from check request.
 pub struct DetectedLanguage {
     pub code: String,
+    #[cfg(feature = "unstable")]
     pub confidence: Option<f64>,
     pub name: String,
+    #[cfg(feature = "unstable")]
     pub source: Option<String>,
 }
 
@@ -242,8 +244,10 @@ pub struct Rule {
     pub category: Category,
     pub description: String,
     pub id: String,
+    #[cfg(feature = "unstable")]
     pub is_premium: Option<bool>,
     pub issue_type: String,
+    #[cfg(feature = "unstable")]
     pub source_file: Option<String>,
     pub sub_id: Option<String>,
     pub urls: Option<Vec<Url>>,
@@ -260,7 +264,9 @@ pub struct Type {
 /// Grammatical error match.
 pub struct Match {
     pub context: Context,
+    #[cfg(feature = "unstable")]
     pub context_for_sure_match: isize,
+    #[cfg(feature = "unstable")]
     pub ignore_for_incomplete_sentence: bool,
     pub length: usize,
     pub message: String,
@@ -269,6 +275,7 @@ pub struct Match {
     pub rule: Rule,
     pub sentence: String,
     pub short_message: String,
+    #[cfg(feature = "unstable")]
     #[serde(rename = "type")]
     pub type_: Type,
 }
@@ -281,6 +288,7 @@ pub struct Software {
     pub build_date: String,
     pub name: String,
     pub premium: bool,
+    #[cfg(feature = "unstable")]
     pub premium_hint: Option<String>,
     pub status: String,
     pub version: String,

@@ -23,6 +23,8 @@ tokio = { version = "1.18.2", features = ["full"] }
 
 [features]
 cli = ["clap"]
+unstable = []
+
 default = ["cli"]
 
 [lib]
