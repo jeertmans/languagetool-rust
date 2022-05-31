@@ -9,7 +9,7 @@
 2. [CLI Reference](#cli-reference)
 3. [API Reference](#api-reference)
     - [Feature Flags](#feature-flags)
-4. [CHANGELOG](changelog.md)
+4. [CHANGELOG](CHANGELOG.md)
 5. [Related Projects](#related-projects)
 6. [Contributing](#contributing)
     - [Future features](#future-features)
