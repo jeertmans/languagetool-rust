@@ -2,7 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.13] - 2022-05-31
+
+### Features
+
+- Annotate text from check response
+
+### Miscellaneous Tasks
+
+- Document new feature
+- Fix typo
+
+### Misc
+
+- Add some todos
+- Derive display order
+
 ## [0.0.12] - 2022-05-31
+
+### Bug Fixes
+
+- Fix changelog link in readme
 
 ### Features
 
@@ -13,6 +33,10 @@ All notable changes to this project will be documented in this file.
 
 - Renaming `with_data` to `with_data_str`
 - Refactor readme based on clap's readme
+
+### Misc
+
+- Update version & changelog
 
 ## [0.0.11] - 2022-05-24
 
