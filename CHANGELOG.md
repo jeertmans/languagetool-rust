@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.12] - 2022-05-31
+
+### Features
+
+- Create new "unstable" feature
+- Make response fields public and add "unstable" attribute
+
+### Miscellaneous Tasks
+
+- Renaming `with_data` to `with_data_str`
+- Refactor readme based on clap's readme
+
 ## [0.0.11] - 2022-05-24
 
 ### Bug Fixes
@@ -15,6 +27,7 @@ All notable changes to this project will be documented in this file.
 ### Misc
 
 - Renamed server variables to client
+- Update version & changelog
 
 ## [0.0.10] - 2022-05-23
 
