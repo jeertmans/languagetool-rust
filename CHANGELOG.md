@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.14] - 2022-05-31
+
+### Miscellaneous Tasks
+
+- Fix file link in readme
+
 ## [0.0.13] - 2022-05-31
 
 ### Features
@@ -17,6 +23,7 @@ All notable changes to this project will be documented in this file.
 
 - Add some todos
 - Derive display order
+- Update version & changelog
 
 ## [0.0.12] - 2022-05-31
 
