@@ -411,7 +411,7 @@ mod tests {
         let client = ServerClient::default();
         let req = CheckRequest::default()
             .with_language("auto")
-            .with_data("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
+            .with_data_str("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
             .unwrap();
         assert!(client.check(&req).await.is_ok());
     }

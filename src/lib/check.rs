@@ -179,10 +179,14 @@ impl CheckRequest {
         self
     }
 
-    pub fn with_data(mut self, data: &str) -> serde_json::Result<Self> {
-        self.data = Some(serde_json::from_str(data)?);
+    pub fn with_data(mut self, data: Data) -> Self {
+        self.data = Some(data);
         self.text = None;
-        Ok(self)
+        self
+    }
+
+    pub fn with_data_str(self, data: &str) -> serde_json::Result<Self> {
+        Ok(self.with_data(serde_json::from_str(data)?))
     }
 
     pub fn with_language(mut self, language: &str) -> Self {
