@@ -17,6 +17,7 @@ async fn try_main() -> Result<()> {
         .about(clap::crate_description!())
         .name(clap::crate_name!())
         .version(clap::crate_version!())
+        .global_setting(clap::AppSettings::DeriveDisplayOrder)
         .subcommand_required(true)
         .arg_required_else_help(true)
         .propagate_version(true)
