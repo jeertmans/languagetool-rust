@@ -307,10 +307,13 @@ pub struct Warnings {
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+/// LanguageTool POST check response.
 pub struct CheckResponse {
-    language: LanguageResponse,
-    matches: Vec<Match>,
-    sentence_ranges: Option<Vec<[usize; 2]>>,
-    software: Software,
-    warnings: Option<Warnings>,
+    pub language: LanguageResponse,
+    pub matches: Vec<Match>,
+    #[cfg(feature = "unstable")]
+    pub sentence_ranges: Option<Vec<[usize; 2]>>,
+    pub software: Software,
+    #[cfg(feature = "unstable")]
+    pub warnings: Option<Warnings>,
 }
