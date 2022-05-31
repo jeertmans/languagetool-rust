@@ -1,17 +1,37 @@
 # LanguageTool-Rust
 
+> **Rust bindings to connect with LanguageTool server API.**
+
 [![Crates.io](https://img.shields.io/crates/v/languagetool-rust)](https://crates.io/crates/languagetool-rust)
 [![docs.rs](https://img.shields.io/docsrs/languagetool-rust)](https://docs.rs/languagetool-rust)
 
-Rust bindings to connect with LanguageTool server API.
+1. [About](#about)
+2. [CLI Reference](#cli-reference)
+3. [API Reference](#api-reference)
+    - [Feature Flags](#feature-flags)
+4. [CHANGELOG](changelog.md)
+5. [Related Projects](#related-projects)
+6. [Contributing](#contributing)
+    - [Future features](#future-features)
 
-## Usage
+## About
 
-LanguageTool-Rust (LTRS) can be both used as an executable or a Rust library.
+LanguageTool-Rust (LTRS) is both an executable and a Rust library that aims to provide correct and safe bindings for the LanguageTool API.
 
-#### Executable
+*Disclaimer: the current work relies on an approximation of the LanguageTool API. We try to avoid breaking changes as much as possible, but we still highly depend on the future evolutions of LanguageTool.*
+
+## CLI Reference
+
+The command line interface of LTRS allows to very quickly use any LanguageTool server to check for grammar and style errors. You can install the latest version with `cargo`:
+```bash
+> cargo install languagetool-rust
+```
+
+The reference for the CLI can be accessed via `ltrs --help`.
 
 By default, LTRS uses LanguageTool public API.
+
+### Example
 
 ```bash
 > ltrs ping # to check if the server is alive
@@ -70,7 +90,17 @@ PONG! Delay: 110 ms
 > ltrs --help # for more details
 ```
 
-#### Rust Library
+## API Reference
+
+If you would like to integrate LTRS within a Rust application or crate, then we recommend reading [documentation](https://docs.rs/languagetool-rust).
+
+To use LanguageTool-Rust in your Rust project, add to your `Cargo.toml`:
+```toml
+[dependencies]
+languagetool_rust = "version"
+```
+
+### Example
 
 ```rust
 use languagetool_rust::{check::CheckRequest, server::ServerClient};
@@ -91,27 +121,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-## Installation
+### Feature Flags
 
-If you wish to use the executable, you can install it with Cargo:
-```bash
-cargo install languagetool-rust
-```
+#### Default Features
 
-You can use LanguageTool-Rust in your Rust project by adding to your `Cargo.toml`:
-```toml
-languagetool_rust = "version"
-```
+* **cli**: Adds command-line related methods for multiple structures. This is feature is required to install the LTRS CLI.
 
-## Documentation
+#### Optional Feautres
+* **unstable**: Adds more fields to JSON responses that are not present in the [Model | Example Value](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All added fields are optional, hence the `Option` around them.
 
-Automatically generated documentation can found found [here](https://docs.rs/languagetool-rust). Many functions are missing docs, but it's on the TODO list!
+## Related Projects
 
-### Disclaimers
+Here are listed some projects that use LTRS.
 
-This software is not production-ready. Many changes are expected before I consider it to be *usable*.
+- *W.I.P.*
 
-### TODO List
+*Do you use LTRS in your project? Contact me so I can add it to the list!*
+
+## Contributing
+
+Contributions are more than welcome!
+
+### Future features
 
 - [x] Use Cargo features to enable Clap and others only in bin.rs
 - [x] Construct a good cli
@@ -123,7 +154,3 @@ This software is not production-ready. Many changes are expected before I consid
 - [ ] Build automated testing with LT server (GitHub action?)
 - [x] Parse "data" as input to check command
 - [ ] ...
-
-## Contributing
-
-Contributions are more than welcome!
