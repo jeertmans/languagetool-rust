@@ -88,6 +88,10 @@ impl std::str::FromStr for Level {
 /// The structure below tries to follow as closely as possible the JSON API decribed
 /// [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
 pub struct CheckRequest {
+    #[cfg(all(feature = "cli", feature = "annotate"))]
+    #[clap(short = 'r', long, takes_value = false)]
+    /// If present, raw JSON output will be printed instead of annotated text.
+    pub raw: bool,
     #[cfg_attr(
         feature = "cli",
         clap(

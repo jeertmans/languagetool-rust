@@ -5,6 +5,11 @@ use crate::words::{
     WordsAddRequest, WordsAddResponse, WordsDeleteRequest, WordsDeleteResponse, WordsRequest,
     WordsResponse,
 };
+#[cfg(feature = "annotate")]
+use annotate_snippets::{
+    display_list::{DisplayList, FormatOptions},
+    snippet::{Annotation, AnnotationType, Slice, Snippet, SourceAnnotation},
+};
 #[cfg(feature = "cli")]
 use clap::{CommandFactory, FromArgMatches, Parser};
 use reqwest::Client;
@@ -288,6 +293,77 @@ impl ServerClient {
             },
             Err(e) => Err(Error::RequestEncode { source: e }),
         }
+    }
+
+    #[cfg(feature = "annotate")]
+    pub async fn annotate_check(&self, request: &CheckRequest) -> Result<String> {
+        let resp = self.check(&request).await?;
+
+        if resp.matches.is_empty() {
+            return Ok("Not error were found in provided text".to_string());
+        }
+
+        let replacements: Vec<_> = resp
+            .matches
+            .iter()
+            .map(|m| {
+                m.replacements.iter().fold(String::new(), |mut acc, r| {
+                    if !acc.is_empty() {
+                        acc.push_str(", ");
+                    }
+                    acc.push_str(&r.value);
+                    acc
+                })
+            })
+            .collect();
+
+        let snippets = resp
+            .matches
+            .iter()
+            .zip(replacements.iter())
+            .map(|(m, r)| Snippet {
+                title: Some(Annotation {
+                    label: Some(&m.message),
+                    id: Some(&m.rule.id),
+                    annotation_type: AnnotationType::Error,
+                }),
+                footer: vec![],
+                slices: vec![Slice {
+                    source: &m.context.text,
+                    line_start: 1 + m.sentence[..m.offset]
+                        .chars()
+                        .filter(|c| *c == '\n')
+                        .count(),
+                    origin: None,
+                    fold: true,
+                    annotations: vec![
+                        SourceAnnotation {
+                            label: &m.rule.description,
+                            annotation_type: AnnotationType::Error,
+                            range: (m.context.offset, m.context.offset + m.context.length),
+                        },
+                        SourceAnnotation {
+                            label: &r,
+                            annotation_type: AnnotationType::Help,
+                            range: (m.context.offset, m.context.offset + m.context.length),
+                        },
+                    ],
+                }],
+                opt: FormatOptions {
+                    color: true,
+                    ..Default::default()
+                },
+            });
+
+        let mut annotation = String::new();
+
+        for snippet in snippets {
+            if !annotation.is_empty() {
+                annotation.push('\n');
+            }
+            annotation.push_str(&DisplayList::from(snippet).to_string());
+        }
+        Ok(annotation)
     }
 
     pub async fn languages(&self) -> Result<LanguagesResponse> {

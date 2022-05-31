@@ -50,14 +50,17 @@ async fn try_main() -> Result<()> {
 
     match matches.subcommand() {
         Some(("check", sub_matches)) => {
+            let req = CheckRequest::from_arg_matches(sub_matches)?;
+            #[cfg(feature = "annotate")]
+            if !req.raw {
+                writeln!(&stdout, "{}", &client.annotate_check(&req).await?)?;
+                return Ok(());
+            }
+
             writeln!(
                 &stdout,
                 "{}",
-                serde_json::to_string_pretty(
-                    &client
-                        .check(&CheckRequest::from_arg_matches(sub_matches)?)
-                        .await?
-                )?
+                serde_json::to_string_pretty(&client.check(&req).await?)?
             )?;
         }
         Some(("languages", _sub_matches)) => {
