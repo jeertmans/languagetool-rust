@@ -157,4 +157,6 @@ Contributions are more than welcome!
 - [ ] Build test for lib
 - [ ] Build automated testing with LT server (GitHub action?)
 - [x] Parse "data" as input to check command
+- [ ] Parse parameters from env value with clap/env feature
+- [ ] Enhance annotated text
 - [ ] ...
