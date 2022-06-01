@@ -2,11 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.15] - 2022-06-01
+
+### Bug Fixes
+
+- Avoid panicking on string slices
+
+### Miscellaneous Tasks
+
+- Reduce necessary dependencies
+
 ## [0.0.14] - 2022-05-31
 
 ### Miscellaneous Tasks
 
 - Fix file link in readme
+
+### Misc
+
+- Update version & changelog
 
 ## [0.0.13] - 2022-05-31
 
