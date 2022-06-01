@@ -20,11 +20,15 @@ reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "1.0.31"
-tokio = { version = "1.18.2", features = ["full"] }
+tokio = { version = "1.18.2", features = ["macros", "rt-multi-thread"], optional = true }
+
+[dev-dependencies]
+tokio = { version = "1.18.2", features = ["macros"]}
+
 
 [features]
 annotate = ["annotate-snippets"]
-cli = ["clap"]
+cli = ["clap", "tokio"]
 unstable = []
 
 default = ["cli"]
@@ -36,6 +40,6 @@ path = "src/lib/lib.rs"
 [[bin]]
 name = "ltrs"
 path = "src/bin.rs"
-required-features = ["cli"]
+required-features = ["cli", "tokio"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
