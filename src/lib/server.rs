@@ -330,7 +330,8 @@ impl ServerClient {
                 footer: vec![],
                 slices: vec![Slice {
                     source: &m.context.text,
-                    line_start: 1 + m.sentence
+                    line_start: 1 + m
+                        .sentence
                         .chars()
                         .take(m.offset)
                         .filter(|c| *c == '\n')
