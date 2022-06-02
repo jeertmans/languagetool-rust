@@ -92,26 +92,10 @@ pub struct CheckRequest {
     #[clap(short = 'r', long, takes_value = false)]
     /// If present, raw JSON output will be printed instead of annotated text.
     pub raw: bool,
-    #[cfg_attr(
-        feature = "cli",
-        clap(
-            short = 't',
-            long,
-            required_unless_present = "data",
-            conflicts_with = "data"
-        )
-    )]
+    #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
     /// The text to be checked. This or 'data' is required.
     pub text: Option<String>,
-    #[cfg_attr(
-        feature = "cli",
-        clap(
-            short = 'd',
-            long,
-            required_unless_present = "text",
-            conflicts_with = "text"
-        )
-    )]
+    #[cfg_attr(feature = "cli", clap(short = 'd', long, conflicts_with = "text"))]
     /// The text to be checked, given as a JSON document that specifies what's text and what's markup. This or 'text' is required.
     ///
     /// Markup will be ignored when looking for errors. Example text:

@@ -1,7 +1,7 @@
 use clap::{CommandFactory, FromArgMatches};
 use languagetool_rust::error::Result;
 use languagetool_rust::*;
-use std::io::Write;
+use std::io::{BufRead, Write};
 
 #[tokio::main]
 async fn main() {
@@ -51,7 +51,18 @@ async fn try_main() -> Result<()> {
 
     match matches.subcommand() {
         Some(("check", sub_matches)) => {
-            let req = CheckRequest::from_arg_matches(sub_matches)?;
+            let mut req = CheckRequest::from_arg_matches(sub_matches)?;
+
+            if req.text.is_none() && req.data.is_none() {
+                let mut text = String::new();
+
+                for line in std::io::stdin().lock().lines() {
+                    text.push_str(&line?);
+                }
+
+                req.text = Some(text);
+            }
+
             #[cfg(feature = "annotate")]
             if !req.raw {
                 writeln!(&stdout, "{}", &client.annotate_check(&req).await?)?;
