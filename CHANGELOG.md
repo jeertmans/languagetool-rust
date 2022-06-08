@@ -2,249 +2,232 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.16] - 2022-06-08
+
+### 🆕 Features
+
+-  [**bin**] Allow to read text from stdin </br> └─ This changes the default behavior where `--text` or `--data` was required. Now, if none are provided, ltrs will read from stdin.
+E.g.: `cat README.md | ltrs check` 
+
+### 🖋️ Styling
+
+-  [**fmt**] Rust fmt 
+-  [**lib**] Clippy suggestion 
+
+### 🗃️ Miscellaneous Tasks
+
+-  [**diet**] Ran cargo diet to save space 
+-  [**cliff**] Enhance changelog appearance </br> └─ This adds emojis as well a more content to the changelog messages 
+-  [**ci**] Updated GitHub action to avoid integration error </br> └─ See [this issue](https://github.com/actions-rs/clippy-check/issues/2) for example 
+
 ## [0.0.15] - 2022-06-01
 
-### Bug Fixes
+### 🗃️ Miscellaneous Tasks
 
-- Avoid panicking on string slices
+-  [**deps**] Reduce necessary dependencies </br> └─ Reduce the amount of features loaded from `tokio` and only require this feature to be activated for bin and tests. 
+-  [**version**] Update version & changelog 
 
-### Miscellaneous Tasks
+### 🩹 Bug Fixes
 
-- Reduce necessary dependencies
+-  [**lib**] Avoid panicking on string slices </br> └─ This fixes the problem that occurred when the string was not made of purely utf-8 chars. E.g.: `ltrs check --text "Un essai de texte en français à controler"` 
 
 ## [0.0.14] - 2022-05-31
 
-### Miscellaneous Tasks
+### 🗃️ Miscellaneous Tasks
 
-- Fix file link in readme
-
-### Misc
-
-- Update version & changelog
+-  [**readme**] Fix file link in readme 
+-  [**version**] Update version & changelog 
 
 ## [0.0.13] - 2022-05-31
 
-### Features
+### 🆕 Features
 
-- Annotate text from check response
+-  [**cli**] Annotate text from check response 
 
-### Miscellaneous Tasks
+### 🗃️ Miscellaneous Tasks
 
-- Document new feature
-- Fix typo
-
-### Misc
-
-- Add some todos
-- Derive display order
-- Update version & changelog
+-  [**readme**] Document new feature 
+-  [**readme**] Fix typo 
+-  [**future**] Add some todos 
+-  [**cli**] Derive display order 
+-  [**version**] Update version & changelog 
 
 ## [0.0.12] - 2022-05-31
 
-### Bug Fixes
+### 🆕 Features
 
-- Fix changelog link in readme
+-  [**src**] Create new "unstable" feature 
+-  [**lib**] Make response fields public and add "unstable" attribute 
 
-### Features
+### 🗃️ Miscellaneous Tasks
 
-- Create new "unstable" feature
-- Make response fields public and add "unstable" attribute
+-  [**check**] Renaming `with_data` to `with_data_str` 
+-  [**readme**] Refactor readme based on clap's readme 
+-  [**version**] Update version & changelog 
 
-### Miscellaneous Tasks
+### 🩹 Bug Fixes
 
-- Renaming `with_data` to `with_data_str`
-- Refactor readme based on clap's readme
-
-### Misc
-
-- Update version & changelog
+-  [**readme**] Fix changelog link in readme 
 
 ## [0.0.11] - 2022-05-24
 
-### Bug Fixes
+### 🗃️ Miscellaneous Tasks
 
-- Automatic links in docstrings
+-  [**doc**] Refactor readme and include it in lib.rs' doc 
+-  [**naming**] Renamed server variables to client 
+-  [**version**] Update version & changelog 
 
-### Miscellaneous Tasks
+### 🩹 Bug Fixes
 
-- Refactor readme and include it in lib.rs' doc
-
-### Misc
-
-- Renamed server variables to client
-- Update version & changelog
+-  [**doc**] Automatic links in docstrings 
 
 ## [0.0.10] - 2022-05-23
 
-### Bug Fixes
+### 🆕 Features
 
-- Now correctly writes arrays in config file
-- Fixing doctest
+-  [**lib**] Add (basic) support for add. languages 
 
-### Features
+### 🗃️ Miscellaneous Tasks
 
-- Add (basic) support for add. languages
+-  [**clean**] Remove useless comments in code 
+-  [**doc**] Document config file struct 
+-  [**version**] Update version & changelog 
 
-### Miscellaneous Tasks
+### 🩹 Bug Fixes
 
-- Remove useless comments in code
-- Document config file struct
-
-### Misc
-
-- Update version & changelog
+-  [**lib**] Now correctly writes arrays in config file 
+-  [**test**] Fixing doctest 
 
 ## [0.0.9] - 2022-05-20
 
-### Miscellaneous Tasks
+### 🗃️ Miscellaneous Tasks
 
-- Auto-doc for "feature"-only commands
-
-### Misc
-
-- Update version & changelog
+-  [**doc**] Auto-doc for "feature"-only commands 
+-  [**version**] Update version & changelog 
 
 ## [0.0.9-beta] - 2022-05-20
 
-### Bug Fixes
+### 🗃️ Miscellaneous Tasks
 
-- Now publish with cli feature
+-  [**version**] Update version & changelog 
 
-### Misc
+### 🩹 Bug Fixes
 
-- Update version & changelog
+-  [**CI**] Now publish with cli feature 
 
 ## [0.0.9-alpha] - 2022-05-20
 
-### Miscellaneous Tasks
+### 🗃️ Miscellaneous Tasks
 
-- Add some doctests
-- Remove default features
-
-### Misc
-
-- Update version & changelog
+-  [**tests**] Add some doctests 
+-  [**features**] Remove default features 
+-  [**version**] Update version & changelog 
 
 ## [0.0.8] - 2022-05-20
 
-### Bug Fixes
+### 🆕 Features
 
-- Text takes now 't' as short flag
-- IDs and categories are String
+-  [**lib**] Derive serialize for words' responses 
+-  [**lib**] New errors system </br> └─ Errors and results are now unified under a common type that can be found inside `lib/error.rs` 
 
-### Features
+### 🗃️ Miscellaneous Tasks
 
-- Derive serialize for words' responses
-- New errors system
+-  [**lib**] Refactor lib. exposed functions 
+-  [**doc**] Update description 
+-  [**deps**] Remove unused crate and add thiserror crate 
+-  [**version**] Update version & changelog 
 
-### Miscellaneous Tasks
+### 🩹 Bug Fixes
 
-- Refactor lib. exposed functions
-- Update description
-- Remove unused crate and add thiserror crate
-
-### Misc
-
-- Update version & changelog
+-  [**cli**] Text takes now 't' as short flag 
+-  [**lib**] IDs and categories are String 
 
 ## [0.0.7] - 2022-05-18
 
-### Features
+### 🆕 Features
 
-- Response errors are now used
-- Changed language to `auto`
+-  [**errors**] Response errors are now used </br> └─ But not the body of the error, only the url 
+-  [**cli**] Changed language to `auto` </br> └─ language flag was required, now it defaults to `auto` 
 
-### Miscellaneous Tasks
+### 🗃️ Miscellaneous Tasks
 
-- Fixed typo in docstring
-- Split docs for `-h` and `--help`
-- Update todos & usage
-
-### Ci
-
-- Rustfmt
-
-### Misc
-
-- Now exits as usage error for two commands
-- Update version & changelog
+-  [**errors**] Now exits as usage error for two commands 
+-  [**lint**] Rustfmt 
+-  [**typo**] Fixed typo in docstring 
+-  [**docs**] Split docs for `-h` and `--help` 
+-  [**readme**] Update todos & usage 
+-  [**version**] Update version & changelog 
 
 ## [0.0.6] - 2022-05-18
 
-### Features
+### 🆕 Features
 
-- Pretty print json output
+-  [**cli**] Pretty print json output 
 
-### Miscellaneous Tasks
+### 🗃️ Miscellaneous Tasks
 
-- Improve docs
-- Server mod and tests
-
-### Ci
-
-- Removed useless ref.
-
-### Misc
-
-- Change default hostname api
-- Update version & changelog
+-  [**doc**] Improve docs 
+-  [**refactor**] Server mod and tests 
+-  [**clippy**] Removed useless ref. 
+-  [**defaults**] Change default hostname api </br> └─ Now uses online server from LanguageTool 
+-  [**version**] Update version & changelog 
 
 ## [0.0.5] - 2022-05-17
 
-### Features
+### 🆕 Features
 
-- Add ping command
+-  [**cli**] Add ping command 
 
-### Misc
+### 🗃️ Miscellaneous Tasks
 
-- Update version & changelog
+-  [**version**] Update version & changelog 
 
 ## [0.0.4] - 2022-05-17
 
-### Features
+### 🆕 Features
 
-- Now correctly uses `data` field + pub fields
+-  [**data**] Now correctly uses `data` field + pub fields </br> └─ `data` field is not correctly serialized for the `check` request 
 
-### Misc
+### 🗃️ Miscellaneous Tasks
 
-- Update todos
-- Update version & changelog
+-  [**readme**] Update todos 
+-  [**version**] Update version & changelog 
 
 ## [0.0.3] - 2022-05-17
 
-### Features
+### 🆕 Features
 
-- Create a nice cli
+-  [**cli**] Create a nice cli 
 
-### Misc
+### 🗃️ Miscellaneous Tasks
 
-- Add new todos
-- Update version & changelog
-- Update version in Cargo.lock
+-  [**readme**] Add new todos 
+-  [**version**] Update version & changelog 
+-  [**version**] Update version in Cargo.lock 
 
 ## [0.0.2] - 2022-05-16
 
-### Bug Fixes
+### 🆕 Features
 
-- Removed empty file
+-  [**features**] Now Clap is a feature required for bin 
 
-### Features
+### 🗃️ Miscellaneous Tasks
 
-- Now Clap is a feature required for bin
+-  [**version**] Update version & changelog 
 
-### Misc
+### 🩹 Bug Fixes
 
-- Update version & changelog
+-  [**src/lib/api**] Removed empty file 
 
 ## [0.0.1] - 2022-05-16
 
-### Features
+### 🆕 Features
 
-- First unstable code version
+-  [**src**] First unstable code version 
 
-### Misc
+### 🗃️ Miscellaneous Tasks
 
-- Basic GitHub setup
-- First changelog
+-  [**ci/lint/doc**] Basic GitHub setup 
+-  [**changelog**] First changelog 
 
 <!-- generated by git-cliff -->
