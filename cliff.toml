@@ -1,4 +1,5 @@
 # configuration file for git-cliff (0.1.0)
+# Icons from: https://www.emojicopy.com/
 
 [changelog]
 # changelog header
@@ -17,7 +18,7 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | upper_first }}
     {% for commit in commits %}
-        - {% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message | upper_first }}\
+        - {% if commit.breaking %}[**breaking**] {% endif %} [**{{ commit.scope }}**] {{ commit.message | upper_first }} {% if commit.body %}</br> └─ {{ commit.body }} {% endif %}\
     {% endfor %}
 {% endfor %}\n
 """
@@ -35,16 +36,17 @@ conventional_commits = true
 filter_unconventional = true
 # regex for parsing and grouping commits
 commit_parsers = [
-    { message = "^feat", group = "Features"},
-    { message = "^fix", group = "Bug Fixes"},
-    { message = "^doc", group = "Documentation"},
-    { message = "^perf", group = "Performance"},
-    { message = "^refactor", group = "Refactor"},
-    { message = "^style", group = "Styling"},
-    { message = "^test", group = "Testing"},
+    { message = "^feat", group = "🆕 Features"},
+    { message = "^fix", group = "🩹 Bug Fixes"},
+    { message = "^doc", group = "📚 Documentation"},
+    { message = "^perf", group = "🚀 Performance"},
+    { message = "^refactor", group = "🔨 Refactor"},
+    { message = "^style", group = "🖋️ Styling"},
+    { message = "^test", group = "⚙️  Testing"},
     { message = "^chore\\(release\\): prepare for", skip = true},
-    { message = "^chore", group = "Miscellaneous Tasks"},
-    { body = ".*security", group = "Security"},
+    { message = "^chore|^misc|^ci", group = "🗃️ Miscellaneous Tasks"},
+    #{ message = "^misc", group = "🗃️ Miscellaneous Task"},
+    { body = ".*security", group = "🔒 Security"},
 ]
 # filter out the commits that are not matched by commit parsers
 filter_commits = false
