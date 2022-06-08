@@ -8,6 +8,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/jeertmans/languagetool-rust"
 keywords = ["languagetool", "rust"]
+include = ["src/**/*", "LICENSE.md", "README.md", "CHANGELOG.md"]
 
 [package.metadata.docs.rs]
 all-features = true
