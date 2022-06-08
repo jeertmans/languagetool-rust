@@ -12,6 +12,5 @@ jobs:
             toolchain: stable
             components: rustfmt
             override: true
-      - uses: mbrobbel/rustfmt-check@master
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check format
+        run: cargo fmt --all -- --check
