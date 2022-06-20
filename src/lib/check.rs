@@ -161,6 +161,11 @@ pub struct CheckRequest {
 }
 
 impl CheckRequest {
+    #[inline]
+    pub fn default() -> Self {
+        Self { language: "auto".to_owned(), ..Default::default() }
+    }
+
     pub fn with_text(mut self, text: &str) -> Self {
         self.text = Some(text.to_string());
         self.data = None;

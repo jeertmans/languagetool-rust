@@ -112,7 +112,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = ServerClient::default();
 
     let req = CheckRequest::default()
-        .with_language("auto")
         .with_text("Some phrase with a smal mistake");
 
     println!(
