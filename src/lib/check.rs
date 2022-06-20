@@ -167,7 +167,7 @@ impl CheckRequest {
     }
 
     pub fn with_text(mut self, text: &str) -> Self {
-        self.text = Some(text.to_string());
+        self.text = Some(text.to_owned());
         self.data = None;
         self
     }
@@ -183,7 +183,7 @@ impl CheckRequest {
     }
 
     pub fn with_language(mut self, language: &str) -> Self {
-        self.language = language.to_string();
+        self.language = language.to_owned();
         self
     }
 }
@@ -214,7 +214,7 @@ pub struct LanguageResponse {
 pub struct Context {
     pub length: usize,
     pub offset: usize,
-    pub text: String,
+   pub text: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
