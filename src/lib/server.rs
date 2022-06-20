@@ -297,7 +297,7 @@ impl ServerClient {
 
     #[cfg(feature = "annotate")]
     pub async fn annotate_check(&self, request: &CheckRequest) -> Result<String> {
-        let resp = self.check(&request).await?;
+        let resp = self.check(request).await?;
 
         if resp.matches.is_empty() {
             return Ok("Not error were found in provided text".to_string());
@@ -345,7 +345,7 @@ impl ServerClient {
                             range: (m.context.offset, m.context.offset + m.context.length),
                         },
                         SourceAnnotation {
-                            label: &r,
+                            label: r,
                             annotation_type: AnnotationType::Help,
                             range: (m.context.offset, m.context.offset + m.context.length),
                         },
