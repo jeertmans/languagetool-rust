@@ -224,11 +224,13 @@ impl Default for ServerParameters {
 /// - `port` to "8081"
 /// if you used the default configuration to start the server.
 pub struct ServerCli {
+    /// Server's hostname
     #[cfg_attr(
         feature = "cli",
         clap(long, default_value = "https://api.languagetoolplus.com")
     )]
     pub hostname: String,
+    /// Server's port number, with the empty string referring to no specific port
     #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", validator = is_port))]
     pub port: String,
 }
@@ -242,13 +244,20 @@ impl Default for ServerCli {
     }
 }
 
+/// Client to communicate with the LanguageTool server using async requests.
 #[derive(Debug)]
 pub struct ServerClient {
-    api: String,
-    client: Client,
+    /// API string: hostname and, optionally, port number (see [ServerCli])
+    pub api: String,
+    /// Reqwest client that can send requests to the server
+    pub client: Client,
 }
 
 impl ServerClient {
+    /// Construct a new server client using hostname and (optional) port
+    ///
+    /// An empty string is accepeted as empty port.
+    /// For port validation, please use [is_port] as this constructor does not check anything.
     pub fn new(hostname: String, port: String) -> Self {
         let api = if port.is_empty() {
             format!("{}/v2", hostname)
@@ -259,21 +268,25 @@ impl ServerClient {
         Self { api, client }
     }
 
+    /// Converts a [ServerCli] into a proper (usable) client
     pub fn from_cli(cli: ServerCli) -> Self {
         Self::new(cli.hostname, cli.port)
     }
 
     #[cfg(feature = "cli")]
+    /// This function has the same sementics as [ServerCli::from_arg_matches]
     pub fn from_arg_matches(matches: &clap::ArgMatches) -> Result<Self> {
         let params = ServerCli::from_arg_matches(matches)?;
         Ok(Self::from_cli(params))
     }
 
+    /// This function has the same semantics as [ServerCli::command]
     #[cfg(feature = "cli")]
     pub fn command<'help>() -> clap::Command<'help> {
         ServerCli::command()
     }
 
+    /// Send a check request to the server and await for the response
     pub async fn check(&self, request: &CheckRequest) -> Result<CheckResponse> {
         match self
             .client
@@ -295,6 +308,7 @@ impl ServerClient {
         }
     }
 
+    /// Send a check request to the server, await for the response and annotate it
     #[cfg(feature = "annotate")]
     pub async fn annotate_check(&self, request: &CheckRequest) -> Result<String> {
         let resp = self.check(request).await?;
@@ -368,6 +382,7 @@ impl ServerClient {
         Ok(annotation)
     }
 
+    /// Send a languages request to the server and await for the response
     pub async fn languages(&self) -> Result<LanguagesResponse> {
         match self
             .client
@@ -388,6 +403,7 @@ impl ServerClient {
         }
     }
 
+    /// Send a words request to the server and await for the response
     pub async fn words(&self, request: &WordsRequest) -> Result<WordsResponse> {
         match self
             .client
@@ -409,6 +425,7 @@ impl ServerClient {
         }
     }
 
+    /// Send a words/add request to the server and await for the response
     pub async fn words_add(&self, request: &WordsAddRequest) -> Result<WordsAddResponse> {
         match self
             .client
@@ -430,6 +447,7 @@ impl ServerClient {
         }
     }
 
+    /// Send a words/delete request to the server and await for the response
     pub async fn words_delete(&self, request: &WordsDeleteRequest) -> Result<WordsDeleteResponse> {
         match self
             .client
@@ -451,6 +469,7 @@ impl ServerClient {
         }
     }
 
+    /// Ping the server and return the elapsed time in milliseconds if the server responded
     pub async fn ping(&self) -> Result<u128> {
         let start = Instant::now();
         self.client.get(&self.api).send().await?;
