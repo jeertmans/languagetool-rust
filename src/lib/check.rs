@@ -17,7 +17,38 @@ pub struct DataAnnotation {
     pub text: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+impl DataAnnotation {
+    /// Instantiate a new `DataAnnotation` with text only
+    #[inline]
+    pub fn new_text(text: &str) -> Self {
+        Self {
+            interpret_as: None,
+            markup: None,
+            text: Some(text.to_owned()),
+        }
+    }
+
+    /// Instantiate a new `DataAnnotation` with markup only
+    #[inline]
+    pub fn new_markup(markup: &str) -> Self {
+        Self {
+            interpret_as: None,
+            markup: Some(markup.to_owned()),
+            text: None,
+        }
+    }
+
+    /// Instantiate a new `DataAnnotation` with markup and its interpretation
+    #[inline]
+    pub fn new_interpreted_markup(markup: &str, interpret_as: &str) -> Self {
+        Self {
+            interpret_as: Some(interpret_as.to_owned()),
+            markup: Some(markup.to_owned()),
+            text: None,
+        }
+    }
+}
+
 /// Alternative text to be checked.
 pub struct Data {
     pub annotation: Vec<DataAnnotation>,
