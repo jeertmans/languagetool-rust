@@ -2,12 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.17] - 2022-06-21
+
+### 🆕 Features
+
+-  [**lib**] Default value to "auto" for language in Default 
+-  [**lib**] Clean `DataAnnotation` constructors </br> └─ Provides simplified constructors for the `DataAnnotation` structure for the different possible cases. 
+-  [**lib**] Deriving `PartialEq` for `Data` and `DataAnnotation` 
+-  [**lib**] Implement `FromIterator` for `Data` & tests </br> └─ This allows for an easy construction of requests with markup data. 
+-  [**lib**] Implement `From<ServerCli>` for `ServerClient` 
+
+### 🖋️ Styling
+
+-  [**fmt**] Rustfmt 
+-  [**lib**] Rustfmt 
+
+### 🗃️ Miscellaneous Tasks
+
+-  [**clean**] Change `to_string` to `to_owned` 
+-  [**lib**] Documentation some add. functions 
+
 ## [0.0.16] - 2022-06-08
 
 ### 🆕 Features
 
--  [**bin**] Allow to read text from stdin </br> └─ This changes the default behavior where `--text` or `--data` was required. Now, if none are provided, ltrs will read from stdin.
-E.g.: `cat README.md | ltrs check` 
+-  [**bin**] Allow to read text from stdin </br> └─ This changes the default behavior where `--text` or `--data` was required. Now, if none are provided, ltrs will read from stdin. 
 
 ### 🖋️ Styling
 
@@ -16,9 +35,11 @@ E.g.: `cat README.md | ltrs check`
 
 ### 🗃️ Miscellaneous Tasks
 
+-  [**fmt**] Rust fmt 
 -  [**diet**] Ran cargo diet to save space 
 -  [**cliff**] Enhance changelog appearance </br> └─ This adds emojis as well a more content to the changelog messages 
 -  [**ci**] Updated GitHub action to avoid integration error </br> └─ See [this issue](https://github.com/actions-rs/clippy-check/issues/2) for example 
+-  [**version**] Update version & changelog 
 
 ## [0.0.15] - 2022-06-01
 
