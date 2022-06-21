@@ -253,6 +253,13 @@ pub struct ServerClient {
     pub client: Client,
 }
 
+impl From<ServerCli> for ServerClient {
+    #[inline]
+    fn from(cli: ServerCli) -> Self {
+        Self::new(cli.hostname, cli.port)
+    }
+}
+
 impl ServerClient {
     /// Construct a new server client using hostname and (optional) port
     ///
@@ -270,7 +277,7 @@ impl ServerClient {
 
     /// Converts a [ServerCli] into a proper (usable) client
     pub fn from_cli(cli: ServerCli) -> Self {
-        Self::new(cli.hostname, cli.port)
+        cli.into()
     }
 
     #[cfg(feature = "cli")]
