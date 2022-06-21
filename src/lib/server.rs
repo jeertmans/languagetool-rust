@@ -478,8 +478,7 @@ mod tests {
     #[tokio::test]
     async fn test_server_check_text() {
         let client = ServerClient::default();
-        let req = CheckRequest::default()
-            .with_text("je suis une poupee");
+        let req = CheckRequest::default().with_text("je suis une poupee");
         assert!(client.check(&req).await.is_ok());
     }
 
