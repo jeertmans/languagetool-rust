@@ -55,6 +55,13 @@ pub struct Data {
     pub annotation: Vec<DataAnnotation>,
 }
 
+impl<T: Into<DataAnnotation>> FromIterator<T> for Data {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let annotation = iter.into_iter().map(|x| x.into()).collect();
+        Data { annotation }
+    }
+}
+
 impl Serialize for Data {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -344,4 +351,55 @@ pub struct CheckResponse {
     pub software: Software,
     #[cfg(feature = "unstable")]
     pub warnings: Option<Warnings>,
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crate::check::{Data, DataAnnotation};
+
+    #[derive(Debug)]
+    enum Token<'source> {
+        Text(&'source str),
+        Skip(&'source str),
+    }
+
+    #[derive(Debug, Clone)]
+    struct ParseTokenError;
+
+    impl<'source> From<&'source str> for Token<'source> {
+        fn from(s: &'source str) -> Self {
+            if s.chars().all(|c| c.is_ascii_alphabetic()) {
+                Token::Text(s)
+            } else {
+                Token::Skip(s)
+            }
+        }
+    }
+
+    impl<'source> From<Token<'source>> for DataAnnotation {
+        fn from(token: Token<'source>) -> Self {
+            match token {
+                Token::Text(s) => DataAnnotation::new_text(s),
+                Token::Skip(s) => DataAnnotation::new_markup(s),
+            }
+        }
+    }
+
+    #[test]
+    fn test_data_annotation() {
+        let words: Vec<&str> = "My name is Q34XY".split(' ').collect();
+        let data: Data = words.iter().map(|w| Token::from(*w)).collect();
+
+        let expected_data = Data {
+            annotation: vec![
+                DataAnnotation::new_text("My"),
+                DataAnnotation::new_text("name"),
+                DataAnnotation::new_text("is"),
+                DataAnnotation::new_markup("Q34XY"),
+            ],
+        };
+
+        assert_eq!(data, expected_data);
+    }
 }
