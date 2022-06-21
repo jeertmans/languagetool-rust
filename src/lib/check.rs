@@ -195,7 +195,10 @@ pub struct CheckRequest {
 impl CheckRequest {
     #[inline]
     pub fn default() -> Self {
-        Self { language: "auto".to_owned(), ..Default::default() }
+        Self {
+            language: "auto".to_owned(),
+            ..Default::default()
+        }
     }
 
     pub fn with_text(mut self, text: &str) -> Self {
@@ -246,7 +249,7 @@ pub struct LanguageResponse {
 pub struct Context {
     pub length: usize,
     pub offset: usize,
-   pub text: String,
+    pub text: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
