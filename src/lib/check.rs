@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 /// Requests
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 /// A portion of text to be checked.
 pub struct DataAnnotation {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -49,6 +49,7 @@ impl DataAnnotation {
     }
 }
 
+#[derive(Debug, Deserialize, PartialEq)]
 /// Alternative text to be checked.
 pub struct Data {
     pub annotation: Vec<DataAnnotation>,
