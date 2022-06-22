@@ -10,16 +10,19 @@ use serde::{Deserialize, Serialize};
 /// A portion of text to be checked.
 pub struct DataAnnotation {
     #[serde(skip_serializing_if = "Option::is_none")]
+    /// If set, the markup will be interpreted as this
     pub interpret_as: Option<String>,
+    /// Text that should be treated as markup
     #[serde(skip_serializing_if = "Option::is_none")]
     pub markup: Option<String>,
+    /// Text that should be treated as normal text
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
 }
 
 impl DataAnnotation {
-    /// Instantiate a new `DataAnnotation` with text only
     #[inline]
+    /// Instantiate a new `DataAnnotation` with text only
     pub fn new_text(text: &str) -> Self {
         Self {
             interpret_as: None,
@@ -28,8 +31,8 @@ impl DataAnnotation {
         }
     }
 
-    /// Instantiate a new `DataAnnotation` with markup only
     #[inline]
+    /// Instantiate a new `DataAnnotation` with markup only
     pub fn new_markup(markup: &str) -> Self {
         Self {
             interpret_as: None,
@@ -38,8 +41,8 @@ impl DataAnnotation {
         }
     }
 
-    /// Instantiate a new `DataAnnotation` with markup and its interpretation
     #[inline]
+    /// Instantiate a new `DataAnnotation` with markup and its interpretation
     pub fn new_interpreted_markup(markup: &str, interpret_as: &str) -> Self {
         Self {
             interpret_as: Some(interpret_as.to_owned()),
@@ -52,6 +55,7 @@ impl DataAnnotation {
 #[derive(Debug, Deserialize, PartialEq)]
 /// Alternative text to be checked.
 pub struct Data {
+    /// Vector of markup text, see [DataAnnotation]
     pub annotation: Vec<DataAnnotation>,
 }
 
@@ -91,7 +95,9 @@ impl std::str::FromStr for Data {
 /// Currently, `Level::Picky` adds additional rules
 /// with respect to `Level::Default`
 pub enum Level {
+    /// Default level
     Default,
+    /// Picky level
     Picky,
 }
 
@@ -201,6 +207,7 @@ pub struct CheckRequest {
 
 impl CheckRequest {
     #[inline]
+    /// Create a default check requests that matches default values from CLI options
     pub fn default() -> Self {
         Self {
             language: "auto".to_owned(),
@@ -208,22 +215,26 @@ impl CheckRequest {
         }
     }
 
+    /// Set the text to be checked and removed potential data field
     pub fn with_text(mut self, text: &str) -> Self {
         self.text = Some(text.to_owned());
         self.data = None;
         self
     }
 
+    /// Set the data to be checked and removed potential text field
     pub fn with_data(mut self, data: Data) -> Self {
         self.data = Some(data);
         self.text = None;
         self
     }
 
+    /// Set the data (obtained from string) to be checked and removed potential text field
     pub fn with_data_str(self, data: &str) -> serde_json::Result<Self> {
         Ok(self.with_data(serde_json::from_str(data)?))
     }
 
+    /// Set the language of the text / data
     pub fn with_language(mut self, language: &str) -> Self {
         self.language = language.to_owned();
         self
@@ -235,11 +246,15 @@ impl CheckRequest {
 #[derive(Debug, Deserialize, Serialize)]
 /// Detected language from check request.
 pub struct DetectedLanguage {
+    /// Language code, e.g., `"sk-SK"` for Slovak
     pub code: String,
     #[cfg(feature = "unstable")]
+    /// Confidence level, from 0 to 1
     pub confidence: Option<f64>,
+    /// Language name, e.g., `"Slovak"`
     pub name: String,
     #[cfg(feature = "unstable")]
+    /// Source (file) for the language detection
     pub source: Option<String>,
 }
 
@@ -247,20 +262,29 @@ pub struct DetectedLanguage {
 #[serde(rename_all = "camelCase")]
 /// Language information in check response.
 pub struct LanguageResponse {
+    /// Language code, e.g., `"sk-SK"` for Slovak
     pub code: String,
+    /// Detected language from provided request
     pub detected_language: DetectedLanguage,
+    /// Language name, e.g., `"Slovak"`
     pub name: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+/// Match context in check response.
 pub struct Context {
+    /// Length of the match
     pub length: usize,
+    /// Char index at which the match starts
     pub offset: usize,
+    /// Contextual text aroung the match
     pub text: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+/// Possible replacement for a given match in check response.
 pub struct Replacement {
+    /// Possible replacement value
     pub value: String,
 }
 
@@ -279,12 +303,16 @@ impl From<&str> for Replacement {
 #[derive(Debug, Deserialize, Serialize)]
 /// A rule category.
 pub struct Category {
+    /// Category id
     pub id: String,
+    /// Category name
     pub name: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+/// A possible url of a rule in a check response.
 pub struct Url {
+    /// Url value
     pub value: String,
 }
 
@@ -292,21 +320,31 @@ pub struct Url {
 #[serde(rename_all = "camelCase")]
 /// The rule that was not satisfied in a given match.
 pub struct Rule {
+    /// Rule category
     pub category: Category,
+    /// Rule description
     pub description: String,
+    /// Rule id
     pub id: String,
     #[cfg(feature = "unstable")]
+    /// Indicate if the rule is from the premium API
     pub is_premium: Option<bool>,
+    /// Issue type
     pub issue_type: String,
     #[cfg(feature = "unstable")]
+    /// Rule source file
     pub source_file: Option<String>,
+    /// Rule sub id
     pub sub_id: Option<String>,
+    /// Rule list of urls
     pub urls: Option<Vec<Url>>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+/// Type of a given match.
 pub struct Type {
+    /// Type name
     pub type_name: String,
 }
 
@@ -314,20 +352,33 @@ pub struct Type {
 #[serde(rename_all = "camelCase")]
 /// Grammatical error match.
 pub struct Match {
+    /// Match context
     pub context: Context,
     #[cfg(feature = "unstable")]
+    /// Unknown: please fill a [PR](https://github.com/jeertmans/languagetool-rust/pulls) of your
+    /// know that this attribute is used for
     pub context_for_sure_match: isize,
     #[cfg(feature = "unstable")]
+    /// Unknown: please fill a [PR](https://github.com/jeertmans/languagetool-rust/pulls) of your
+    /// know that this attribute is used for
     pub ignore_for_incomplete_sentence: bool,
+    /// Match length
     pub length: usize,
+    /// Error message
     pub message: String,
+    /// Char index at which the match start
     pub offset: usize,
+    /// List of possible replacements (if applies)
     pub replacements: Vec<Replacement>,
+    /// Match rule that was not satisfied
     pub rule: Rule,
+    /// Sentence in which the error was found
     pub sentence: String,
+    /// Short message about the error
     pub short_message: String,
     #[cfg(feature = "unstable")]
     #[serde(rename = "type")]
+    /// Match type
     pub type_: Type,
 }
 
@@ -335,20 +386,29 @@ pub struct Match {
 #[serde(rename_all = "camelCase")]
 /// LanguageTool software details.
 pub struct Software {
+    /// LanguageTool API version
     pub api_version: usize,
+    /// Some information about build date
     pub build_date: String,
+    /// Name (should be `"LanguageTool"`)
     pub name: String,
+    /// Tell wether the server uses premium API or not
     pub premium: bool,
     #[cfg(feature = "unstable")]
+    /// Sentence that indicates if using premium API would find more errors
     pub premium_hint: Option<String>,
+    /// Unknown: please fill a [PR](https://github.com/jeertmans/languagetool-rust/pulls) of your
+    /// know that this attribute is used for
     pub status: String,
+    /// LanguageTool version
     pub version: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-/// Warnings about incomplete results.
+/// Warnings about check response.
 pub struct Warnings {
+    /// Indicate if results are imcomplete
     pub incomplete_results: bool,
 }
 
@@ -356,12 +416,17 @@ pub struct Warnings {
 #[serde(rename_all = "camelCase")]
 /// LanguageTool POST check response.
 pub struct CheckResponse {
+    /// Language information
     pub language: LanguageResponse,
+    /// List of error matches
     pub matches: Vec<Match>,
     #[cfg(feature = "unstable")]
+    /// Ranges ([start, end]) of sentences
     pub sentence_ranges: Option<Vec<[usize; 2]>>,
+    /// LanguageTool software information
     pub software: Software,
     #[cfg(feature = "unstable")]
+    /// Possible warnings
     pub warnings: Option<Warnings>,
 }
 

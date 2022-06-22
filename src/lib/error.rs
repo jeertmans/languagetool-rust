@@ -1,24 +1,48 @@
+//! Error and Result structure used all across this crate.
+
+/// Enumeration of all possible error types.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[cfg(feature = "cli")]
     #[error(transparent)]
+    /// Error from the command line parsing (see [clap::Error])
     Cli(#[from] clap::Error),
     #[error(transparent)]
+    /// Error from parsing JSON (see [serde_json::Error])
     JSON(#[from] serde_json::Error),
     #[error(transparent)]
+    /// Error from reading and writing to IO (see [std::io::Error])
     IO(#[from] std::io::Error),
     #[error("invalid request: {body:?}")]
-    InvalidRequest { body: String },
+    /// Error specifying an invalid request
+    InvalidRequest {
+        /// Error body
+        body: String,
+    },
     #[error("invalid value: {body:?}")]
-    InvalidValue { body: String },
+    /// Error specifying an invalid value
+    InvalidValue {
+        /// Error body
+        body: String,
+    },
     #[error("request could not be properly encoded: {source}")]
-    RequestEncode { source: reqwest::Error },
+    /// Error from request encoding
+    RequestEncode {
+        /// Source error
+        source: reqwest::Error,
+    },
     #[error("response could not be properly decoded: {source}")]
-    ResponseDecode { source: reqwest::Error },
+    /// Error from request decoding
+    ResponseDecode {
+        /// Source error
+        source: reqwest::Error,
+    },
     #[error(transparent)]
+    /// Any other error from requests (see [reqwest::Error])
     Reqwest(#[from] reqwest::Error),
 }
 
+/// Result type alias with error type defined above (see [Error]).
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[cfg(test)]

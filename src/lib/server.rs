@@ -1,3 +1,5 @@
+//! Structure to communite with some LanguageTool server throught the API.
+
 use crate::check::{CheckRequest, CheckResponse};
 use crate::error::{Error, Result};
 use crate::languages::LanguagesResponse;
@@ -112,6 +114,7 @@ pub struct ConfigFile {
 }
 
 impl ConfigFile {
+    /// Write the config file in a `key = value` format
     pub fn write_to<T: io::Write>(&self, w: &mut T) -> io::Result<()> {
         let json = serde_json::to_value(self.clone()).unwrap();
         let m = json.as_object().unwrap();
@@ -178,6 +181,7 @@ impl Default for ConfigFile {
 
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Debug, Deserialize, Serialize)]
+/// Server parameters that are to be used when instantiating a LanguageTool server
 pub struct ServerParameters {
     #[cfg_attr(feature = "cli", clap(long))]
     config: Option<PathBuf>,
@@ -326,7 +330,8 @@ impl ServerClient {
                             resp.matches.iter_mut().for_each(|m| {
                                 let len = m.replacements.len();
                                 if max < len {
-                                    m.replacements[max] = format!("... ({} not shown)", len - max).into();
+                                    m.replacements[max] =
+                                        format!("... ({} not shown)", len - max).into();
                                     m.replacements.truncate(max + 1);
                                 }
                             })

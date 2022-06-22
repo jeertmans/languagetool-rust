@@ -4,6 +4,18 @@
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
+/// Check if `v` is a valid word.
+///
+/// A valid word is any string slice that does not contain any whitespace
+///
+/// # Examples
+///
+/// ```
+/// # use languagetool_rust::words::is_word;
+/// assert!(is_word("word").is_ok());
+///
+/// assert!(is_word("some words").is_err());
+/// ```
 pub fn is_word(v: &str) -> Result<(), String> {
     if !v.contains(' ') {
         return Ok(());
@@ -16,13 +28,14 @@ pub fn is_word(v: &str) -> Result<(), String> {
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Debug, Default, Serialize)]
 #[serde(rename_all = "camelCase")]
+/// Login arguments required by the API.
 pub struct LoginArgs {
     #[cfg_attr(feature = "cli", clap(short = 'u', long, required = true))]
     /// Your username as used to log in at languagetool.org.
-    username: String,
+    pub username: String,
     #[cfg_attr(feature = "cli", clap(short = 'k', long, required = true))]
     /// [Your API key](https://languagetool.org/editor/settings/api)
-    api_key: String,
+    pub api_key: String,
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
@@ -36,12 +49,13 @@ pub struct WordsRequest {
     offset: isize,
     #[cfg_attr(feature = "cli", clap(long, default_value = "10"))]
     /// Maximum number of words to return.
-    limit: isize,
+    pub limit: isize,
     #[cfg_attr(feature = "cli", clap(flatten))]
-    login: LoginArgs,
+    /// Login arguments
+    pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
     /// Comma-separated list of dictionaries to include words from; uses special default dictionary if this is unset
-    dicts: Option<Vec<String>>,
+    pub dicts: Option<Vec<String>>,
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
@@ -52,9 +66,10 @@ pub struct WordsRequest {
 pub struct WordsAddRequest {
     #[cfg_attr(feature = "cli", clap(required = true, validator = is_word))]
     /// The word to be added. Must not be a phrase, i.e. cannot contain white space. The word is added to a global dictionary that applies to all languages.
-    word: String,
+    pub word: String,
     #[cfg_attr(feature = "cli", clap(flatten))]
-    login: LoginArgs,
+    /// Login arguments
+    pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
     /// Name of the dictionary to add the word to; non-existent dictionaries are created after
     /// calling this; if unset, adds to special default dictionary
@@ -69,26 +84,33 @@ pub struct WordsAddRequest {
 pub struct WordsDeleteRequest {
     #[cfg_attr(feature = "cli", clap(required = true, validator = is_word))]
     /// The word to be removed.
-    word: String,
+    pub word: String,
     #[cfg_attr(feature = "cli", clap(flatten))]
-    login: LoginArgs,
+    /// Login arguments
+    pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
     /// Name of the dictionary to add the word to; non-existent dictionaries are created after
     /// calling this; if unset, adds to special default dictionary
-    dict: Option<String>,
+    pub dict: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+/// LanguageTool GET words reponse.
 pub struct WordsResponse {
+    /// List of words
     words: Vec<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+/// LanguageTool POST word add reponse.
 pub struct WordsAddResponse {
+    /// `true` if word was corretly added
     added: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+/// LanguageTool POST word delete reponse.
 pub struct WordsDeleteResponse {
+    /// `true` if word was correctly removed
     deleted: bool,
 }
