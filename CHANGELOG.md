@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.18] - 2022-06-22
+
+### 🆕 Features
+
+-  [**cli/lib**] Allow for max. number of suggestions </br> └─ This feature is very likely to change in the future 
+-  [**lib**] Allow to easily convert strings into `Replacement`s 
+
+### 🖋️ Styling
+
+-  [**lib**] Rustfmt and unused import 
+
+### 🗃️ Miscellaneous Tasks
+
+-  [**readme**] Fix typo in readme 
+-  [**tests**] Added test for errors 
+-  [**docs**] 100% of src/lib is now documented 
+
 ## [0.0.17] - 2022-06-21
 
 ### 🆕 Features
@@ -21,6 +38,7 @@ All notable changes to this project will be documented in this file.
 
 -  [**clean**] Change `to_string` to `to_owned` 
 -  [**lib**] Documentation some add. functions 
+-  [**version**] Update version & changelog 
 
 ## [0.0.16] - 2022-06-08
 

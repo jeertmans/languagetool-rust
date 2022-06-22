@@ -372,7 +372,7 @@ dependencies = [
 
 [[package]]
 name = "languagetool-rust"
-version = "0.0.17"
+version = "0.0.18"
 dependencies = [
  "annotate-snippets",
  "clap",
