@@ -49,7 +49,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 mod tests {
 
     use crate::error::Error;
-    use crate::server::ServerClient;
     use clap::Command;
 
     #[cfg(feature = "cli")]
@@ -137,4 +136,5 @@ mod tests {
         let error: Error = result.unwrap_err().into();
 
         assert!(matches!(error, Error::Reqwest(_)));
-    }}
+    }
+}
