@@ -264,6 +264,18 @@ pub struct Replacement {
     pub value: String,
 }
 
+impl From<String> for Replacement {
+    fn from(value: String) -> Self {
+        Self { value }
+    }
+}
+
+impl From<&str> for Replacement {
+    fn from(value: &str) -> Self {
+        value.to_string().into()
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 /// A rule category.
 pub struct Category {
