@@ -251,6 +251,7 @@ pub struct ServerClient {
     pub api: String,
     /// Reqwest client that can send requests to the server
     pub client: Client,
+    max_suggestions: isize,
 }
 
 impl From<ServerCli> for ServerClient {
@@ -272,7 +273,18 @@ impl ServerClient {
             format!("{}:{}/v2", hostname, port)
         };
         let client = Client::new();
-        Self { api, client }
+        Self {
+            api,
+            client,
+            max_suggestions: -1,
+        }
+    }
+
+    /// Sets the maximum number of suggestions (defaults to -1), a negative number will keep all
+    /// replacement suggestions
+    pub fn with_max_suggestions(mut self, max_suggestions: isize) -> Self {
+        self.max_suggestions = max_suggestions;
+        self
     }
 
     /// Converts a [ServerCli] into a proper (usable) client
@@ -306,7 +318,21 @@ impl ServerClient {
                 Ok(_) => resp
                     .json::<CheckResponse>()
                     .await
-                    .map_err(|e| Error::ResponseDecode { source: e }),
+                    .map_err(|e| Error::ResponseDecode { source: e })
+                    .map(|mut resp| {
+                        if self.max_suggestions > 0 {
+                            let max = self.max_suggestions as usize;
+                            println!("{}", max);
+                            resp.matches.iter_mut().for_each(|m| {
+                                let len = m.replacements.len();
+                                if max < len {
+                                    m.replacements[max] = format!("... ({} not shown)", len - max).into();
+                                    m.replacements.truncate(max + 1);
+                                }
+                            })
+                        }
+                        resp
+                    }),
                 Err(_) => Err(Error::InvalidRequest {
                     body: resp.text().await?,
                 }),

@@ -46,7 +46,8 @@ async fn try_main() -> Result<()> {
         )
         .get_matches();
 
-    let client = ServerClient::from_arg_matches(&matches)?;
+    // TODO: prompt max_suggestion
+    let client = ServerClient::from_arg_matches(&matches)?.with_max_suggestions(5);
     let stdout = std::io::stdout();
 
     match matches.subcommand() {
@@ -58,6 +59,7 @@ async fn try_main() -> Result<()> {
 
                 for line in std::io::stdin().lock().lines() {
                     text.push_str(&line?);
+                    text.push('\n');
                 }
 
                 req.text = Some(text);
