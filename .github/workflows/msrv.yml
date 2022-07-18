@@ -1,0 +1,12 @@
+on: push
+name: MSRV check
+jobs:
+  msrv_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+      - name: Download cargo-msrv
+        run: cargo install cargo-msrv
+      - name: Check MSRV
+        run: cargo msrv verify -- cargo check --all-features
