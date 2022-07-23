@@ -20,7 +20,7 @@ body = """
     {% for commit in commits %}
         - {% if commit.breaking %}[**breaking**] {% endif %} [**{{ commit.scope }}**] {{ commit.message | upper_first }} {% if commit.body %}</br> └─ {{ commit.body }} {% endif %}\
     {% endfor %}
-{% endfor %}\n
+{% endfor %}</br>
 """
 # remove the leading and trailing whitespace from the template
 trim = true
