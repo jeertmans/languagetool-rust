@@ -11,7 +11,7 @@ jobs:
   docker-tests:
     runs-on: ubuntu-latest
     env:
-      LANGUAGETOOL_HOSTNAME: localhost
+      LANGUAGETOOL_HOSTNAME: "http://localhost"
       LANGUAGETOOL_POST: 8010
     steps:
       - uses: actions/checkout@v1
@@ -20,4 +20,7 @@ jobs:
             toolchain: nightly
       - run: docker pull erikvl87/languagetool
       - run: docker run -d --rm -p 8010:8010 erikvl87/languagetool
-      - run: cargo run --all-features 
+      - run: cargo install --path . --all-features --debug
+      - run: cat README.md | ltrs check
+      - run: ltrs languages
+      - run: ltrs check -t "Some text with a apparent mistake"
