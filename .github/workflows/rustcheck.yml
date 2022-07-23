@@ -1,0 +1,8 @@
+on: push
+name: Cargo check
+jobs:
+  msrv_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: taiki-e/install-action@cargo-hack
