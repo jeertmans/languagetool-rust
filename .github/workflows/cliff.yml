@@ -1,6 +1,8 @@
 on:
   push:
 
+name: Cliff changelog
+
 jobs:
   changelog:
     name: Generate changelog
