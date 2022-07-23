@@ -151,11 +151,11 @@ Contributions are more than welcome!
 - [x] Construct a good cli
 - [x] Handle all possible responses from LT
 - [ ] Document installation procedure
-- [ ] Document functions
+- [x] Document functions
 - [ ] Test commands that need API keys
-- [ ] Build test for lib
-- [ ] Build automated testing with LT server (GitHub action?)
+- [x] Build test for lib
+- [x] Build automated testing with LT server (GitHub action?)
 - [x] Parse "data" as input to check command
-- [ ] Parse parameters from env value with clap/env feature
-- [ ] Enhance annotated text
+- [x] Parse parameters from env value with clap/env feature
+- [x] Enhance annotated text
 - [ ] ...
