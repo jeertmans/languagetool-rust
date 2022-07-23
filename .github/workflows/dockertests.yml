@@ -8,12 +8,16 @@ on:
 name: Docker tests
 
 jobs:
-  msrv_check:
+  docker-tests:
     runs-on: ubuntu-latest
+    env:
+      LANGUAGETOOL_HOSTNAME: localhost
+      LANGUAGETOOL_POST: 8010
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
             toolchain: nightly
       - run: docker pull erikvl87/languagetool
-      - run: docker run --rm -p 8010:8010 erikvl87/languagetool
+      - run: docker run -d --rm -p 8010:8010 erikvl87/languagetool
+      - run: cargo run --all-features 
