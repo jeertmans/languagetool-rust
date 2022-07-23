@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// Language information
 pub struct Language {
     /// Language name, e.g., `"Ukrainian"`

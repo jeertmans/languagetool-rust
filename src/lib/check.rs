@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 /// Requests
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[non_exhaustive]
 /// A portion of text to be checked.
 pub struct DataAnnotation {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -63,6 +64,7 @@ impl DataAnnotation {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq)]
+#[non_exhaustive]
 /// Alternative text to be checked.
 pub struct Data {
     /// Vector of markup text, see [DataAnnotation]
@@ -100,6 +102,7 @@ impl std::str::FromStr for Data {
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
+#[non_exhaustive]
 /// Possible levels for additional rules.
 ///
 /// Currently, `Level::Picky` adds additional rules
@@ -136,6 +139,7 @@ impl std::str::FromStr for Level {
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Clone, Deserialize, Debug, Default, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// LanguageTool POST check request.
 ///
 /// The main feature - check a text with LanguageTool for possible style and grammar issues.
@@ -254,6 +258,7 @@ impl CheckRequest {
 /// Reponses
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[non_exhaustive]
 /// Detected language from check request.
 pub struct DetectedLanguage {
     /// Language code, e.g., `"sk-SK"` for Slovak
@@ -270,6 +275,7 @@ pub struct DetectedLanguage {
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// Language information in check response.
 pub struct LanguageResponse {
     /// Language code, e.g., `"sk-SK"` for Slovak
@@ -281,6 +287,7 @@ pub struct LanguageResponse {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[non_exhaustive]
 /// Match context in check response.
 pub struct Context {
     /// Length of the match
@@ -292,6 +299,7 @@ pub struct Context {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[non_exhaustive]
 /// Possible replacement for a given match in check response.
 pub struct Replacement {
     /// Possible replacement value
@@ -311,6 +319,7 @@ impl From<&str> for Replacement {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[non_exhaustive]
 /// A rule category.
 pub struct Category {
     /// Category id
@@ -320,6 +329,7 @@ pub struct Category {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[non_exhaustive]
 /// A possible url of a rule in a check response.
 pub struct Url {
     /// Url value
@@ -328,6 +338,7 @@ pub struct Url {
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// The rule that was not satisfied in a given match.
 pub struct Rule {
     /// Rule category
@@ -352,6 +363,7 @@ pub struct Rule {
 
 #[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// Type of a given match.
 pub struct Type {
     /// Type name
@@ -360,6 +372,7 @@ pub struct Type {
 
 #[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// Grammatical error match.
 pub struct Match {
     /// Match context
@@ -394,6 +407,7 @@ pub struct Match {
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// LanguageTool software details.
 pub struct Software {
     /// LanguageTool API version
@@ -416,6 +430,7 @@ pub struct Software {
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// Warnings about check response.
 pub struct Warnings {
     /// Indicate if results are imcomplete
@@ -424,6 +439,7 @@ pub struct Warnings {
 
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// LanguageTool POST check response.
 pub struct CheckResponse {
     /// Language information

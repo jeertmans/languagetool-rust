@@ -182,6 +182,7 @@ impl Default for ConfigFile {
 
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[non_exhaustive]
 /// Server parameters that are to be used when instantiating a LanguageTool server
 pub struct ServerParameters {
     #[cfg_attr(feature = "cli", clap(long))]
