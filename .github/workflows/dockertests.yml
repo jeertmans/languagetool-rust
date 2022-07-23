@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       LANGUAGETOOL_HOSTNAME: "http://localhost"
-      LANGUAGETOOL_POST: 8010
+      LANGUAGETOOL_PORT: 8010
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
