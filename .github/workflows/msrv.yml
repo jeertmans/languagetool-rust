@@ -13,7 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
-        toolchain: nightly
+        with:
+            toolchain: nightly
       - name: Download cargo-msrv
         run: cargo install cargo-msrv
       - name: Check MSRV

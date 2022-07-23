@@ -13,6 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
-        toolchain: nightly
+        with:
+            toolchain: nightly
       - run: docker pull erikvl87/languagetool
       - run: docker run --rm -p 8010:8010 erikvl87/languagetool
