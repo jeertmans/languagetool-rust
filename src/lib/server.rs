@@ -332,7 +332,6 @@ impl ServerClient {
                     .map(|mut resp| {
                         if self.max_suggestions > 0 {
                             let max = self.max_suggestions as usize;
-                            println!("{}", max);
                             resp.matches.iter_mut().for_each(|m| {
                                 let len = m.replacements.len();
                                 if max < len {
