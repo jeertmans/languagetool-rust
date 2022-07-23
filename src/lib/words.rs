@@ -26,7 +26,7 @@ pub fn is_word(v: &str) -> Result<(), String> {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 /// Login arguments required by the API.
 pub struct LoginArgs {
@@ -39,7 +39,7 @@ pub struct LoginArgs {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 /// LanguageTool GET words request.
 ///
 /// List words in the user's personal dictionaries.
@@ -59,7 +59,7 @@ pub struct WordsRequest {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 /// LanguageTool POST words add request.
 ///
 /// Add a word to one of the user's personal dictionaries. Please note that this feature is considered to be used for personal dictionaries which must not contain more than 500 words. If this is an issue for you, please contact us.
@@ -77,7 +77,7 @@ pub struct WordsAddRequest {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 /// LanguageTool POST words delete request.
 ///
 /// Remove a word from one of the user's personal dictionaries.
@@ -94,21 +94,21 @@ pub struct WordsDeleteRequest {
     pub dict: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 /// LanguageTool GET words reponse.
 pub struct WordsResponse {
     /// List of words
     words: Vec<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 /// LanguageTool POST word add reponse.
 pub struct WordsAddResponse {
     /// `true` if word was corretly added
     added: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 /// LanguageTool POST word delete reponse.
 pub struct WordsDeleteResponse {
     /// `true` if word was correctly removed
