@@ -17,7 +17,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 annotate-snippets = { version = "^0.8.0", features = ["color"], optional = true }
-clap = { version = "^3.0", features = ["derive", "cargo"], optional = true }
+clap = { version = "^3.0", features = ["derive", "cargo", "env"], optional = true }
 reqwest = { version = "^0.11", features = ["json"] }
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "^1.0"

@@ -233,11 +233,15 @@ pub struct ServerCli {
     /// Server's hostname
     #[cfg_attr(
         feature = "cli",
-        clap(long, default_value = "https://api.languagetoolplus.com")
+        clap(
+            long,
+            default_value = "https://api.languagetoolplus.com",
+            env = "LANGUAGETOOL_HOSTNAME"
+        )
     )]
     pub hostname: String,
     /// Server's port number, with the empty string referring to no specific port
-    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", validator = is_port))]
+    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", validator = is_port, env = "LANGUAGETOOL_PORT"))]
     pub port: String,
 }
 
