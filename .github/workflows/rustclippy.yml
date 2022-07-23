@@ -3,7 +3,7 @@ on:
     paths:
       - '**.rs'
       - 'Cargo.toml'
-  workflow_dispatch
+  workflow_dispatch:
 
 name: Clippy check
 
