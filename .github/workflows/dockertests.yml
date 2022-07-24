@@ -19,7 +19,7 @@ jobs:
         with:
             toolchain: nightly
       - run: docker pull erikvl87/languagetool
-      - run: docker run -d --rm -p 8010:8010 erikvl87/languagetool
+      - run: docker run -d --rm -p 8010:8010 -e langtool_pipelinePrewarming=true erikvl87/languagetool
       - run: cargo install --path . --all-features --debug
       - run: sleep 10
       - run: cat README.md | ltrs check
