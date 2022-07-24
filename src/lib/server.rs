@@ -46,8 +46,9 @@ pub fn is_port(v: &str) -> Result<()> {
     })
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// A Java property file (one key=value entry per line) with values listed below.
 pub struct ConfigFile {
     /// Maximum text length, longer texts will cause an error (optional)
@@ -180,7 +181,8 @@ impl Default for ConfigFile {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[non_exhaustive]
 /// Server parameters that are to be used when instantiating a LanguageTool server
 pub struct ServerParameters {
     #[cfg_attr(feature = "cli", clap(long))]
@@ -220,7 +222,7 @@ impl Default for ServerParameters {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
 /// Hostname and (optional) port to connect to a LanguageTool server.
 ///
 /// To use your local server instead of online api, set:
@@ -231,11 +233,15 @@ pub struct ServerCli {
     /// Server's hostname
     #[cfg_attr(
         feature = "cli",
-        clap(long, default_value = "https://api.languagetoolplus.com")
+        clap(
+            long,
+            default_value = "https://api.languagetoolplus.com",
+            env = "LANGUAGETOOL_HOSTNAME"
+        )
     )]
     pub hostname: String,
     /// Server's port number, with the empty string referring to no specific port
-    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", validator = is_port))]
+    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", validator = is_port, env = "LANGUAGETOOL_PORT"))]
     pub port: String,
 }
 
@@ -249,7 +255,7 @@ impl Default for ServerCli {
 }
 
 /// Client to communicate with the LanguageTool server using async requests.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ServerClient {
     /// API string: hostname and, optionally, port number (see [ServerCli])
     pub api: String,
@@ -261,7 +267,7 @@ pub struct ServerClient {
 impl From<ServerCli> for ServerClient {
     #[inline]
     fn from(cli: ServerCli) -> Self {
-        Self::new(cli.hostname, cli.port)
+        Self::new(&cli.hostname[..], &cli.port[..])
     }
 }
 
@@ -270,7 +276,7 @@ impl ServerClient {
     ///
     /// An empty string is accepeted as empty port.
     /// For port validation, please use [is_port] as this constructor does not check anything.
-    pub fn new(hostname: String, port: String) -> Self {
+    pub fn new(hostname: &str, port: &str) -> Self {
         let api = if port.is_empty() {
             format!("{}/v2", hostname)
         } else {
@@ -326,7 +332,6 @@ impl ServerClient {
                     .map(|mut resp| {
                         if self.max_suggestions > 0 {
                             let max = self.max_suggestions as usize;
-                            println!("{}", max);
                             resp.matches.iter_mut().for_each(|m| {
                                 let len = m.replacements.len();
                                 if max < len {
@@ -535,7 +540,7 @@ mod tests {
     #[tokio::test]
     async fn test_server_check_text() {
         let client = ServerClient::default();
-        let req = CheckRequest::default().with_text("je suis une poupee");
+        let req = CheckRequest::default().with_text("je suis une poupee".to_string());
         assert!(client.check(&req).await.is_ok());
     }
 

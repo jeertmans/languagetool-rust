@@ -5,17 +5,17 @@ on:
       - 'Cargo.toml'
   workflow_dispatch:
 
-name: Clippy check
+name: MSRV check
 
 jobs:
-  clippy_check:
+  msrv_check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
             toolchain: nightly
-            components: clippy
-            override: true
-      - name: Check with clippy
-        run: cargo clippy --all-features
+      - name: Download cargo-msrv
+        run: cargo install cargo-msrv
+      - name: Check MSRV
+        run: cargo msrv verify -- cargo check --all-features

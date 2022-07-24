@@ -49,6 +49,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 mod tests {
 
     use crate::error::Error;
+    #[cfg(feature = "cli")]
     use clap::Command;
 
     #[cfg(feature = "cli")]

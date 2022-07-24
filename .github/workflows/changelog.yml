@@ -1,0 +1,69 @@
+on:
+  pull_request:
+  workflow_dispatch:
+
+name: CHANGELOG check
+
+jobs:
+  changelog_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Check if changelog was updated
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+           filters: |
+             src:
+               - 'CHANGELOG.md'
+      - name: Find Comment
+        uses: peter-evans/find-comment@v2
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: CHANGELOG
+      - if: steps.changes.outputs.src == 'false' && steps.fc.outputs.comment-id == ''
+        name: Create comment
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Please summarize your changes in [CHANGELOG.md](CHANGELOG.md).
+            See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
+          reactions: rocket
+          edit-mode: replace
+      - if: steps.changes.outputs.src == 'false' && steps.fc.outputs.comment-id != ''
+        name: Update comment
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          body: |
+            Please summarize your changes in [CHANGELOG.md](CHANGELOG.md).
+            See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
+          reactions: rocket
+          edit-mode: replace
+      - if: steps.changes.outputs.src == 'true' && steps.fc.outputs.comment-id == ''
+        name: Create comment
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Thank you for updating [CHANGELOG.md](CHANGELOG.md)! Always feel free to edit it.
+            See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
+          reactions: hooray
+          edit-mode: replace
+      - if: steps.changes.outputs.src == 'true' && steps.fc.outputs.comment-id != ''
+        name: Update comment
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          body: |
+            Thank you for updating [CHANGELOG.md](CHANGELOG.md)! Always feel free to edit it.
+            See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
+          reactions: hooray
+          edit-mode: replace
+      - if: steps.changes.outputs.src == 'false'
+        run: echo "Please summarize your changes in [CHANGELOG.md](CHANGELOG.md)." && exit 1
+      - if: steps.changes.outputs.src == 'true'
+        run: exit 0

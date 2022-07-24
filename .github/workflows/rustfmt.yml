@@ -1,6 +1,11 @@
-on: push
+on:
+  pull_request:
+    paths:
+      - '**.rs'
+      - 'Cargo.toml'
+  workflow_dispatch:
 
-name: Rustfmt
+name: Cargo fmt
 
 jobs:
   format:

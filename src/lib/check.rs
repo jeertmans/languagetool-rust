@@ -6,7 +6,8 @@ use serde::{Deserialize, Serialize};
 
 /// Requests
 
-#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[non_exhaustive]
 /// A portion of text to be checked.
 pub struct DataAnnotation {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -20,39 +21,50 @@ pub struct DataAnnotation {
     pub text: Option<String>,
 }
 
-impl DataAnnotation {
-    #[inline]
-    /// Instantiate a new `DataAnnotation` with text only
-    pub fn new_text(text: &str) -> Self {
+impl Default for DataAnnotation {
+    fn default() -> Self {
         Self {
             interpret_as: None,
             markup: None,
-            text: Some(text.to_owned()),
+            text: Some(String::new()),
+        }
+    }
+}
+
+impl DataAnnotation {
+    #[inline]
+    /// Instantiate a new `DataAnnotation` with text only
+    pub fn new_text(text: String) -> Self {
+        Self {
+            interpret_as: None,
+            markup: None,
+            text: Some(text),
         }
     }
 
     #[inline]
     /// Instantiate a new `DataAnnotation` with markup only
-    pub fn new_markup(markup: &str) -> Self {
+    pub fn new_markup(markup: String) -> Self {
         Self {
             interpret_as: None,
-            markup: Some(markup.to_owned()),
+            markup: Some(markup),
             text: None,
         }
     }
 
     #[inline]
     /// Instantiate a new `DataAnnotation` with markup and its interpretation
-    pub fn new_interpreted_markup(markup: &str, interpret_as: &str) -> Self {
+    pub fn new_interpreted_markup(markup: String, interpret_as: String) -> Self {
         Self {
-            interpret_as: Some(interpret_as.to_owned()),
-            markup: Some(markup.to_owned()),
+            interpret_as: Some(interpret_as),
+            markup: Some(markup),
             text: None,
         }
     }
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq)]
+#[non_exhaustive]
 /// Alternative text to be checked.
 pub struct Data {
     /// Vector of markup text, see [DataAnnotation]
@@ -88,8 +100,9 @@ impl std::str::FromStr for Data {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
+#[non_exhaustive]
 /// Possible levels for additional rules.
 ///
 /// Currently, `Level::Picky` adds additional rules
@@ -124,8 +137,9 @@ impl std::str::FromStr for Level {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Debug, Default, Serialize)]
+#[derive(Clone, Deserialize, Debug, Default, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// LanguageTool POST check request.
 ///
 /// The main feature - check a text with LanguageTool for possible style and grammar issues.
@@ -216,8 +230,8 @@ impl CheckRequest {
     }
 
     /// Set the text to be checked and removed potential data field
-    pub fn with_text(mut self, text: &str) -> Self {
-        self.text = Some(text.to_owned());
+    pub fn with_text(mut self, text: String) -> Self {
+        self.text = Some(text);
         self.data = None;
         self
     }
@@ -235,15 +249,16 @@ impl CheckRequest {
     }
 
     /// Set the language of the text / data
-    pub fn with_language(mut self, language: &str) -> Self {
-        self.language = language.to_owned();
+    pub fn with_language(mut self, language: String) -> Self {
+        self.language = language;
         self
     }
 }
 
 /// Reponses
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[non_exhaustive]
 /// Detected language from check request.
 pub struct DetectedLanguage {
     /// Language code, e.g., `"sk-SK"` for Slovak
@@ -258,8 +273,9 @@ pub struct DetectedLanguage {
     pub source: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// Language information in check response.
 pub struct LanguageResponse {
     /// Language code, e.g., `"sk-SK"` for Slovak
@@ -270,7 +286,8 @@ pub struct LanguageResponse {
     pub name: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[non_exhaustive]
 /// Match context in check response.
 pub struct Context {
     /// Length of the match
@@ -281,7 +298,8 @@ pub struct Context {
     pub text: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[non_exhaustive]
 /// Possible replacement for a given match in check response.
 pub struct Replacement {
     /// Possible replacement value
@@ -300,7 +318,8 @@ impl From<&str> for Replacement {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[non_exhaustive]
 /// A rule category.
 pub struct Category {
     /// Category id
@@ -309,15 +328,17 @@ pub struct Category {
     pub name: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[non_exhaustive]
 /// A possible url of a rule in a check response.
 pub struct Url {
     /// Url value
     pub value: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// The rule that was not satisfied in a given match.
 pub struct Rule {
     /// Rule category
@@ -340,16 +361,18 @@ pub struct Rule {
     pub urls: Option<Vec<Url>>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// Type of a given match.
 pub struct Type {
     /// Type name
     pub type_name: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// Grammatical error match.
 pub struct Match {
     /// Match context
@@ -382,8 +405,9 @@ pub struct Match {
     pub type_: Type,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// LanguageTool software details.
 pub struct Software {
     /// LanguageTool API version
@@ -404,16 +428,18 @@ pub struct Software {
     pub version: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// Warnings about check response.
 pub struct Warnings {
     /// Indicate if results are imcomplete
     pub incomplete_results: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[non_exhaustive]
 /// LanguageTool POST check response.
 pub struct CheckResponse {
     /// Language information
@@ -457,8 +483,8 @@ mod tests {
     impl<'source> From<Token<'source>> for DataAnnotation {
         fn from(token: Token<'source>) -> Self {
             match token {
-                Token::Text(s) => DataAnnotation::new_text(s),
-                Token::Skip(s) => DataAnnotation::new_markup(s),
+                Token::Text(s) => DataAnnotation::new_text(s.to_string()),
+                Token::Skip(s) => DataAnnotation::new_markup(s.to_string()),
             }
         }
     }
@@ -470,10 +496,10 @@ mod tests {
 
         let expected_data = Data {
             annotation: vec![
-                DataAnnotation::new_text("My"),
-                DataAnnotation::new_text("name"),
-                DataAnnotation::new_text("is"),
-                DataAnnotation::new_markup("Q34XY"),
+                DataAnnotation::new_text("My".to_string()),
+                DataAnnotation::new_text("name".to_string()),
+                DataAnnotation::new_text("is".to_string()),
+                DataAnnotation::new_markup("Q34XY".to_string()),
             ],
         };
 
