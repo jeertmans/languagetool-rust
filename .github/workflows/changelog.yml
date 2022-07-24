@@ -17,6 +17,6 @@ jobs:
                - 'CHANGELOG.md'
 
         # run only if some file in 'src' folder was changed
-        if: steps.changes.outputs.src == 'true'
+      - if: steps.changes.outputs.src == 'true'
         run: echo "LOL" && exit 1
 
