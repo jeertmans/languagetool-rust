@@ -29,7 +29,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            Please summarize your changes in [CHANGELOG.md].
+            Please summarize your changes in [CHANGELOG.md](CHANGELOG.md).
             See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
           reactions: rocket
       - if: steps.changes.outputs.src == 'false' && steps.fc.outputs.comment-id != ''
@@ -38,7 +38,7 @@ jobs:
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           body: |
-            Please summarize your changes in [CHANGELOG.md].
+            Please summarize your changes in [CHANGELOG.md](CHANGELOG.md).
             See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
           reactions: rocket
       - if: steps.changes.outputs.src == 'true' && steps.fc.outputs.comment-id == ''
@@ -47,7 +47,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            Thank you for updating [CHANGELOG.md]! Always feel free to edit it.
+            Thank you for updating [CHANGELOG.md](CHANGELOG.md)! Always feel free to edit it.
             See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
           reactions: hooray
       - if: steps.changes.outputs.src == 'true' && steps.fc.outputs.comment-id != ''
@@ -56,10 +56,10 @@ jobs:
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           body: |
-            Thank you for updating [CHANGELOG.md]! Always feel free to edit it.
+            Thank you for updating [CHANGELOG.md](CHANGELOG.md)! Always feel free to edit it.
             See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
           reactions: hooray
       - if: steps.changes.outputs.src == 'false'
-        run: echo "Please summarize your changes in [CHANGELOG.md]." && exit 1
+        run: echo "Please summarize your changes in [CHANGELOG.md](CHANGELOG.md)." && exit 1
       - if: steps.changes.outputs.src == 'true'
         run: exit 0
