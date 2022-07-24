@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2022-07-24
+
+### Chore
+
+- Add GitHub actions for MSRV.
+- Enhance GitHub actions' set by adding more checks.
+- Add `pre-commit.ci` linting.
+- Add GitHub action with dockerized LanguageTool server for more advanced tests.
+- Remove `cliff`'s changelog generation and opt for a manual changelog maintenance.
+- Create "changelog-bot" that requires pull-requests to contain diffs in CHANGELOG.md.
+
+### Added
+
+- Add loading `hostname` and `port` from env. variables if `feature = "cli"` is set.
+
+### Changed
+
+- Bump MSRV to 1.57.
+- Changed some `&str` parameters to `String` when `to_string()` was called inside the function.
+- Add `[non_exhaustive]` flag to all structures that rely on the LT server API.
+
+### Fixed
+
+- Lowered depedency versions and using non-strict versions.
+- Fix compilation error in `src/lib/error.rs` when `feature = "cli"` was not set.
+- Remove unused print in `src/lib/server.rs`.
+
+> **_NOTE:_** Pre v1.0.0, the changelog was generated using the `cliff` tool that is based on commits.
+
 ## [0.0.18] - 2022-06-22
 
 ### 🆕 Features
