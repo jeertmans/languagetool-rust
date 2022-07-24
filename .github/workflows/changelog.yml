@@ -9,38 +9,59 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Check if changelog was updated
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+           filters: |
+             src:
+               - 'CHANGELOG.md'
       - name: Find Comment
         uses: peter-evans/find-comment@v2
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes: This comment was written by a bot!
-      
-      - name: Create comment
-        if: steps.fc.outputs.comment-id == ''
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            This comment was written by a bot!
-          reactions: rocket
-      
-      - name: Update comment
-        if: steps.fc.outputs.comment-id != ''
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          body: |
-            This comment has been updated!
-          reactions: hooray
-      - uses: dorny/paths-filter@v2
-        id: changes
-        with:
-           filters: |
-             src:
-               - 'CHANGELOG.md'
-
-        # run only if some file in 'src' folder was changed
+          body-includes: CHANGELOG
+      - if: steps.changes.outputs.src == 'false'
+        steps:
+        - name: Create comment
+          if: steps.fc.outputs.comment-id == ''
+          uses: peter-evans/create-or-update-comment@v2
+          with:
+            issue-number: ${{ github.event.pull_request.number }}
+            body: |
+              Please summarize your changes in [CHANGELOG.md]. 
+              See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
+            reactions: rocket
+        - name: Update comment
+          if: steps.fc.outputs.comment-id != ''
+          uses: peter-evans/create-or-update-comment@v2
+          with:
+            comment-id: ${{ steps.fc.outputs.comment-id }}
+            body: |
+              Please summarize your changes in [CHANGELOG.md]. 
+              See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
+            reactions: rocket
+        - run: echo "Please summarize your changes in [CHANGELOG.md]." && exit 1
       - if: steps.changes.outputs.src == 'true'
-        run: echo "LOL" && exit 1
+        steps:
+        - name: Create comment
+          if: steps.fc.outputs.comment-id == ''
+          uses: peter-evans/create-or-update-comment@v2
+          with:
+            issue-number: ${{ github.event.pull_request.number }}
+            body: |
+              Thank you for updating [CHANGELOG.md]! Always feel free to edit it. 
+              See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
+            reactions: hooray
+        - name: Update comment
+          if: steps.fc.outputs.comment-id != ''
+          uses: peter-evans/create-or-update-comment@v2
+          with:
+            comment-id: ${{ steps.fc.outputs.comment-id }}
+            body: |
+              Thank you for updating [CHANGELOG.md]! Always feel free to edit it. 
+              See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
+            reactions: hooray
+        - run: exit 0
