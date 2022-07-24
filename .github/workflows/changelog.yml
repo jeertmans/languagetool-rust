@@ -32,6 +32,7 @@ jobs:
             Please summarize your changes in [CHANGELOG.md](CHANGELOG.md).
             See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
           reactions: rocket
+          edit-mode: replace
       - if: steps.changes.outputs.src == 'false' && steps.fc.outputs.comment-id != ''
         name: Update comment
         uses: peter-evans/create-or-update-comment@v2
@@ -41,6 +42,7 @@ jobs:
             Please summarize your changes in [CHANGELOG.md](CHANGELOG.md).
             See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
           reactions: rocket
+          edit-mode: replace
       - if: steps.changes.outputs.src == 'true' && steps.fc.outputs.comment-id == ''
         name: Create comment
         uses: peter-evans/create-or-update-comment@v2
@@ -50,6 +52,7 @@ jobs:
             Thank you for updating [CHANGELOG.md](CHANGELOG.md)! Always feel free to edit it.
             See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
           reactions: hooray
+          edit-mode: replace
       - if: steps.changes.outputs.src == 'true' && steps.fc.outputs.comment-id != ''
         name: Update comment
         uses: peter-evans/create-or-update-comment@v2
@@ -59,6 +62,7 @@ jobs:
             Thank you for updating [CHANGELOG.md](CHANGELOG.md)! Always feel free to edit it.
             See [Keep A Changelog](https://keepachangelog.com/en/1.0.0/) for more details.
           reactions: hooray
+          edit-mode: replace
       - if: steps.changes.outputs.src == 'false'
         run: echo "Please summarize your changes in [CHANGELOG.md](CHANGELOG.md)." && exit 1
       - if: steps.changes.outputs.src == 'true'
