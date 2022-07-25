@@ -100,7 +100,7 @@ pub struct WordsDeleteRequest {
 
 #[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// LanguageTool GET words reponse.
+/// LanguageTool GET words response.
 pub struct WordsResponse {
     /// List of words
     words: Vec<String>,
@@ -108,15 +108,15 @@ pub struct WordsResponse {
 
 #[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// LanguageTool POST word add reponse.
+/// LanguageTool POST word add response.
 pub struct WordsAddResponse {
-    /// `true` if word was corretly added
+    /// `true` if word was correctly added
     added: bool,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// LanguageTool POST word delete reponse.
+/// LanguageTool POST word delete response.
 pub struct WordsDeleteResponse {
     /// `true` if word was correctly removed
     deleted: bool,

@@ -144,7 +144,7 @@ impl std::str::FromStr for Level {
 ///
 /// The main feature - check a text with LanguageTool for possible style and grammar issues.
 ///
-/// The structure below tries to follow as closely as possible the JSON API decribed
+/// The structure below tries to follow as closely as possible the JSON API described
 /// [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
 pub struct CheckRequest {
     #[cfg(all(feature = "cli", feature = "annotate"))]
@@ -255,7 +255,7 @@ impl CheckRequest {
     }
 }
 
-/// Reponses
+/// Responses
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -294,7 +294,7 @@ pub struct Context {
     pub length: usize,
     /// Char index at which the match starts
     pub offset: usize,
-    /// Contextual text aroung the match
+    /// Contextual text around the match
     pub text: String,
 }
 
@@ -416,7 +416,7 @@ pub struct Software {
     pub build_date: String,
     /// Name (should be `"LanguageTool"`)
     pub name: String,
-    /// Tell wether the server uses premium API or not
+    /// Tell weather the server uses premium API or not
     pub premium: bool,
     #[cfg(feature = "unstable")]
     /// Sentence that indicates if using premium API would find more errors
@@ -433,7 +433,7 @@ pub struct Software {
 #[non_exhaustive]
 /// Warnings about check response.
 pub struct Warnings {
-    /// Indicate if results are imcomplete
+    /// Indicate if results are incomplete
     pub incomplete_results: bool,
 }
 

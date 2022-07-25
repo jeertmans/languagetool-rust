@@ -1,4 +1,4 @@
-//! Structure to communite with some LanguageTool server throught the API.
+//! Structure to communite with some LanguageTool server through the API.
 
 use crate::check::{CheckRequest, CheckResponse};
 use crate::error::{Error, Result};

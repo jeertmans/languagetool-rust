@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Lowered depedency versions and using non-strict versions.
+- Lowered dependency versions and using non-strict versions.
 - Fix compilation error in `src/lib/error.rs` when `feature = "cli"` was not set.
 - Remove unused print in `src/lib/server.rs`.
 
