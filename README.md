@@ -27,6 +27,7 @@ LanguageTool-Rust (LTRS) is both an executable and a Rust library that aims to p
 ![Screenshot from CLI](https://raw.githubusercontent.com/jeertmans/languagetool-rust/main/img/screenshot.png)
 
 The command line interface of LTRS allows to very quickly use any LanguageTool server to check for grammar and style errors. You can install the latest version with `cargo`:
+
 ```bash
 > cargo install languagetool-rust --all-features
 ```
@@ -99,6 +100,7 @@ PONG! Delay: 110 ms
 If you would like to integrate LTRS within a Rust application or crate, then we recommend reading [documentation](https://docs.rs/languagetool-rust).
 
 To use LanguageTool-Rust in your Rust project, add to your `Cargo.toml`:
+
 ```toml
 [dependencies]
 languagetool_rust = "version"
