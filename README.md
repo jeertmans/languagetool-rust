@@ -2,6 +2,8 @@
 
 > **Rust bindings to connect with LanguageTool server API.**
 
+Here is an small mistak.
+
 *LanguageTool is an open source grammar style checker. It can correct 20+ languages and is free to use, more on that on [languagetool.org](https://languagetool.org/). There is a public API (with a free tier), but you can also host your own server locally. LanguageTool-Rust helps you communicate with those servers very easily via Rust code!*
 
 [![Crates.io](https://img.shields.io/crates/v/languagetool-rust)](https://crates.io/crates/languagetool-rust)
