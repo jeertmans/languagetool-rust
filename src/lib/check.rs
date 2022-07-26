@@ -416,7 +416,7 @@ pub struct Software {
     pub build_date: String,
     /// Name (should be `"LanguageTool"`)
     pub name: String,
-    /// Tell weather the server uses premium API or not
+    /// Tell whether the server uses premium API or not
     pub premium: bool,
     #[cfg(feature = "unstable")]
     /// Sentence that indicates if using premium API would find more errors
