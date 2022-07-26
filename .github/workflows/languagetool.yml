@@ -12,5 +12,5 @@ jobs:
       - uses: reviewdog/action-languagetool@v1
         with:
           reporter: github-pr-review
-          patterns: 'README.md' 'CHANGELOG.md'
+          patterns: 'README.md CHANGELOG.md'
           level: error
