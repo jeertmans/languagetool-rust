@@ -130,12 +130,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #### Default Features
 
-* **cli**: Adds command-line related methods for multiple structures. This is feature is required to install the LTRS CLI.
+- **cli**: Adds command-line related methods for multiple structures. This is feature is required to install the LTRS CLI.
 
 #### Optional Features
 
-* **annotate**: Adds method(s) to annotate results from check request. If **cli** feature is also enabled, the CLI will by default print an annotated output.
-* **unstable**: Adds more fields to JSON responses that are not present in the [Model | Example Value](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All added fields are optional, hence the `Option` around them.
+- **annotate**: Adds method(s) to annotate results from check request. If **cli** feature is also enabled, the CLI will by default print an annotated output.
+- **unstable**: Adds more fields to JSON responses that are not present in the [Model | Example Value](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All added fields are optional, hence the `Option` around them.
 
 ## Related Projects
 
