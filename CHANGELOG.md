@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Chore
 
-- Add some LanguageTool context
+- Add some LanguageTool context.
+- Correct some typos in the various docs ([@kianmeng](https://github.com/kianmeng)). [#4](https://github.com/jeertmans/languagetool-rust/pull/4)
 
 ## [1.0.0] - 2022-07-24
 
