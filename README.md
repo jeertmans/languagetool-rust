@@ -27,6 +27,7 @@ LanguageTool-Rust (LTRS) is both an executable and a Rust library that aims to p
 ![Screenshot from CLI](https://raw.githubusercontent.com/jeertmans/languagetool-rust/main/img/screenshot.png)
 
 The command line interface of LTRS allows to very quickly use any LanguageTool server to check for grammar and style errors. You can install the latest version with `cargo`:
+
 ```bash
 > cargo install languagetool-rust --all-features
 ```
@@ -99,6 +100,7 @@ PONG! Delay: 110 ms
 If you would like to integrate LTRS within a Rust application or crate, then we recommend reading [documentation](https://docs.rs/languagetool-rust).
 
 To use LanguageTool-Rust in your Rust project, add to your `Cargo.toml`:
+
 ```toml
 [dependencies]
 languagetool_rust = "version"
@@ -128,12 +130,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #### Default Features
 
-* **cli**: Adds command-line related methods for multiple structures. This is feature is required to install the LTRS CLI.
+- **cli**: Adds command-line related methods for multiple structures. This is feature is required to install the LTRS CLI.
 
 #### Optional Features
 
-* **annotate**: Adds method(s) to annotate results from check request. If **cli** feature is also enabled, the CLI will by default print an annotated output.
-* **unstable**: Adds more fields to JSON responses that are not present in the [Model | Example Value](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All added fields are optional, hence the `Option` around them.
+- **annotate**: Adds method(s) to annotate results from check request. If **cli** feature is also enabled, the CLI will by default print an annotated output.
+- **unstable**: Adds more fields to JSON responses that are not present in the [Model | Example Value](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All added fields are optional, hence the `Option` around them.
 
 ## Related Projects
 
