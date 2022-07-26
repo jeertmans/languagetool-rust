@@ -63,6 +63,40 @@ impl DataAnnotation {
     }
 }
 
+
+#[cfg(test)]
+mod data_annotation_tests {
+
+    use crate::check::DataAnnotation;
+
+    #[test]
+    fn test_text() {
+        let da = DataAnnotation::new_text("Hello".to_string());
+
+        assert_eq!(da.text.unwrap(), "Hello".to_string());
+        assert!(da.markup.is_none());
+        assert!(da.interpret_as.is_none());
+    }
+
+    #[test]
+    fn test_markup() {
+        let da = DataAnnotation::new_markup("<a>Hello</a>`".to_string());
+
+        assert!(da.text.is_none());
+        assert_eq!(da.markup.unwrap(), "<a>Hello</a>".to_string());
+        assert!(da.interpret_as.is_none());
+    }
+
+    #[test]
+    fn test_interpreted_markup() {
+        let da = DataAnnotation::new_interpreted_markup("<a>Hello</a>`".to_string(), "Hello".to_string());
+
+        assert!(da.text.is_none());
+        assert_eq!(da.markup.unwrap(), "<a>Hello</a>".to_string());
+        assert_eq!(da.interpret_as.unwrap(), "Hello".to_string());
+    }
+}
+
 #[derive(Clone, Debug, Default, Deserialize, PartialEq)]
 #[non_exhaustive]
 /// Alternative text to be checked.
@@ -151,7 +185,7 @@ pub struct CheckRequest {
     #[clap(short = 'r', long, takes_value = false)]
     /// If present, raw JSON output will be printed instead of annotated text.
     pub raw: bool,
-    #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
+    #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data"))]
     /// The text to be checked. This or 'data' is required.
     pub text: Option<String>,
     #[cfg_attr(feature = "cli", clap(short = 'd', long, conflicts_with = "text"))]
@@ -252,6 +286,29 @@ impl CheckRequest {
     pub fn with_language(mut self, language: String) -> Self {
         self.language = language;
         self
+    }
+}
+
+
+#[cfg(test)]
+mod request_tests {
+
+    use crate::CheckRequest;
+
+    #[test]
+    fn test_with_text() {
+        let req = CheckRequest::default().with_text("hello".to_string());
+
+        assert_eq!(req.text.unwrap(), "hello".to_string());
+        assert!(req.data.is_none());
+    }
+
+    #[test]
+    fn test_with_data() {
+        let req = CheckRequest::default().with_text("hello".to_string());
+
+        assert_eq!(req.text.unwrap(), "hello".to_string());
+        assert!(req.data.is_none());
     }
 }
 
