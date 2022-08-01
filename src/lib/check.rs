@@ -488,23 +488,34 @@ pub struct CheckResponse {
 }
 
 impl CheckResponse {
-    fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
+    /// Return an iterator over matches.
+    pub fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
         self.matches.iter()
     }
 
-    fn iter_matches_mut(&mut self) -> std::slice::IterMut<'_, Match> {
+    /// Return an iterator over mutable matches.
+    pub fn iter_matches_mut(&mut self) -> std::slice::IterMut<'_, Match> {
         self.matches.iter_mut()
     }
 }
 
-struct CheckResponseWithContext {
-    text: String,
-    response: CheckResponse,
-    text_length: usize,
+#[derive(Debug, Clone, PartialEq)]
+/// Check response with additional context.
+///
+/// This structure exists to keep a link between a check response
+/// and the original text that was checked.
+pub struct CheckResponseWithContext {
+    /// Original text that was checked by LT
+    pub text: String,
+    /// Check response
+    pub response: CheckResponse,
+    /// Text's length
+    pub text_length: usize,
 }
 
 impl CheckResponseWithContext {
-    fn new(text: String, response: CheckResponse) -> Self {
+    /// Bind a check response with its original text.
+    pub fn new(text: String, response: CheckResponse) -> Self {
         let text_length = text.chars().count();
         Self {
             text,
@@ -513,23 +524,106 @@ impl CheckResponseWithContext {
         }
     }
 
-    fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
+    /// Return an iterator over matches.
+    pub fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
         self.response.iter_matches()
     }
 
-    fn iter_matches_mut(&mut self) -> std::slice::IterMut<'_, Match> {
+    /// Return an iterator over mutable matches.
+    pub fn iter_matches_mut(&mut self) -> std::slice::IterMut<'_, Match> {
         self.response.iter_matches_mut()
     }
 
-    fn append(mut self, mut other: Self) -> Self {
+    /// Return an iterator over matches and correspondig line number and line offset.
+    pub fn iter_match_positions(&self) -> MatchPositions<'_> {
+        self.into()
+    }
+
+    /// Append a check response to the current while
+    /// adjusting the matches' offsets.
+    ///
+    /// This is especially useful when a text was split in multiple requests.
+    pub fn append(mut self, mut other: Self) -> Self {
         let offset = self.text_length;
         for m in other.iter_matches_mut() {
             m.offset += offset;
         }
 
+        #[cfg(feature = "unstable")]
+        if let Some(ref mut sr_other) = other.response.sentence_ranges {
+            match self.response.sentence_ranges {
+                Some(ref mut sr_self) => {
+                    sr_self.append(sr_other);
+                }
+                None => {
+                    std::mem::swap(
+                        &mut self.response.sentence_ranges,
+                        &mut other.response.sentence_ranges,
+                    );
+                }
+            }
+        }
+
+        self.response.matches.append(&mut other.response.matches);
         self.text.push_str(other.text.as_str());
         self.text_length += other.text_length;
         self
+    }
+}
+
+/// Iterator over matches and their corresponding line number and line offset.
+#[derive(Clone, Debug)]
+pub struct MatchPositions<'source> {
+    text_chars: std::str::Chars<'source>,
+    matches: std::slice::Iter<'source, Match>,
+    line_number: usize,
+    line_offset: usize,
+    offset: usize,
+}
+
+impl<'source> From<&'source CheckResponseWithContext> for MatchPositions<'source> {
+    fn from(response: &'source CheckResponseWithContext) -> Self {
+        MatchPositions {
+            text_chars: response.text.chars(),
+            matches: response.iter_matches(),
+            line_number: 1,
+            line_offset: 0,
+            offset: 0,
+        }
+    }
+}
+
+impl<'source> MatchPositions<'source> {
+    /// Set the line number to a give value.
+    ///
+    /// By default, the first line number is 1.
+    pub fn set_line_number(mut self, line_number: usize) -> Self {
+        self.line_number = line_number;
+        self
+    }
+}
+
+impl<'source> Iterator for MatchPositions<'source> {
+    type Item = (usize, usize, &'source Match);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(m) = self.matches.next() {
+            let n = m.offset - self.offset;
+            for _ in 0..n {
+                match self.text_chars.next() {
+                    Some('\n') => {
+                        self.line_number += 1;
+                        self.line_offset = 0;
+                    }
+                    None => panic!("text is shorter than expected, are you sure this text was the one used for the check request?"),
+                    _ => self.line_offset += 1,
+                }
+            }
+            self.offset = m.offset;
+            Some((self.line_number, self.line_offset, m))
+        } else {
+            None
+        }
     }
 }
 
