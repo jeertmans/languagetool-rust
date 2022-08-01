@@ -487,6 +487,52 @@ pub struct CheckResponse {
     pub warnings: Option<Warnings>,
 }
 
+impl CheckResponse {
+    fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
+        self.matches.iter()
+    }
+
+    fn iter_matches_mut(&mut self) -> std::slice::IterMut<'_, Match> {
+        self.matches.iter_mut()
+    }
+}
+
+struct CheckResponseWithContext {
+    text: String,
+    response: CheckResponse,
+    text_length: usize,
+}
+
+impl CheckResponseWithContext {
+    fn new(text: String, response: CheckResponse) -> Self {
+        let text_length = text.chars().count();
+        Self {
+            text,
+            response,
+            text_length,
+        }
+    }
+
+    fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
+        self.response.iter_matches()
+    }
+
+    fn iter_matches_mut(&mut self) -> std::slice::IterMut<'_, Match> {
+        self.response.iter_matches_mut()
+    }
+
+    fn append(mut self, mut other: Self) -> Self {
+        let offset = self.text_length;
+        for m in other.iter_matches_mut() {
+            m.offset += offset;
+        }
+
+        self.text.push_str(other.text.as_str());
+        self.text_length += other.text_length;
+        self
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
