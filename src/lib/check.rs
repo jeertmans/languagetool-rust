@@ -151,6 +151,10 @@ pub struct CheckRequest {
     #[clap(short = 'r', long, takes_value = false)]
     /// If present, raw JSON output will be printed instead of annotated text.
     pub raw: bool,
+    #[cfg(feature = "cli"))]
+    #[clap(short = 'c', long, takes_value = false)]
+    /// If present, context (i.e., line number and line offset) will be added to response.
+    pub with_context: bool,
     #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
     /// The text to be checked. This or 'data' is required.
     pub text: Option<String>,
