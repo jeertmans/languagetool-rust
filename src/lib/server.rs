@@ -354,6 +354,7 @@ impl ServerClient {
     /// Send a check request to the server, await for the response and annotate it
     #[cfg(feature = "annotate")]
     pub async fn annotate_check(&self, request: &CheckRequest) -> Result<String> {
+        let text = request.get_text();
         let resp = self.check(request).await?;
 
         if resp.matches.is_empty() {
@@ -387,12 +388,7 @@ impl ServerClient {
                 footer: vec![],
                 slices: vec![Slice {
                     source: &m.context.text,
-                    line_start: 1 + m
-                        .sentence
-                        .chars()
-                        .take(m.offset)
-                        .filter(|c| *c == '\n')
-                        .count(),
+                    line_start: 1 + text.chars().take(m.offset).filter(|c| *c == '\n').count(),
                     origin: None,
                     fold: true,
                     annotations: vec![

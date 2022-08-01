@@ -253,6 +253,32 @@ impl CheckRequest {
         self.language = language;
         self
     }
+
+    /// Return a copy of the text within the request.
+    ///
+    /// # Panics
+    ///
+    /// Panics if both self.text and self.data are None.
+    /// Panics if any data annotation does not contain text or markup.
+    pub fn get_text(&self) -> String {
+        if let Some(ref text) = self.text {
+            text.clone()
+        } else if let Some(ref data) = self.data {
+            let mut text = String::new();
+            for da in data.annotation.iter() {
+                if let Some(ref t) = da.text {
+                    text.push_str(t.as_str());
+                } else if let Some(ref t) = da.markup {
+                    text.push_str(t.as_str());
+                } else {
+                    panic!("request contains some invalid data annotations(s): {:?}", da);
+                }
+            }
+            text
+        } else {
+            panic!("impossible to retrieve text from request if both data and text fields are None");
+        }
+    }
 }
 
 /// Responses
