@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v1.0.0...HEAD)
 
 ### Chore
 
@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Correct some typos in the various docs ([@kianmeng](https://github.com/kianmeng)). [#4](https://github.com/jeertmans/languagetool-rust/pull/4)
 - Add lint test for Markdown files ([@kianmeng](https://github.com/kianmeng)). [#5](https://github.com/jeertmans/languagetool-rust/pull/5)
 - Add grammar check for text-like files. [#6](https://github.com/jeertmans/languagetool-rust/pull/6)
+- Add compare links to release tags in CHANGELOG. [#9](https://github.com/jeertmans/languagetool-rust/pull/9)
 
 ### Added
 
@@ -23,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed line number in annotated responses. [#8](https://github.com/jeertmans/languagetool-rust/pull/8)
 
-## [1.0.0] - 2022-07-24
+## [1.0.0](https://github.com/jeertmans/languagetool-rust/compare/v0.0.18...v1.0.0) - 2022-07-24
 
 ### Chore
 
@@ -52,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **_NOTE:_** Pre v1.0.0, the changelog was generated using the `cliff` tool that is based on commits.
 
-## [0.0.18] - 2022-06-22
+## [0.0.18](https://github.com/jeertmans/languagetool-rust/compare/v0.0.17...v0.0.18) - 2022-06-22
 
 ### 🆕 Features
 
@@ -69,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  [**tests**] Added test for errors
 -  [**docs**] 100% of src/lib is now documented
 
-## [0.0.17] - 2022-06-21
+## [0.0.17](https://github.com/jeertmans/languagetool-rust/compare/v0.0.16...v0.0.17) - 2022-06-21
 
 ### 🆕 Features
 
@@ -90,7 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  [**lib**] Documentation some add. functions
 -  [**version**] Update version & changelog
 
-## [0.0.16] - 2022-06-08
+## [0.0.16](https://github.com/jeertmans/languagetool-rust/compare/v0.0.15...v0.0.16) - 2022-06-08
 
 ### 🆕 Features
 
@@ -109,7 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  [**ci**] Updated GitHub action to avoid integration error </br> └─ See [this issue](https://github.com/actions-rs/clippy-check/issues/2) for example
 -  [**version**] Update version & changelog
 
-## [0.0.15] - 2022-06-01
+## [0.0.15](https://github.com/jeertmans/languagetool-rust/compare/v0.0.14...v0.0.15) - 2022-06-01
 
 ### 🗃️ Miscellaneous Tasks
 
@@ -120,14 +121,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -  [**lib**] Avoid panicking on string slices </br> └─ This fixes the problem that occurred when the string was not made of purely utf-8 chars. E.g.: `ltrs check --text "Un essai de texte en français à controler"`
 
-## [0.0.14] - 2022-05-31
+## [0.0.14](https://github.com/jeertmans/languagetool-rust/compare/v0.0.13...v0.0.14) - 2022-05-31
 
 ### 🗃️ Miscellaneous Tasks
 
 -  [**readme**] Fix file link in readme
 -  [**version**] Update version & changelog
 
-## [0.0.13] - 2022-05-31
+## [0.0.13](https://github.com/jeertmans/languagetool-rust/compare/v0.0.12...v0.0.13) - 2022-05-31
 
 ### 🆕 Features
 
@@ -141,7 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  [**cli**] Derive display order
 -  [**version**] Update version & changelog
 
-## [0.0.12] - 2022-05-31
+## [0.0.12](https://github.com/jeertmans/languagetool-rust/compare/v0.0.11...v0.0.12) - 2022-05-31
 
 ### 🆕 Features
 
@@ -158,7 +159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -  [**readme**] Fix changelog link in readme
 
-## [0.0.11] - 2022-05-24
+## [0.0.11](https://github.com/jeertmans/languagetool-rust/compare/v0.0.10...v0.0.11) - 2022-05-24
 
 ### 🗃️ Miscellaneous Tasks
 
@@ -170,7 +171,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -  [**doc**] Automatic links in docstrings
 
-## [0.0.10] - 2022-05-23
+## [0.0.10](https://github.com/jeertmans/languagetool-rust/compare/v0.0.9...v0.0.10) - 2022-05-23
 
 ### 🆕 Features
 
@@ -187,14 +188,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  [**lib**] Now correctly writes arrays in config file
 -  [**test**] Fixing doctest
 
-## [0.0.9] - 2022-05-20
+## [0.0.9](https://github.com/jeertmans/languagetool-rust/compare/v0.0.9-beta...v0.0.9) - 2022-05-20
 
 ### 🗃️ Miscellaneous Tasks
 
 -  [**doc**] Auto-doc for "feature"-only commands
 -  [**version**] Update version & changelog
 
-## [0.0.9-beta] - 2022-05-20
+## [0.0.9-beta](https://github.com/jeertmans/languagetool-rust/compare/v0.0.9-alpha...v0.0.9-beta) - 2022-05-20
 
 ### 🗃️ Miscellaneous Tasks
 
@@ -204,7 +205,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -  [**CI**] Now publish with cli feature
 
-## [0.0.9-alpha] - 2022-05-20
+## [0.0.9-alpha](https://github.com/jeertmans/languagetool-rust/compare/v0.0.8...v0.0.9-alpha) - 2022-05-20
 
 ### 🗃️ Miscellaneous Tasks
 
@@ -212,7 +213,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  [**features**] Remove default features
 -  [**version**] Update version & changelog
 
-## [0.0.8] - 2022-05-20
+## [0.0.8](https://github.com/jeertmans/languagetool-rust/compare/v0.0.7...v0.0.8) - 2022-05-20
 
 ### 🆕 Features
 
@@ -231,7 +232,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  [**cli**] Text takes now 't' as short flag
 -  [**lib**] IDs and categories are String
 
-## [0.0.7] - 2022-05-18
+## [0.0.7](https://github.com/jeertmans/languagetool-rust/compare/v0.0.6...v0.0.7) - 2022-05-18
 
 ### 🆕 Features
 
@@ -247,7 +248,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  [**readme**] Update todos & usage
 -  [**version**] Update version & changelog
 
-## [0.0.6] - 2022-05-18
+## [0.0.6](https://github.com/jeertmans/languagetool-rust/compare/v0.0.5...v0.0.6) - 2022-05-18
 
 ### 🆕 Features
 
@@ -261,7 +262,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  [**defaults**] Change default hostname api </br> └─ Now uses online server from LanguageTool
 -  [**version**] Update version & changelog
 
-## [0.0.5] - 2022-05-17
+## [0.0.5](https://github.com/jeertmans/languagetool-rust/compare/v0.0.4...v0.0.5) - 2022-05-17
 
 ### 🆕 Features
 
@@ -271,7 +272,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -  [**version**] Update version & changelog
 
-## [0.0.4] - 2022-05-17
+## [0.0.4](https://github.com/jeertmans/languagetool-rust/compare/v0.0.3...v0.0.4) - 2022-05-17
 
 ### 🆕 Features
 
@@ -282,7 +283,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  [**readme**] Update todos
 -  [**version**] Update version & changelog
 
-## [0.0.3] - 2022-05-17
+## [0.0.3](https://github.com/jeertmans/languagetool-rust/compare/v0.0.2...v0.0.3) - 2022-05-17
 
 ### 🆕 Features
 
@@ -294,7 +295,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  [**version**] Update version & changelog
 -  [**version**] Update version in Cargo.lock
 
-## [0.0.2] - 2022-05-16
+## [0.0.2](https://github.com/jeertmans/languagetool-rust/compare/v0.0.1...v0.0.2) - 2022-05-16
 
 ### 🆕 Features
 
@@ -308,7 +309,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -  [**src/lib/api**] Removed empty file
 
-## [0.0.1] - 2022-05-16
+## [0.0.1](https://github.com/jeertmans/languagetool-rust/tree/v0.0.1) - 2022-05-16
 
 ### 🆕 Features
 
