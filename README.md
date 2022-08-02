@@ -130,7 +130,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #### Default Features
 
-- **cli**: Adds command-line related methods for multiple structures. This is feature is required to install the LTRS CLI.
+- **cli**: Adds command-line related methods for multiple structures. This feature is required to install the LTRS CLI.
 
 #### Optional Features
 
