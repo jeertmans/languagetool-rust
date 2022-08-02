@@ -292,7 +292,7 @@ impl CheckRequest {
 
 /// Responses
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// Detected language from check request.
 pub struct DetectedLanguage {
@@ -308,7 +308,7 @@ pub struct DetectedLanguage {
     pub source: Option<String>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// Language information in check response.
@@ -487,7 +487,7 @@ pub struct Warnings {
     pub incomplete_results: bool,
 }
 
-#[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// LanguageTool POST check response.
@@ -518,7 +518,7 @@ impl CheckResponse {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 /// Check response with additional context.
 ///
 /// This structure exists to keep a link between a check response
@@ -590,6 +590,7 @@ impl CheckResponseWithContext {
     }
 }
 
+#[cfg(feature = "cli")]
 impl From<CheckResponseWithContext> for CheckResponse {
     fn from(mut resp: CheckResponseWithContext) -> Self {
         let iter: MatchPositions<'_, std::slice::IterMut<'_, Match>> = (&mut resp).into();
