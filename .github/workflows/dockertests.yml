@@ -25,3 +25,4 @@ jobs:
       - run: cat README.md | ltrs check
       - run: ltrs languages
       - run: ltrs check -t "Some text with a apparent mistake"
+      - run: cargo test --all-features

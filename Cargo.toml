@@ -44,4 +44,8 @@ name = "ltrs"
 path = "src/bin.rs"
 required-features = ["cli", "tokio"]
 
+[[test]]
+name = "match-positions"
+path = "tests/match_positions.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
