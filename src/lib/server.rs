@@ -254,7 +254,6 @@ impl Default for ServerCli {
     }
 }
 
-
 impl ServerCli {
     /// Create a new [ServeCli] instance from environ variables:
     /// - LANGUAGETOOL_HOSTNAME
@@ -569,7 +568,6 @@ impl ServerClient {
         Self::from_cli(ServerCli::from_env_or_default())
     }
 }
-
 
 #[cfg(test)]
 mod tests {
