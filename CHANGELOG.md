@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `get_text` method for `CheckRequest`. [#8](https://github.com/jeertmans/languagetool-rust/pull/8)
 - Create `CheckResponseWithContext` that enables keeping information about checked text. Hence, mutable and immutable iterators have been created to provide more tools to the end-user. [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
 - Add `--more-context` option flag to CLI. This enables to add more information in the JSON output. [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
-- Derive `Eq` for all structs that derive `PartialEq`. [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
+- Derive `Eq` for all structs that derive `PartialEq` and with fields that derive `Eq`. [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
 
 ### Fixed
 
