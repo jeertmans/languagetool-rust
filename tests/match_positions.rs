@@ -39,8 +39,8 @@ i can drive a car",
 
 test_match_positions!(
     test_match_positions_2,
-    "Some phrase with 
-a smal mistake. i can 
+    "Some phrase with
+a smal mistake. i can
 drive a car",
     (2, 2),
     (2, 16)
