@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 /// Requests
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// A portion of text to be checked.
 pub struct DataAnnotation {
@@ -63,7 +63,7 @@ impl DataAnnotation {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 #[non_exhaustive]
 /// Alternative text to be checked.
 pub struct Data {
@@ -100,7 +100,7 @@ impl std::str::FromStr for Data {
     }
 }
 
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
+#[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
 /// Possible levels for additional rules.
@@ -137,7 +137,7 @@ impl std::str::FromStr for Level {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Clone, Deserialize, Debug, Default, PartialEq, Serialize)]
+#[derive(Clone, Deserialize, Debug, Default, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// LanguageTool POST check request.
@@ -292,7 +292,7 @@ impl CheckRequest {
 
 /// Responses
 
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// Detected language from check request.
 pub struct DetectedLanguage {
@@ -308,7 +308,7 @@ pub struct DetectedLanguage {
     pub source: Option<String>,
 }
 
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// Language information in check response.
@@ -321,7 +321,7 @@ pub struct LanguageResponse {
     pub name: String,
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// Match context in check response.
 pub struct Context {
@@ -334,7 +334,7 @@ pub struct Context {
 }
 
 #[cfg(feature = "cli")]
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// More context, post-processed in check response.
 pub struct MoreContext {
@@ -344,7 +344,7 @@ pub struct MoreContext {
     pub line_offset: usize,
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// Possible replacement for a given match in check response.
 pub struct Replacement {
@@ -364,7 +364,7 @@ impl From<&str> for Replacement {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// A rule category.
 pub struct Category {
@@ -374,7 +374,7 @@ pub struct Category {
     pub name: String,
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// A possible url of a rule in a check response.
 pub struct Url {
@@ -382,7 +382,7 @@ pub struct Url {
     pub value: String,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// The rule that was not satisfied in a given match.
@@ -407,7 +407,7 @@ pub struct Rule {
     pub urls: Option<Vec<Url>>,
 }
 
-#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
+#[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// Type of a given match.
@@ -416,7 +416,7 @@ pub struct Type {
     pub type_name: String,
 }
 
-#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
+#[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// Grammatical error match.
@@ -455,7 +455,7 @@ pub struct Match {
     pub type_: Type,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// LanguageTool software details.
@@ -478,7 +478,7 @@ pub struct Software {
     pub version: String,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// Warnings about check response.
@@ -487,7 +487,7 @@ pub struct Warnings {
     pub incomplete_results: bool,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// LanguageTool POST check response.
@@ -518,7 +518,7 @@ impl CheckResponse {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 /// Check response with additional context.
 ///
 /// This structure exists to keep a link between a check response

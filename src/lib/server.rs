@@ -46,7 +46,7 @@ pub fn is_port(v: &str) -> Result<()> {
     })
 }
 
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// A Java property file (one key=value entry per line) with values listed below.
@@ -181,7 +181,7 @@ impl Default for ConfigFile {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// Server parameters that are to be used when instantiating a LanguageTool server
 pub struct ServerParameters {
@@ -222,7 +222,7 @@ impl Default for ServerParameters {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 /// Hostname and (optional) port to connect to a LanguageTool server.
 ///
 /// To use your local server instead of online api, set:

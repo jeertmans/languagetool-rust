@@ -26,7 +26,7 @@ pub fn is_word(v: &str) -> Result<(), String> {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// Login arguments required by the API.
@@ -40,7 +40,7 @@ pub struct LoginArgs {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// LanguageTool GET words request.
 ///
@@ -61,7 +61,7 @@ pub struct WordsRequest {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// LanguageTool POST words add request.
 ///
@@ -80,7 +80,7 @@ pub struct WordsAddRequest {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// LanguageTool POST words delete request.
 ///
@@ -98,7 +98,7 @@ pub struct WordsDeleteRequest {
     pub dict: Option<String>,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// LanguageTool GET words response.
 pub struct WordsResponse {
@@ -106,7 +106,7 @@ pub struct WordsResponse {
     words: Vec<String>,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// LanguageTool POST word add response.
 pub struct WordsAddResponse {
@@ -114,7 +114,7 @@ pub struct WordsAddResponse {
     added: bool,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// LanguageTool POST word delete response.
 pub struct WordsDeleteResponse {
