@@ -151,10 +151,10 @@ pub struct CheckRequest {
     #[clap(short = 'r', long, takes_value = false)]
     /// If present, raw JSON output will be printed instead of annotated text.
     pub raw: bool,
-    #[cfg(feature = "cli"))]
-    #[clap(short = 'c', long, takes_value = false)]
-    /// If present, context (i.e., line number and line offset) will be added to response.
-    pub with_context: bool,
+    #[cfg(feature = "cli")]
+    #[clap(short = 'm', long, takes_value = false)]
+    /// If present, more context (i.e., line number and line offset) will be added to response.
+    pub more_context: bool,
     #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
     /// The text to be checked. This or 'data' is required.
     pub text: Option<String>,
@@ -333,6 +333,17 @@ pub struct Context {
     pub text: String,
 }
 
+#[cfg(feature = "cli")]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[non_exhaustive]
+/// More context, post-processed in check response.
+pub struct MoreContext {
+    /// Line number where match occured
+    pub line_number: usize,
+    /// Char index at which the match starts on the current line
+    pub line_offset: usize,
+}
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[non_exhaustive]
 /// Possible replacement for a given match in check response.
@@ -424,6 +435,10 @@ pub struct Match {
     pub length: usize,
     /// Error message
     pub message: String,
+    #[cfg(feature = "cli")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// More context to match, post-processed using original text
+    pub more_context: Option<MoreContext>,
     /// Char index at which the match start
     pub offset: usize,
     /// List of possible replacements (if applies)
@@ -539,7 +554,7 @@ impl CheckResponseWithContext {
     }
 
     /// Return an iterator over matches and correspondig line number and line offset.
-    pub fn iter_match_positions(&self) -> MatchPositions<'_> {
+    pub fn iter_match_positions(&self) -> MatchPositions<'_, std::slice::Iter<'_, Match>> {
         self.into()
     }
 
@@ -575,17 +590,33 @@ impl CheckResponseWithContext {
     }
 }
 
+impl From<CheckResponseWithContext> for CheckResponse {
+    fn from(mut resp: CheckResponseWithContext) -> Self {
+        let iter: MatchPositions<'_, std::slice::IterMut<'_, Match>> = (&mut resp).into();
+
+        for (line_number, line_offset, m) in iter {
+            m.more_context = Some(MoreContext {
+                line_number,
+                line_offset,
+            });
+        }
+        resp.response
+    }
+}
+
 /// Iterator over matches and their corresponding line number and line offset.
 #[derive(Clone, Debug)]
-pub struct MatchPositions<'source> {
+pub struct MatchPositions<'source, T> {
     text_chars: std::str::Chars<'source>,
-    matches: std::slice::Iter<'source, Match>,
+    matches: T,
     line_number: usize,
     line_offset: usize,
     offset: usize,
 }
 
-impl<'source> From<&'source CheckResponseWithContext> for MatchPositions<'source> {
+impl<'source> From<&'source CheckResponseWithContext>
+    for MatchPositions<'source, std::slice::Iter<'source, Match>>
+{
     fn from(response: &'source CheckResponseWithContext) -> Self {
         MatchPositions {
             text_chars: response.text.chars(),
@@ -597,7 +628,21 @@ impl<'source> From<&'source CheckResponseWithContext> for MatchPositions<'source
     }
 }
 
-impl<'source> MatchPositions<'source> {
+impl<'source> From<&'source mut CheckResponseWithContext>
+    for MatchPositions<'source, std::slice::IterMut<'source, Match>>
+{
+    fn from(response: &'source mut CheckResponseWithContext) -> Self {
+        MatchPositions {
+            text_chars: response.text.chars(),
+            matches: response.response.iter_matches_mut(),
+            line_number: 1,
+            line_offset: 0,
+            offset: 0,
+        }
+    }
+}
+
+impl<'source, T> MatchPositions<'source, T> {
     /// Set the line number to a give value.
     ///
     /// By default, the first line number is 1.
@@ -605,16 +650,12 @@ impl<'source> MatchPositions<'source> {
         self.line_number = line_number;
         self
     }
-}
 
-impl<'source> Iterator for MatchPositions<'source> {
-    type Item = (usize, usize, &'source Match);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if let Some(m) = self.matches.next() {
-            let n = m.offset - self.offset;
-            for _ in 0..n {
-                match self.text_chars.next() {
+    fn update_line_number_and_offset(&mut self, m: &Match) {
+        // TODO: check cases where newline is actually '\r\n' (Windows platforms)
+        let n = m.offset - self.offset;
+        for _ in 0..n {
+            match self.text_chars.next() {
                     Some('\n') => {
                         self.line_number += 1;
                         self.line_offset = 0;
@@ -622,8 +663,30 @@ impl<'source> Iterator for MatchPositions<'source> {
                     None => panic!("text is shorter than expected, are you sure this text was the one used for the check request?"),
                     _ => self.line_offset += 1,
                 }
-            }
-            self.offset = m.offset;
+        }
+        self.offset = m.offset;
+    }
+}
+
+impl<'source> Iterator for MatchPositions<'source, std::slice::Iter<'source, Match>> {
+    type Item = (usize, usize, &'source Match);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(m) = self.matches.next() {
+            self.update_line_number_and_offset(m);
+            Some((self.line_number, self.line_offset, m))
+        } else {
+            None
+        }
+    }
+}
+
+impl<'source> Iterator for MatchPositions<'source, std::slice::IterMut<'source, Match>> {
+    type Item = (usize, usize, &'source mut Match);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(m) = self.matches.next() {
+            self.update_line_number_and_offset(m);
             Some((self.line_number, self.line_offset, m))
         } else {
             None

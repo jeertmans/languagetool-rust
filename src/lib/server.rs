@@ -357,10 +357,20 @@ impl ServerClient {
         let text = request.get_text();
         let resp = self.check(request).await?;
 
+        use crate::check::CheckResponseWithContext;
+
+        for (lineno, lineof, m) in
+            CheckResponseWithContext::new(text.clone(), resp.clone()).iter_match_positions()
+        {
+            println!(
+                "Error found at line: {}, offset: {}, length: {}.",
+                lineno, lineof, m.length
+            );
+        }
+
         if resp.matches.is_empty() {
             return Ok("Not error were found in provided text".to_string());
         }
-
         let replacements: Vec<_> = resp
             .matches
             .iter()
