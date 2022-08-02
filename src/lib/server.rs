@@ -254,6 +254,28 @@ impl Default for ServerCli {
     }
 }
 
+
+impl ServerCli {
+    /// Create a new [ServeCli] instance from environ variables:
+    /// - LANGUAGETOOL_HOSTNAME
+    /// - LANGUAGETOOL_PORT
+    ///
+    /// If one or both environ variables are empty, an error is returned.
+    pub fn from_env() -> Result<Self> {
+        let hostname = std::env::var("LANGUAGETOOL_HOSTNAME")?;
+        let port = std::env::var("LANGUAGETOOL_PORT")?;
+
+        Ok(Self { hostname, port })
+    }
+
+    /// Create a new [ServerCli] instance from environ variables,
+    /// but defaults to [ServerCli::default()] if expected environ
+    /// variables are not set.
+    pub fn from_env_or_default() -> Self {
+        ServerCli::from_env().unwrap_or_default()
+    }
+}
+
 /// Client to communicate with the LanguageTool server using async requests.
 #[derive(Clone, Debug)]
 pub struct ServerClient {
@@ -532,6 +554,23 @@ impl Default for ServerClient {
     }
 }
 
+impl ServerClient {
+    /// Create a new [ServerClient] instance from environ variables.
+    ///
+    /// See [ServerCli::from_env] for more details.
+    pub fn from_env() -> Result<Self> {
+        Ok(Self::from_cli(ServerCli::from_env()?))
+    }
+
+    /// Create a new [ServerClient] instance from environ variables,
+    /// but defaults to [ServerClient::default()] if expected environ
+    /// variables are not set.
+    pub fn from_env_or_default() -> Self {
+        Self::from_cli(ServerCli::from_env_or_default())
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use crate::check::CheckRequest;
@@ -539,20 +578,20 @@ mod tests {
 
     #[tokio::test]
     async fn test_server_ping() {
-        let client = ServerClient::default();
+        let client = ServerClient::from_env_or_default();
         assert!(client.ping().await.is_ok());
     }
 
     #[tokio::test]
     async fn test_server_check_text() {
-        let client = ServerClient::default();
+        let client = ServerClient::from_env_or_default();
         let req = CheckRequest::default().with_text("je suis une poupee".to_string());
         assert!(client.check(&req).await.is_ok());
     }
 
     #[tokio::test]
     async fn test_server_check_data() {
-        let client = ServerClient::default();
+        let client = ServerClient::from_env_or_default();
         let req = CheckRequest::default()
             .with_data_str("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
             .unwrap();
@@ -561,7 +600,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_server_languages() {
-        let client = ServerClient::default();
+        let client = ServerClient::from_env_or_default();
         assert!(client.languages().await.is_ok());
     }
 }
