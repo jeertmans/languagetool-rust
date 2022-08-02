@@ -73,6 +73,7 @@ async fn try_main() -> Result<()> {
 
             let mut resp = client.check(&req).await?;
 
+            #[cfg(feature = "cli")]
             if req.more_context {
                 use crate::check::CheckResponseWithContext;
                 let text = req.get_text();
