@@ -25,8 +25,9 @@ thiserror = "^1.0"
 tokio = { version = "^1.0", features = ["macros", "rt-multi-thread"], optional = true }
 
 [dev-dependencies]
+criterion = "0.3" 
+futures = "0.3"
 tokio = { version = "^1.0", features = ["macros"]}
-
 
 [features]
 annotate = ["annotate-snippets"]
@@ -47,5 +48,9 @@ required-features = ["cli", "tokio"]
 [[test]]
 name = "match-positions"
 path = "tests/match_positions.rs"
+
+[[bench]]
+name    = "bench_main"
+harness = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

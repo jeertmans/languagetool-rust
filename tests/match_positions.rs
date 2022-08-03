@@ -4,7 +4,7 @@ use languagetool_rust::{
 };
 
 #[macro_export]
-macro_rules! test_match_positions{
+macro_rules! test_match_positions {
     ($name:ident, $text:expr, $(($x:expr, $y:expr)),*) => {
         #[tokio::test]
         async fn $name()  -> Result<(), Box<dyn std::error::Error>> {
