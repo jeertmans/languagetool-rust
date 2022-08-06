@@ -71,11 +71,16 @@ async fn try_main() -> Result<()> {
                 return Ok(());
             }
 
-            writeln!(
-                &stdout,
-                "{}",
-                serde_json::to_string_pretty(&client.check(&req).await?)?
-            )?;
+            let mut resp = client.check(&req).await?;
+
+            #[cfg(feature = "cli")]
+            if req.more_context {
+                use crate::check::CheckResponseWithContext;
+                let text = req.get_text();
+                resp = CheckResponseWithContext::new(text, resp).into();
+            }
+
+            writeln!(&stdout, "{}", serde_json::to_string_pretty(&resp)?)?;
         }
         Some(("languages", _sub_matches)) => {
             writeln!(

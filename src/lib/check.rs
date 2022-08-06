@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 /// Requests
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// A portion of text to be checked.
 pub struct DataAnnotation {
@@ -63,7 +63,7 @@ impl DataAnnotation {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 #[non_exhaustive]
 /// Alternative text to be checked.
 pub struct Data {
@@ -100,7 +100,7 @@ impl std::str::FromStr for Data {
     }
 }
 
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
+#[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
 /// Possible levels for additional rules.
@@ -137,7 +137,7 @@ impl std::str::FromStr for Level {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Clone, Deserialize, Debug, Default, PartialEq, Serialize)]
+#[derive(Clone, Deserialize, Debug, Default, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// LanguageTool POST check request.
@@ -151,6 +151,10 @@ pub struct CheckRequest {
     #[clap(short = 'r', long, takes_value = false)]
     /// If present, raw JSON output will be printed instead of annotated text.
     pub raw: bool,
+    #[cfg(feature = "cli")]
+    #[clap(short = 'm', long, takes_value = false)]
+    /// If present, more context (i.e., line number and line offset) will be added to response.
+    pub more_context: bool,
     #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
     /// The text to be checked. This or 'data' is required.
     pub text: Option<String>,
@@ -317,7 +321,7 @@ pub struct LanguageResponse {
     pub name: String,
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// Match context in check response.
 pub struct Context {
@@ -329,7 +333,18 @@ pub struct Context {
     pub text: String,
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg(feature = "cli")]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
+#[non_exhaustive]
+/// More context, post-processed in check response.
+pub struct MoreContext {
+    /// Line number where match occured
+    pub line_number: usize,
+    /// Char index at which the match starts on the current line
+    pub line_offset: usize,
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// Possible replacement for a given match in check response.
 pub struct Replacement {
@@ -349,7 +364,7 @@ impl From<&str> for Replacement {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// A rule category.
 pub struct Category {
@@ -359,7 +374,7 @@ pub struct Category {
     pub name: String,
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// A possible url of a rule in a check response.
 pub struct Url {
@@ -367,7 +382,7 @@ pub struct Url {
     pub value: String,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// The rule that was not satisfied in a given match.
@@ -392,7 +407,7 @@ pub struct Rule {
     pub urls: Option<Vec<Url>>,
 }
 
-#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
+#[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// Type of a given match.
@@ -401,7 +416,7 @@ pub struct Type {
     pub type_name: String,
 }
 
-#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
+#[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// Grammatical error match.
@@ -420,6 +435,10 @@ pub struct Match {
     pub length: usize,
     /// Error message
     pub message: String,
+    #[cfg(feature = "cli")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// More context to match, post-processed using original text
+    pub more_context: Option<MoreContext>,
     /// Char index at which the match start
     pub offset: usize,
     /// List of possible replacements (if applies)
@@ -436,7 +455,7 @@ pub struct Match {
     pub type_: Type,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// LanguageTool software details.
@@ -459,7 +478,7 @@ pub struct Software {
     pub version: String,
 }
 
-#[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// Warnings about check response.
@@ -485,6 +504,195 @@ pub struct CheckResponse {
     #[cfg(feature = "unstable")]
     /// Possible warnings
     pub warnings: Option<Warnings>,
+}
+
+impl CheckResponse {
+    /// Return an iterator over matches.
+    pub fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
+        self.matches.iter()
+    }
+
+    /// Return an iterator over mutable matches.
+    pub fn iter_matches_mut(&mut self) -> std::slice::IterMut<'_, Match> {
+        self.matches.iter_mut()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+/// Check response with additional context.
+///
+/// This structure exists to keep a link between a check response
+/// and the original text that was checked.
+pub struct CheckResponseWithContext {
+    /// Original text that was checked by LT
+    pub text: String,
+    /// Check response
+    pub response: CheckResponse,
+    /// Text's length
+    pub text_length: usize,
+}
+
+impl CheckResponseWithContext {
+    /// Bind a check response with its original text.
+    pub fn new(text: String, response: CheckResponse) -> Self {
+        let text_length = text.chars().count();
+        Self {
+            text,
+            response,
+            text_length,
+        }
+    }
+
+    /// Return an iterator over matches.
+    pub fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
+        self.response.iter_matches()
+    }
+
+    /// Return an iterator over mutable matches.
+    pub fn iter_matches_mut(&mut self) -> std::slice::IterMut<'_, Match> {
+        self.response.iter_matches_mut()
+    }
+
+    /// Return an iterator over matches and correspondig line number and line offset.
+    pub fn iter_match_positions(&self) -> MatchPositions<'_, std::slice::Iter<'_, Match>> {
+        self.into()
+    }
+
+    /// Append a check response to the current while
+    /// adjusting the matches' offsets.
+    ///
+    /// This is especially useful when a text was split in multiple requests.
+    pub fn append(mut self, mut other: Self) -> Self {
+        let offset = self.text_length;
+        for m in other.iter_matches_mut() {
+            m.offset += offset;
+        }
+
+        #[cfg(feature = "unstable")]
+        if let Some(ref mut sr_other) = other.response.sentence_ranges {
+            match self.response.sentence_ranges {
+                Some(ref mut sr_self) => {
+                    sr_self.append(sr_other);
+                }
+                None => {
+                    std::mem::swap(
+                        &mut self.response.sentence_ranges,
+                        &mut other.response.sentence_ranges,
+                    );
+                }
+            }
+        }
+
+        self.response.matches.append(&mut other.response.matches);
+        self.text.push_str(other.text.as_str());
+        self.text_length += other.text_length;
+        self
+    }
+}
+
+#[cfg(feature = "cli")]
+impl From<CheckResponseWithContext> for CheckResponse {
+    fn from(mut resp: CheckResponseWithContext) -> Self {
+        let iter: MatchPositions<'_, std::slice::IterMut<'_, Match>> = (&mut resp).into();
+
+        for (line_number, line_offset, m) in iter {
+            m.more_context = Some(MoreContext {
+                line_number,
+                line_offset,
+            });
+        }
+        resp.response
+    }
+}
+
+/// Iterator over matches and their corresponding line number and line offset.
+#[derive(Clone, Debug)]
+pub struct MatchPositions<'source, T> {
+    text_chars: std::str::Chars<'source>,
+    matches: T,
+    line_number: usize,
+    line_offset: usize,
+    offset: usize,
+}
+
+impl<'source> From<&'source CheckResponseWithContext>
+    for MatchPositions<'source, std::slice::Iter<'source, Match>>
+{
+    fn from(response: &'source CheckResponseWithContext) -> Self {
+        MatchPositions {
+            text_chars: response.text.chars(),
+            matches: response.iter_matches(),
+            line_number: 1,
+            line_offset: 0,
+            offset: 0,
+        }
+    }
+}
+
+impl<'source> From<&'source mut CheckResponseWithContext>
+    for MatchPositions<'source, std::slice::IterMut<'source, Match>>
+{
+    fn from(response: &'source mut CheckResponseWithContext) -> Self {
+        MatchPositions {
+            text_chars: response.text.chars(),
+            matches: response.response.iter_matches_mut(),
+            line_number: 1,
+            line_offset: 0,
+            offset: 0,
+        }
+    }
+}
+
+impl<'source, T> MatchPositions<'source, T> {
+    /// Set the line number to a give value.
+    ///
+    /// By default, the first line number is 1.
+    pub fn set_line_number(mut self, line_number: usize) -> Self {
+        self.line_number = line_number;
+        self
+    }
+
+    fn update_line_number_and_offset(&mut self, m: &Match) {
+        // TODO: check cases where newline is actually '\r\n' (Windows platforms)
+        let n = m.offset - self.offset;
+        for _ in 0..n {
+            match self.text_chars.next() {
+                    Some('\n') => {
+                        self.line_number += 1;
+                        self.line_offset = 0;
+                    }
+                    None => panic!("text is shorter than expected, are you sure this text was the one used for the check request?"),
+                    _ => self.line_offset += 1,
+                }
+        }
+        self.offset = m.offset;
+    }
+}
+
+impl<'source> Iterator for MatchPositions<'source, std::slice::Iter<'source, Match>> {
+    type Item = (usize, usize, &'source Match);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(m) = self.matches.next() {
+            self.update_line_number_and_offset(m);
+            Some((self.line_number, self.line_offset, m))
+        } else {
+            None
+        }
+    }
+}
+
+impl<'source> Iterator for MatchPositions<'source, std::slice::IterMut<'source, Match>> {
+    type Item = (usize, usize, &'source mut Match);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(m) = self.matches.next() {
+            self.update_line_number_and_offset(m);
+            Some((self.line_number, self.line_offset, m))
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]

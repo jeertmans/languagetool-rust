@@ -113,10 +113,10 @@ use languagetool_rust::{check::CheckRequest, server::ServerClient};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = ServerClient::default();
+    let client = ServerClient::from_env_or_default();
 
     let req = CheckRequest::default()
-        .with_text("Some phrase with a smal mistake");
+        .with_text("Some phrase with a smal mistake".to_string());
 
     println!(
         "{}",
@@ -130,7 +130,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #### Default Features
 
-- **cli**: Adds command-line related methods for multiple structures. This is feature is required to install the LTRS CLI.
+- **cli**: Adds command-line related methods for multiple structures. This feature is required to install the LTRS CLI.
 
 #### Optional Features
 

@@ -6,7 +6,7 @@
 //! # Note
 //!
 //! Most structures in this library are marked with
-//! ```rust
+//! ```ignore
 //! #[non_exhaustive]
 //! ```
 //! to indicate that they are likely to change in the future.

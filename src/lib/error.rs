@@ -40,6 +40,9 @@ pub enum Error {
     #[error(transparent)]
     /// Any other error from requests (see [reqwest::Error])
     Reqwest(#[from] reqwest::Error),
+    #[error(transparent)]
+    /// Error from reading environ variable (see [std::env::VarError])
+    VarError(#[from] std::env::VarError),
 }
 
 /// Result type alias with error type defined above (see [Error]).

@@ -46,7 +46,7 @@ pub fn is_port(v: &str) -> Result<()> {
     })
 }
 
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// A Java property file (one key=value entry per line) with values listed below.
@@ -181,7 +181,7 @@ impl Default for ConfigFile {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// Server parameters that are to be used when instantiating a LanguageTool server
 pub struct ServerParameters {
@@ -222,7 +222,7 @@ impl Default for ServerParameters {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Clone, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 /// Hostname and (optional) port to connect to a LanguageTool server.
 ///
 /// To use your local server instead of online api, set:
@@ -251,6 +251,27 @@ impl Default for ServerCli {
             hostname: "https://api.languagetoolplus.com".to_string(),
             port: "".to_string(),
         }
+    }
+}
+
+impl ServerCli {
+    /// Create a new [ServeCli] instance from environ variables:
+    /// - LANGUAGETOOL_HOSTNAME
+    /// - LANGUAGETOOL_PORT
+    ///
+    /// If one or both environ variables are empty, an error is returned.
+    pub fn from_env() -> Result<Self> {
+        let hostname = std::env::var("LANGUAGETOOL_HOSTNAME")?;
+        let port = std::env::var("LANGUAGETOOL_PORT")?;
+
+        Ok(Self { hostname, port })
+    }
+
+    /// Create a new [ServerCli] instance from environ variables,
+    /// but defaults to [ServerCli::default()] if expected environ
+    /// variables are not set.
+    pub fn from_env_or_default() -> Self {
+        ServerCli::from_env().unwrap_or_default()
     }
 }
 
@@ -360,7 +381,6 @@ impl ServerClient {
         if resp.matches.is_empty() {
             return Ok("Not error were found in provided text".to_string());
         }
-
         let replacements: Vec<_> = resp
             .matches
             .iter()
@@ -522,6 +542,22 @@ impl Default for ServerClient {
     }
 }
 
+impl ServerClient {
+    /// Create a new [ServerClient] instance from environ variables.
+    ///
+    /// See [ServerCli::from_env] for more details.
+    pub fn from_env() -> Result<Self> {
+        Ok(Self::from_cli(ServerCli::from_env()?))
+    }
+
+    /// Create a new [ServerClient] instance from environ variables,
+    /// but defaults to [ServerClient::default()] if expected environ
+    /// variables are not set.
+    pub fn from_env_or_default() -> Self {
+        Self::from_cli(ServerCli::from_env_or_default())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::check::CheckRequest;
@@ -529,20 +565,20 @@ mod tests {
 
     #[tokio::test]
     async fn test_server_ping() {
-        let client = ServerClient::default();
+        let client = ServerClient::from_env_or_default();
         assert!(client.ping().await.is_ok());
     }
 
     #[tokio::test]
     async fn test_server_check_text() {
-        let client = ServerClient::default();
+        let client = ServerClient::from_env_or_default();
         let req = CheckRequest::default().with_text("je suis une poupee".to_string());
         assert!(client.check(&req).await.is_ok());
     }
 
     #[tokio::test]
     async fn test_server_check_data() {
-        let client = ServerClient::default();
+        let client = ServerClient::from_env_or_default();
         let req = CheckRequest::default()
             .with_data_str("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
             .unwrap();
@@ -551,7 +587,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_server_languages() {
-        let client = ServerClient::default();
+        let client = ServerClient::from_env_or_default();
         assert!(client.languages().await.is_ok());
     }
 }
