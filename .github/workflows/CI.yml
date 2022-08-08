@@ -30,7 +30,7 @@ jobs:
   check-publish:
     name: Check Publish
     runs-on: ubuntu-latest
-    if: !startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') != true
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
