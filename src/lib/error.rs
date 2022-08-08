@@ -7,6 +7,11 @@ pub enum Error {
     #[error(transparent)]
     /// Error from the command line parsing (see [clap::Error])
     Cli(#[from] clap::Error),
+    #[error("command failed: {body:?}")]
+    CommandFailed {
+        /// Error body
+        body: String,
+    },
     #[error(transparent)]
     /// Error from parsing JSON (see [serde_json::Error])
     JSON(#[from] serde_json::Error),
