@@ -3,6 +3,7 @@ on:
     # Pattern matched against refs/tags
     tags:
       - '*'           # Push events to every tag not containing /
+  pull_request:
   workflow_dispatch:
 
 name: Publish
@@ -11,6 +12,7 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -23,5 +25,23 @@ jobs:
           override: true
 
       - run: cargo publish --features cli --token ${CRATES_TOKEN}
+        env:
+          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
+  check-publish:
+    name: Check Publish
+    runs-on: ubuntu-latest
+    if: !startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - run: cargo publish --features cli --token ${CRATES_TOKEN} --dry-run -v
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}

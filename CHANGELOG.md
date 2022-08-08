@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add lint test for Markdown files ([@kianmeng](https://github.com/kianmeng)). [#5](https://github.com/jeertmans/languagetool-rust/pull/5)
 - Add grammar check for text-like files. [#6](https://github.com/jeertmans/languagetool-rust/pull/6)
 - Add compare links to release tags in CHANGELOG. [#9](https://github.com/jeertmans/languagetool-rust/pull/9)
+- Add action to check if can publish. [#11](https://github.com/jeertmans/languagetool-rust/pull/11)
+
 
 ### Added
 
@@ -28,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed line number in annotated responses. [#8](https://github.com/jeertmans/languagetool-rust/pull/8)
+- Fixed missing bench path in `Cargo.toml`. [#11](https://github.com/jeertmans/languagetool-rust/pull/11)
 
 ## [1.0.0](https://github.com/jeertmans/languagetool-rust/compare/v0.0.18...v1.0.0) - 2022-07-24
 
