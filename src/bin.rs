@@ -44,6 +44,11 @@ async fn try_main() -> Result<()> {
                 .author(clap::crate_authors!())
                 .about("Ping the LanguageTool server and return time elapsed in ms if success"),
         )
+        .subcommand(
+            Docker::command()
+                .name("docker")
+                .author(clap::crate_authors!()),
+        )
         .get_matches();
 
     // TODO: prompt max_suggestion
@@ -127,6 +132,9 @@ async fn try_main() -> Result<()> {
         Some(("ping", _sub_matches)) => {
             writeln!(&stdout, "PONG! Delay: {} ms", client.ping().await?)?
         }
+        Some(("docker", sub_matches)) => Docker::from_arg_matches(sub_matches)?
+            .run_action()
+            .map(|_| ())?,
         _ => unreachable!(), // Can't be None since subcommand is required
     }
 

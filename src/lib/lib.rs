@@ -15,12 +15,14 @@
 //! that cannot be controlled and (possible) breaking changes are to be expected.
 
 pub mod check;
+pub mod docker;
 pub mod error;
 pub mod languages;
 pub mod server;
 pub mod words;
 
 pub use crate::check::{CheckRequest, CheckResponse};
+pub use crate::docker::Docker;
 pub use crate::languages::LanguagesResponse;
 pub use crate::server::ServerClient;
 pub use crate::words::{
