@@ -80,14 +80,12 @@ jobs:
         toolchain: ${{ matrix.rust }}
         target: ${{ matrix.target }}
 
-    - name: Install OpenSSL (linux)
-      if: matrix.build == 'linux'
-      run: sudo apt-get -y install libssl-dev
-
     - name: Use Cross
       shell: bash
       run: |
-        cargo install cross
+        # Version of cross with OpenSSL
+        # https://github.com/cross-rs/cross/issues/229#issuecomment-590546949
+        cargo install --version 0.1.16 cross
         echo "CARGO=cross" >> $GITHUB_ENV
         echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
         echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
