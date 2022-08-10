@@ -80,6 +80,10 @@ jobs:
         toolchain: ${{ matrix.rust }}
         target: ${{ matrix.target }}
 
+    - name: Install OpenSSL (linux)
+      if: matrix.build == 'linux'
+      run: sudo apt-get -y install libssl-dev
+
     - name: Use Cross
       shell: bash
       run: |
@@ -99,14 +103,6 @@ jobs:
       if: matrix.build == 'linux' || matrix.build == 'macos'
       run: strip "target/${{ matrix.target }}/release/ltrs"
 
-    - name: Strip release binary (arm)
-      if: matrix.build == 'linux-arm'
-      run: |
-        docker run --rm -v \
-          "$PWD/target:/target:Z" \
-          rustembedded/cross:arm-unknown-linux-gnueabihf \
-          arm-linux-gnueabihf-strip \
-          /target/arm-unknown-linux-gnueabihf/release/ltrs
     - name: Build archive
       shell: bash
       run: |
