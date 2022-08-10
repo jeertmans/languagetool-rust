@@ -104,7 +104,6 @@ jobs:
     - name: Build archive
       shell: bash
       run: |
-        outdir="$(ci/cargo-out-dir "${{ env.TARGET_DIR }}")"
         staging="ltrs-${{ needs.create-release.outputs.ltrs_version }}-${{ matrix.target }}"
         mkdir -p "$staging"
         cp {README.md,LICENSE.md} "$staging/"
