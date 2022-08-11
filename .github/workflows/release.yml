@@ -56,44 +56,48 @@ jobs:
         include:
         - build: linux
           os: ubuntu-latest
-          rust: nightly
           target: x86_64-unknown-linux-musl
+          cross: true
         - build: macos
           os: macos-latest
-          rust: nightly
           target: x86_64-apple-darwin
+          cross: false
         - build: win-msvc
           os: windows-2019
-          rust: nightly
           target: x86_64-pc-windows-msvc
+          cross: false
         - build: win-gnu
           os: windows-2019
-          rust: nightly-x86_64-gnu
           target: x86_64-pc-windows-gnu
+          cross: false
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Install Rust
-      uses: dtolnay/rust-toolchain@v1
+      uses: actions-rs/toolchain@v1
       with:
-        toolchain: ${{ matrix.rust }}
+        toolchain: stable
         target: ${{ matrix.target }}
+        override: true
+        profile: minimal
 
-    - name: Use Cross
+    - name: Setup variables
       shell: bash
       run: |
-        cargo install cross
-        echo "CARGO=cross" >> $GITHUB_ENV
         echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
         echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
+
     - name: Show command used for Cargo
       run: |
-        echo "cargo command is: ${{ env.CARGO }}"
         echo "target flag is: ${{ env.TARGET_FLAGS }}"
         echo "target dir is: ${{ env.TARGET_DIR }}"
     - name: Build release binary
-      run: ${{ env.CARGO }} build --verbose --release --no-default-features --features full,native-tls-vendored ${{ env.TARGET_FLAGS }}
+      uses: actions-rs/cargo@v1
+      with:
+        use-cross: ${{ matrix.cross }}
+        command: build
+        args: build --verbose --release --no-default-features --features full,native-tls-vendored ${{ env.TARGET_FLAGS }}
 
     - name: Strip release binary (linux and macos)
       if: matrix.build == 'linux' || matrix.build == 'macos'
