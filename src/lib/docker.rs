@@ -1,7 +1,7 @@
 //! Structures and methods to easily manipulate Docker images, especially for LanguageTool
 //! applications.
 
-use crate::error::{exit_status_error, Result};
+use crate::error::{exit_status_error, Error, Result};
 use clap::Parser;
 use std::process::{Command, Output, Stdio};
 
@@ -28,6 +28,7 @@ pub struct Docker {
 
 #[cfg_attr(feature = "cli", derive(clap::Subcommand))]
 #[derive(Clone, Debug)]
+/// Enumerate supported Docker actions.
 enum Action {
     /// Pull a docker docker image.
     ///
@@ -43,7 +44,30 @@ enum Action {
     Stop,
 }
 
+impl FromStr for Action {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        match s.lowercase().trim_matches(' ') {
+            "pull" => Ok(Action::Pull),
+            "start" => Ok(Action::Start),
+            "stop" => Ok(Action::Stop),
+            _ => Err(Error::ParseAction { s: s.to_string() }),
+        }
+    }
+}
+
 impl Docker {
+    fn from_env() -> Result<Self> {
+        let name = std::env::var("LANGUAGETOOL_DOCKER_NAME")?;
+        let bin = std::env::var("LANGUAGETOOL_DOCKER_IMAGE")?;
+        let name = std::env::var("LANGUAGETOOL_DOCKER_IMAGE")?;
+        let port = std::env::var("LANGUAGETOOL_DOCKER_PORT")?;
+        let name = std::env::var("LANGUAGETOOL_DOCKER_ACTION")?;
+
+        Ok(Self { hostname, port })
+    }
+
     /// Pull a Docker image from the given repository/file/...
     pub fn pull(&self) -> Result<Output> {
         let output = Command::new(&self.bin)
@@ -76,7 +100,8 @@ impl Docker {
 
         exit_status_error(&output.status)?;
 
-        Ok(output)    }
+        Ok(output)
+    }
 
     /// Stop the latest Docker container with the given name.
     pub fn stop(&self) -> Result<Output> {
@@ -106,7 +131,7 @@ impl Docker {
 
         exit_status_error(&output.status)?;
 
-        Ok(output) 
+        Ok(output)
     }
 
     /// Run a Docker command according to self.action.

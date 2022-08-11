@@ -10,7 +10,7 @@ pub enum Error {
     Cli(#[from] clap::Error),
     #[error("command failed: {body:?}")]
     /// Error from a command line process (see [std::process:Command]).
-    ExitStatusError {
+    ExitStatus {
         /// Error body.
         body: String,
     },
@@ -31,6 +31,12 @@ pub enum Error {
     InvalidValue {
         /// Error body.
         body: String,
+    },
+    #[error("could not parse `{s:?}` in a Docker action")]
+    /// Error while parsing Action.
+    ParseAction {
+        /// String that could not be parsed.
+        s: String,
     },
     #[error("request could not be properly encoded: {source}")]
     /// Error from request encoding.
@@ -59,10 +65,10 @@ pub(crate) fn exit_status_error(exit_status: &ExitStatus) -> Result<()> {
     match exit_status.success() {
         true => Ok(()),
         false => match exit_status.code() {
-            Some(code) => Err(Error::ExitStatusError {
+            Some(code) => Err(Error::ExitStatus {
                 body: format!("Process terminated with exit code: {}", code),
             }),
-            None => Err(Error::ExitStatusError {
+            None => Err(Error::ExitStatus {
                 body: "Process terminated by signal".to_string(),
             }),
         },
