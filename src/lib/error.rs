@@ -1,4 +1,5 @@
 //! Error and Result structure used all across this crate.
+use std::process::ExitStatus;
 
 /// Enumeration of all possible error types.
 #[derive(Debug, thiserror::Error)]
@@ -8,7 +9,7 @@ pub enum Error {
     /// Error from the command line parsing (see [clap::Error])
     Cli(#[from] clap::Error),
     #[error("command failed: {body:?}")]
-    CommandFailed {
+    ExitStatusError {
         /// Error body
         body: String,
     },
@@ -52,6 +53,22 @@ pub enum Error {
 
 /// Result type alias with error type defined above (see [Error]).
 pub type Result<T> = std::result::Result<T, Error>;
+
+impl From<ExitStatus> for Result<(), Error::ExitStatusError> {
+    fn from(exit_status: ExitStatus) -> Self {
+        match exit_status.success() {
+            true => Ok(()),
+            false => match exit_status.code() {
+                Some(code) => Err(Error::ExitStatusError {
+                    body: format!("Process terminated with exit code: {}", code),
+                }),
+                None => Err(Error::ExitStatusError {
+                    body: "Process terminated by signal".to_string(),
+                }),
+            },
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {

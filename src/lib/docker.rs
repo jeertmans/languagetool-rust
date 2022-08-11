@@ -1,6 +1,22 @@
 use crate::error::{Error, Result};
 use clap::Parser;
-use std::process::{Command, Output, Stdio};
+use std::process::{Command, ExitStatus, Output, Stdio};
+
+impl From<ExitStatus> for Result<()> {
+    fn from(exit_status: ExitStatus) -> Self {
+        match exit_status.succes() {
+            true => Ok(()),
+            false => match exit_status.code() {
+                Some(code) => Err(Error::CommandFailed {
+                    body: format!("Process terminated with exit code: {}", code),
+                }),
+                None => Err(Error::CommandFailed {
+                    body: "Process terminated by signal".to_string(),
+                }),
+            },
+        }
+    }
+}
 
 trait CommandOk {
     fn command_ok(&mut self) -> Result<Output>;
@@ -91,7 +107,13 @@ impl Docker {
 
     pub fn stop(&self) -> Result<Output> {
         let output = Command::new(&self.bin)
-            .args(["ps", "-l", "-f", &format!("name={}", self.container_name), "-q"])
+            .args([
+                "ps",
+                "-l",
+                "-f",
+                &format!("name={}", self.container_name),
+                "-q",
+            ])
             .stderr(Stdio::inherit())
             .command_ok()?;
 

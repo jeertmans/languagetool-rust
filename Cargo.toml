@@ -32,6 +32,7 @@ tokio = { version = "^1.0", features = ["macros"]}
 [features]
 annotate = ["annotate-snippets"]
 cli = ["clap", "tokio"]
+docker = []
 unstable = []
 
 default = ["cli"]
