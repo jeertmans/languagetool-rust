@@ -29,7 +29,7 @@ LanguageTool-Rust (LTRS) is both an executable and a Rust library that aims to p
 The command line interface of LTRS allows to very quickly use any LanguageTool server to check for grammar and style errors. You can install the latest version with `cargo`:
 
 ```bash
-> cargo install languagetool-rust --all-features
+> cargo install languagetool-rust --features full
 ```
 
 The reference for the CLI can be accessed via `ltrs --help`.
@@ -131,10 +131,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 #### Default Features
 
 - **cli**: Adds command-line related methods for multiple structures. This feature is required to install the LTRS CLI.
+- **native-tls**: Enables TLS functionality provided by `native-tls`.
 
 #### Optional Features
 
 - **annotate**: Adds method(s) to annotate results from check request. If **cli** feature is also enabled, the CLI will by default print an annotated output.
+- **full**: Enables all features that are mutually compatible (i.e., `cli` and `annotate`).
+- **native-tls-vendored**: Enables the `vendored` feature of `native-tls`. This or `native-tls` should be activated if you are planning to use HTTPS servers.
 - **unstable**: Adds more fields to JSON responses that are not present in the [Model | Example Value](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All added fields are optional, hence the `Option` around them.
 
 ## Related Projects
