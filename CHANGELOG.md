@@ -10,11 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Chore
 
-- Use vendored TLS for release. [#13](https://github.com/jeertmans/languagetool-rust/pull/13)
+- Use vendored TLS for release. [#14](https://github.com/jeertmans/languagetool-rust/pull/14)
+- Fixed PR links in CHANGELOG. [#15](https://github.com/jeertmans/languagetool-rust/pull/15)
 
 ### Added
 
-- Add 3 new features `native-tls`, `native-tls-vendored` and `full`. [#13](https://github.com/jeertmans/languagetool-rust/pull/13)
+- Add 3 new features `native-tls`, `native-tls-vendored` and `full`. [#14](https://github.com/jeertmans/languagetool-rust/pull/14)
 
 ## [1.1.1](https://github.com/jeertmans/languagetool-rust/compare/v1.0.1...v1.1.1)
 
