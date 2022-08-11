@@ -83,9 +83,7 @@ jobs:
     - name: Use Cross
       shell: bash
       run: |
-        # Version of cross with OpenSSL
-        # https://github.com/cross-rs/cross/issues/229#issuecomment-590546949
-        cargo install --version 0.1.16 cross
+        cargo install cross
         echo "CARGO=cross" >> $GITHUB_ENV
         echo "TARGET_FLAGS=--target ${{ matrix.target }}" >> $GITHUB_ENV
         echo "TARGET_DIR=./target/${{ matrix.target }}" >> $GITHUB_ENV
@@ -95,7 +93,7 @@ jobs:
         echo "target flag is: ${{ env.TARGET_FLAGS }}"
         echo "target dir is: ${{ env.TARGET_DIR }}"
     - name: Build release binary
-      run: ${{ env.CARGO }} build --verbose --release --all-features ${{ env.TARGET_FLAGS }}
+      run: ${{ env.CARGO }} build --verbose --release --no-default-features --features full,native-tls-vendored ${{ env.TARGET_FLAGS }}
 
     - name: Strip release binary (linux and macos)
       if: matrix.build == 'linux' || matrix.build == 'macos'

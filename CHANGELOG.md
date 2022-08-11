@@ -6,12 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.2.0](https://github.com/jeertmans/languagetool-rust/compare/v1.1.1...v1.2.0)
+
+### Chore
+
+- Use vendored TLS for release. [#13](https://github.com/jeertmans/languagetool-rust/pull/13)
+
+### Added
+
+- Add 3 new features `native-tls`, `native-tls-vendored` and `full`. [#13](https://github.com/jeertmans/languagetool-rust/pull/13)
+
 ## [1.1.1](https://github.com/jeertmans/languagetool-rust/compare/v1.0.1...v1.1.1)
 
 ### Chore
 
 - Add GitHub action to automate release process. [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
-
 
 ## [1.1.0](https://github.com/jeertmans/languagetool-rust/compare/v1.0.0...v1.1.0)
 
@@ -24,7 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add compare links to release tags in CHANGELOG. [#9](https://github.com/jeertmans/languagetool-rust/pull/9)
 - Add action to check if can publish. [#11](https://github.com/jeertmans/languagetool-rust/pull/11)
 
-
 ### Added
 
 - Add `get_text` method for `CheckRequest`. [#8](https://github.com/jeertmans/languagetool-rust/pull/8)
@@ -32,7 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `--more-context` option flag to CLI. This enables to add more information in the JSON output. [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
 - Derive `Eq` for all structs that derive `PartialEq` and with fields that derive `Eq`. [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
 - Add `from_env` and `from_env_or_default` methods for `ServerCli` and `ServerClient`. [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
-
 
 ### Fixed
 
