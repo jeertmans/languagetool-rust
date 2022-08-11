@@ -97,7 +97,7 @@ jobs:
       with:
         use-cross: ${{ matrix.cross }}
         command: build
-        args: build --verbose --release --no-default-features --features full,native-tls-vendored ${{ env.TARGET_FLAGS }}
+        args: --verbose --release --no-default-features --features full,native-tls-vendored ${{ env.TARGET_FLAGS }}
 
     - name: Strip release binary (linux and macos)
       if: matrix.build == 'linux' || matrix.build == 'macos'
