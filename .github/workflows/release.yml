@@ -63,11 +63,11 @@ jobs:
           rust: nightly
           target: x86_64-apple-darwin
         - build: win-msvc
-          os: windows-latest
+          os: windows-2019
           rust: nightly
           target: x86_64-pc-windows-msvc
         - build: win-gnu
-          os: windows-latest
+          os: windows-2019
           rust: nightly-x86_64-gnu
           target: x86_64-pc-windows-gnu
 
@@ -105,7 +105,7 @@ jobs:
         staging="ltrs-${{ needs.create-release.outputs.ltrs_version }}-${{ matrix.target }}"
         mkdir -p "$staging"
         cp {README.md,LICENSE.md} "$staging/"
-        if [ "${{ matrix.os }}" = "windows-latest" ]; then
+        if [ "${{ matrix.os }}" = "windows-2019" ]; then
           cp "target/${{ matrix.target }}/release/ltrs.exe" "$staging/"
           7z a "$staging.zip" "$staging"
           echo "ASSET=$staging.zip" >> $GITHUB_ENV
