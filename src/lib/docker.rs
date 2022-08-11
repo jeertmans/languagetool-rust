@@ -1,49 +1,12 @@
-use crate::error::{Error, Result};
+//! Structures and methods to easily manipulate Docker images, especially for LanguageTool
+//! applications.
+
+use crate::error::{exit_status_error, Result};
 use clap::Parser;
-use std::process::{Command, ExitStatus, Output, Stdio};
-
-impl From<ExitStatus> for Result<()> {
-    fn from(exit_status: ExitStatus) -> Self {
-        match exit_status.succes() {
-            true => Ok(()),
-            false => match exit_status.code() {
-                Some(code) => Err(Error::CommandFailed {
-                    body: format!("Process terminated with exit code: {}", code),
-                }),
-                None => Err(Error::CommandFailed {
-                    body: "Process terminated by signal".to_string(),
-                }),
-            },
-        }
-    }
-}
-
-trait CommandOk {
-    fn command_ok(&mut self) -> Result<Output>;
-}
-
-impl CommandOk for Command {
-    #[inline]
-    fn command_ok(&mut self) -> Result<Output> {
-        let output = self.output()?;
-        let status = output.status;
-
-        if status.success() {
-            Ok(output)
-        } else {
-            match status.code() {
-                Some(code) => Err(Error::CommandFailed {
-                    body: format!("Process terminated with exit code: {}", code),
-                }),
-                None => Err(Error::CommandFailed {
-                    body: "Process terminated by signal".to_string(),
-                }),
-            }
-        }
-    }
-}
+use std::process::{Command, Output, Stdio};
 
 #[cfg_attr(feature = "cli", derive(Parser))]
+#[derive(Debug, Clone)]
 /// Commands to pull, start and stop a LanguageTool using Docker.
 pub struct Docker {
     #[cfg_attr(feature = "cli", clap(default_value = "erikvl87/languagetool"))]
@@ -63,7 +26,8 @@ pub struct Docker {
     action: Action,
 }
 
-#[derive(clap::Subcommand)]
+#[cfg_attr(feature = "cli", derive(clap::Subcommand))]
+#[derive(Clone, Debug)]
 enum Action {
     /// Pull a docker docker image.
     ///
@@ -80,16 +44,22 @@ enum Action {
 }
 
 impl Docker {
+    /// Pull a Docker image from the given repository/file/...
     pub fn pull(&self) -> Result<Output> {
-        Command::new(&self.bin)
+        let output = Command::new(&self.bin)
             .args(["pull", &self.name])
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
-            .command_ok()
+            .output()?;
+
+        exit_status_error(&output.status)?;
+
+        Ok(output)
     }
 
+    /// Start a Docker container with given specifications.
     pub fn start(&self) -> Result<Output> {
-        Command::new(&self.bin)
+        let output = Command::new(&self.bin)
             .args([
                 "run",
                 "--rm",
@@ -102,9 +72,13 @@ impl Docker {
             ])
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
-            .command_ok()
-    }
+            .output()?;
 
+        exit_status_error(&output.status)?;
+
+        Ok(output)    }
+
+    /// Stop the latest Docker container with the given name.
     pub fn stop(&self) -> Result<Output> {
         let output = Command::new(&self.bin)
             .args([
@@ -115,20 +89,27 @@ impl Docker {
                 "-q",
             ])
             .stderr(Stdio::inherit())
-            .command_ok()?;
+            .output()?;
+
+        exit_status_error(&output.status)?;
 
         let docker_id: String = String::from_utf8_lossy(&output.stdout)
             .chars()
             .filter(|c| c.is_alphanumeric()) // This avoids newlines
             .collect();
 
-        Command::new(&self.bin)
+        let output = Command::new(&self.bin)
             .args(["kill", &docker_id])
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
-            .command_ok()
+            .output()?;
+
+        exit_status_error(&output.status)?;
+
+        Ok(output) 
     }
 
+    /// Run a Docker command according to self.action.
     pub fn run_action(&self) -> Result<Output> {
         match self.action {
             Action::Pull => self.pull(),
