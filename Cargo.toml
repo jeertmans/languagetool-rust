@@ -1,6 +1,6 @@
 [package]
 name = "languagetool-rust"
-version = "1.1.0"
+version = "1.1.1"
 authors = ["Jérome Eertmans <jeertmans@icloud.com>"]
 edition = "2021"
 description = "LanguageTool API bindings in Rust."
@@ -32,6 +32,7 @@ tokio = { version = "^1.0", features = ["macros"]}
 [features]
 annotate = ["annotate-snippets"]
 cli = ["clap", "tokio"]
+docker = []
 unstable = []
 
 default = ["cli"]
