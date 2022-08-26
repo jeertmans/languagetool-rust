@@ -73,7 +73,7 @@ pub struct Data {
 
 impl<T: Into<DataAnnotation>> FromIterator<T> for Data {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        let annotation = iter.into_iter().map(|x| x.into()).collect();
+        let annotation = iter.into_iter().map(std::convert::Into::into).collect();
         Data { annotation }
     }
 }
@@ -140,9 +140,9 @@ impl std::str::FromStr for Level {
 #[derive(Clone, Deserialize, Debug, Default, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// LanguageTool POST check request.
+/// `LanguageTool` POST check request.
 ///
-/// The main feature - check a text with LanguageTool for possible style and grammar issues.
+/// The main feature - check a text with `LanguageTool` for possible style and grammar issues.
 ///
 /// The structure below tries to follow as closely as possible the JSON API described
 /// [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
@@ -458,7 +458,7 @@ pub struct Match {
 #[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// LanguageTool software details.
+/// `LanguageTool` software details.
 pub struct Software {
     /// LanguageTool API version
     pub api_version: usize,
@@ -490,7 +490,7 @@ pub struct Warnings {
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// LanguageTool POST check response.
+/// `LanguageTool` POST check response.
 pub struct CheckResponse {
     /// Language information
     pub language: LanguageResponse,

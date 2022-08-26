@@ -9,6 +9,7 @@
 
 1. [About](#about)
 2. [CLI Reference](#cli-reference)
+    - [Docker](#docker)
 3. [API Reference](#api-reference)
     - [Feature Flags](#feature-flags)
 4. [CHANGELOG](CHANGELOG.md)
@@ -95,6 +96,20 @@ PONG! Delay: 110 ms
 > ltrs --help # for more details
 ```
 
+### Docker
+
+Since LanguageTool's installation might not be straighforward, we provide a basic Docker integration that allows to `pull`, `start`, and `stop` LanguageTool Docker containers in a few lines:
+
+```bash
+ltrs docker pull # only once
+ltrs docker start # start the LT server
+ltrs --hostname http://localhost -p 8010 check -t "Some tex"
+# Other commands...
+ltrs docker stop # stop the LT server
+```
+
+> *Note:* Docker is a tool that facilitates running applications without worrying about dependencies, platform-related issues, and so on. Installation guidelines can be found [here](https://www.docker.com/get-started/). On Linux platform, you might need to circumvent the *sudo privilege issue* by doing [this](https://docs.docker.com/engine/install/linux-postinstall/).
+
 ## API Reference
 
 If you would like to integrate LTRS within a Rust application or crate, then we recommend reading [documentation](https://docs.rs/languagetool-rust).
@@ -136,7 +151,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 #### Optional Features
 
 - **annotate**: Adds method(s) to annotate results from check request. If **cli** feature is also enabled, the CLI will by default print an annotated output.
-- **full**: Enables all features that are mutually compatible (i.e., `cli` and `annotate`).
+- **full**: Enables all features that are mutually compatible (i.e., `annotate`, `cli`, `docker`, and `unstable`).
 - **native-tls-vendored**: Enables the `vendored` feature of `native-tls`. This or `native-tls` should be activated if you are planning to use HTTPS servers.
 - **unstable**: Adds more fields to JSON responses that are not present in the [Model | Example Value](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All added fields are optional, hence the `Option` around them.
 

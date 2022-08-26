@@ -1,4 +1,4 @@
-//! Structure to communite with some LanguageTool server through the API.
+//! Structure to communite with some `LanguageTool` server through the API.
 
 use crate::check::{CheckRequest, CheckResponse};
 use crate::error::{Error, Result};
@@ -129,7 +129,7 @@ impl ConfigFile {
                     "{}=\"{}\"",
                     key,
                     a.iter()
-                        .map(|v| v.to_string())
+                        .map(std::string::ToString::to_string)
                         .collect::<Vec<String>>()
                         .join(",")
                 )?,
@@ -183,7 +183,7 @@ impl Default for ConfigFile {
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// Server parameters that are to be used when instantiating a LanguageTool server
+/// Server parameters that are to be used when instantiating a `LanguageTool` server
 pub struct ServerParameters {
     #[cfg_attr(feature = "cli", clap(long))]
     config: Option<PathBuf>,
@@ -223,7 +223,7 @@ impl Default for ServerParameters {
 
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
-/// Hostname and (optional) port to connect to a LanguageTool server.
+/// Hostname and (optional) port to connect to a `LanguageTool` server.
 ///
 /// To use your local server instead of online api, set:
 /// - `hostname` to "http://localhost"
@@ -255,9 +255,9 @@ impl Default for ServerCli {
 }
 
 impl ServerCli {
-    /// Create a new [ServeCli] instance from environ variables:
-    /// - LANGUAGETOOL_HOSTNAME
-    /// - LANGUAGETOOL_PORT
+    /// Create a new [`ServeCli`] instance from environ variables:
+    /// - `LANGUAGETOOL_HOSTNAME`
+    /// - `LANGUAGETOOL_PORT`
     ///
     /// If one or both environ variables are empty, an error is returned.
     pub fn from_env() -> Result<Self> {
@@ -267,15 +267,15 @@ impl ServerCli {
         Ok(Self { hostname, port })
     }
 
-    /// Create a new [ServerCli] instance from environ variables,
-    /// but defaults to [ServerCli::default()] if expected environ
+    /// Create a new [`ServerCli`] instance from environ variables,
+    /// but defaults to [`ServerCli::default`()] if expected environ
     /// variables are not set.
     pub fn from_env_or_default() -> Self {
         ServerCli::from_env().unwrap_or_default()
     }
 }
 
-/// Client to communicate with the LanguageTool server using async requests.
+/// Client to communicate with the `LanguageTool` server using async requests.
 #[derive(Clone, Debug)]
 pub struct ServerClient {
     /// API string: hostname and, optionally, port number (see [ServerCli])
@@ -296,7 +296,7 @@ impl ServerClient {
     /// Construct a new server client using hostname and (optional) port
     ///
     /// An empty string is accepeted as empty port.
-    /// For port validation, please use [is_port] as this constructor does not check anything.
+    /// For port validation, please use [`is_port`] as this constructor does not check anything.
     pub fn new(hostname: &str, port: &str) -> Self {
         let api = if port.is_empty() {
             format!("{}/v2", hostname)
@@ -318,19 +318,19 @@ impl ServerClient {
         self
     }
 
-    /// Converts a [ServerCli] into a proper (usable) client
+    /// Converts a [`ServerCli`] into a proper (usable) client
     pub fn from_cli(cli: ServerCli) -> Self {
         cli.into()
     }
 
     #[cfg(feature = "cli")]
-    /// This function has the same sementics as [ServerCli::from_arg_matches]
+    /// This function has the same sementics as [`ServerCli::from_arg_matches`]
     pub fn from_arg_matches(matches: &clap::ArgMatches) -> Result<Self> {
         let params = ServerCli::from_arg_matches(matches)?;
         Ok(Self::from_cli(params))
     }
 
-    /// This function has the same semantics as [ServerCli::command]
+    /// This function has the same semantics as [`ServerCli::command`]
     #[cfg(feature = "cli")]
     pub fn command<'help>() -> clap::Command<'help> {
         ServerCli::command()
@@ -379,7 +379,7 @@ impl ServerClient {
         let resp = self.check(request).await?;
 
         if resp.matches.is_empty() {
-            return Ok("Not error were found in provided text".to_string());
+            return Ok("No error were found in provided text".to_string());
         }
         let replacements: Vec<_> = resp
             .matches
@@ -543,15 +543,15 @@ impl Default for ServerClient {
 }
 
 impl ServerClient {
-    /// Create a new [ServerClient] instance from environ variables.
+    /// Create a new [`ServerClient`] instance from environ variables.
     ///
-    /// See [ServerCli::from_env] for more details.
+    /// See [`ServerCli::from_env`] for more details.
     pub fn from_env() -> Result<Self> {
         Ok(Self::from_cli(ServerCli::from_env()?))
     }
 
-    /// Create a new [ServerClient] instance from environ variables,
-    /// but defaults to [ServerClient::default()] if expected environ
+    /// Create a new [`ServerClient`] instance from environ variables,
+    /// but defaults to [`ServerClient::default`()] if expected environ
     /// variables are not set.
     pub fn from_env_or_default() -> Self {
         Self::from_cli(ServerCli::from_env_or_default())

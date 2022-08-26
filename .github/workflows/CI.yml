@@ -24,7 +24,7 @@ jobs:
           toolchain: stable
           override: true
 
-      - run: cargo publish --features cli --token ${CRATES_TOKEN}
+      - run: cargo publish --features full --token ${CRATES_TOKEN}
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
   check-publish:

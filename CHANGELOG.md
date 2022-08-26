@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.3.0](https://github.com/jeertmans/languagetool-rust/compare/v1.2.0...v1.3.0)
+
+### Chore
+
+- Fixed features flag in `CI.yml` action. [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
+
+### Added
+
+- Added basic Docker support. [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
+
+### Fixed
+
+- Fixed typo in message when no error was found. [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
+
 ## [1.2.0](https://github.com/jeertmans/languagetool-rust/compare/v1.1.1...v1.2.0)
 
 ### Chore

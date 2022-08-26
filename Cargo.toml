@@ -1,6 +1,6 @@
 [package]
 name = "languagetool-rust"
-version = "1.2.0"
+version = "1.3.0"
 authors = ["Jérome Eertmans <jeertmans@icloud.com>"]
 edition = "2021"
 description = "LanguageTool API bindings in Rust."
@@ -30,10 +30,10 @@ futures = "0.3"
 tokio = { version = "^1.0", features = ["macros"]}
 
 [features]
-
 annotate = ["annotate-snippets"]
 cli = ["clap", "tokio"]
-full = ["annotate", "cli", "unstable"]
+docker = []
+full = ["annotate", "cli", "docker", "unstable"]
 
 native-tls = ["reqwest/native-tls"]
 native-tls-vendored = ["reqwest/native-tls-vendored"]

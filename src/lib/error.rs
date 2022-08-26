@@ -1,52 +1,80 @@
 //! Error and Result structure used all across this crate.
+use std::process::ExitStatus;
 
 /// Enumeration of all possible error types.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[cfg(feature = "cli")]
     #[error(transparent)]
-    /// Error from the command line parsing (see [clap::Error])
+    /// Error from the command line parsing (see [clap::Error]).
     Cli(#[from] clap::Error),
+    #[error("command failed: {body:?}")]
+    /// Error from a command line process (see [std::process:Command]).
+    ExitStatus {
+        /// Error body.
+        body: String,
+    },
     #[error(transparent)]
-    /// Error from parsing JSON (see [serde_json::Error])
+    /// Error from parsing JSON (see [serde_json::Error]).
     JSON(#[from] serde_json::Error),
     #[error(transparent)]
-    /// Error from reading and writing to IO (see [std::io::Error])
+    /// Error from reading and writing to IO (see [std::io::Error]).
     IO(#[from] std::io::Error),
     #[error("invalid request: {body:?}")]
-    /// Error specifying an invalid request
+    /// Error specifying an invalid request.
     InvalidRequest {
-        /// Error body
+        /// Error body.
         body: String,
     },
     #[error("invalid value: {body:?}")]
-    /// Error specifying an invalid value
+    /// Error specifying an invalid value.
     InvalidValue {
-        /// Error body
+        /// Error body.
         body: String,
     },
+    #[error("could not parse `{s:?}` in a Docker action")]
+    /// Error while parsing Action.
+    ParseAction {
+        /// String that could not be parsed.
+        s: String,
+    },
     #[error("request could not be properly encoded: {source}")]
-    /// Error from request encoding
+    /// Error from request encoding.
     RequestEncode {
-        /// Source error
+        /// Source error.
         source: reqwest::Error,
     },
     #[error("response could not be properly decoded: {source}")]
-    /// Error from request decoding
+    /// Error from request decoding.
     ResponseDecode {
-        /// Source error
+        /// Source error.
         source: reqwest::Error,
     },
     #[error(transparent)]
-    /// Any other error from requests (see [reqwest::Error])
+    /// Any other error from requests (see [reqwest::Error]).
     Reqwest(#[from] reqwest::Error),
     #[error(transparent)]
-    /// Error from reading environ variable (see [std::env::VarError])
+    /// Error from reading environ variable (see [std::env::VarError]).
     VarError(#[from] std::env::VarError),
 }
 
 /// Result type alias with error type defined above (see [Error]).
 pub type Result<T> = std::result::Result<T, Error>;
+
+#[allow(dead_code)]
+pub(crate) fn exit_status_error(exit_status: &ExitStatus) -> Result<()> {
+    match exit_status.success() {
+        true => Ok(()),
+        false => match exit_status.code() {
+            Some(code) => Err(Error::ExitStatus {
+                body: format!("Process terminated with exit code: {}", code),
+            }),
+            None => Err(Error::ExitStatus {
+                body: "Process terminated by signal".to_string(),
+            }),
+        },
+    }
+}
 
 #[cfg(test)]
 mod tests {
