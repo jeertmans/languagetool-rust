@@ -61,6 +61,7 @@ pub enum Error {
 /// Result type alias with error type defined above (see [Error]).
 pub type Result<T> = std::result::Result<T, Error>;
 
+#[allow(dead_code)]
 pub(crate) fn exit_status_error(exit_status: &ExitStatus) -> Result<()> {
     match exit_status.success() {
         true => Ok(()),

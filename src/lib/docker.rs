@@ -2,6 +2,7 @@
 //! applications.
 
 use crate::error::{exit_status_error, Result};
+#[cfg(feature = "cli")]
 use clap::Parser;
 use std::process::{Command, Output, Stdio};
 
