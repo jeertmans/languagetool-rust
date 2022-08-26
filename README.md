@@ -151,7 +151,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 #### Optional Features
 
 - **annotate**: Adds method(s) to annotate results from check request. If **cli** feature is also enabled, the CLI will by default print an annotated output.
-- **full**: Enables all features that are mutually compatible (i.e., `cli` and `annotate`).
+- **full**: Enables all features that are mutually compatible (i.e., `annotate`, `cli`, `docker`, and `unstable`).
 - **native-tls-vendored**: Enables the `vendored` feature of `native-tls`. This or `native-tls` should be activated if you are planning to use HTTPS servers.
 - **unstable**: Adds more fields to JSON responses that are not present in the [Model | Example Value](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All added fields are optional, hence the `Option` around them.
 
