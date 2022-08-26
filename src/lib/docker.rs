@@ -9,16 +9,41 @@ use std::process::{Command, Output, Stdio};
 #[derive(Debug, Clone)]
 /// Commands to pull, start and stop a LanguageTool using Docker.
 pub struct Docker {
-    #[cfg_attr(feature = "cli", clap(default_value = "erikvl87/languagetool", env = "LANGUAGETOOL_DOCKER_IMAGE"))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(
+            default_value = "erikvl87/languagetool",
+            env = "LANGUAGETOOL_DOCKER_IMAGE"
+        )
+    )]
     /// Image or repository from a registry.
     name: String,
-    #[cfg_attr(feature = "cli", clap(short = 'b', long, default_value = "docker", env = "LANGUAGETOOL_DOCKER_BIN"))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(
+            short = 'b',
+            long,
+            default_value = "docker",
+            env = "LANGUAGETOOL_DOCKER_BIN"
+        )
+    )]
     /// Path to Docker's binaries.
     bin: String,
-    #[cfg_attr(feature = "cli", clap(long, default_value = "languagetool", env = "LANGUAGETOOL_DOCKER_NAME"))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(long, default_value = "languagetool", env = "LANGUAGETOOL_DOCKER_NAME")
+    )]
     /// Name assigned to the container.
     container_name: String,
-    #[cfg_attr(feature = "cli", clap(short = 'p', long, default_value = "8010:8010", env = "LANGUAGETOOL_DOCKER_PORT"))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(
+            short = 'p',
+            long,
+            default_value = "8010:8010",
+            env = "LANGUAGETOOL_DOCKER_PORT"
+        )
+    )]
     /// Publish a container's port(s) to the host.
     port: String,
     #[cfg_attr(feature = "cli", clap(subcommand))]
