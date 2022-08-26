@@ -8,10 +8,10 @@ use languagetool_rust::{
 
 async fn request_until_success(req: &CheckRequest, client: &ServerClient) -> CheckResponse {
     loop {
-        match client.check(&req).await {
+        match client.check(req).await {
             Ok(resp) => return resp,
             Err(Error::InvalidRequest { body })
-                if body == "Error: Server overloaded, please try again later".to_string() =>
+                if body == *"Error: Server overloaded, please try again later" =>
             {
                 continue
             }
