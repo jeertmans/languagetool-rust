@@ -9,6 +9,7 @@
 
 1. [About](#about)
 2. [CLI Reference](#cli-reference)
+    - [Docker](#docker)
 3. [API Reference](#api-reference)
     - [Feature Flags](#feature-flags)
 4. [CHANGELOG](CHANGELOG.md)
@@ -94,6 +95,20 @@ PONG! Delay: 110 ms
 }
 > ltrs --help # for more details
 ```
+
+### Docker
+
+Since LanguageTool's installation might not be straighforward, we provide a basic Docker integration that allows to `pull`, `start`, and `stop` LanguageTool Docker containers in a few lines:
+
+```bash
+ltrs docker pull # only once
+ltrs docker start # start the LT server
+ltrs --hostname http://localhost -p 8010 check -t "Some tex"
+# Other commands...
+ltrs docker stop # stop the LT server
+```
+
+> *Note:* Docker is a tool that facilitates running applications without worrying about dependencies, platform-related issues, and so on. Installation guidelines can be found [here](https://www.docker.com/get-started/). On Linux platform, you might need to circumvent the *sudo privilege issue* by doing [this](https://docs.docker.com/engine/install/linux-postinstall/).
 
 ## API Reference
 

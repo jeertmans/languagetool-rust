@@ -1,7 +1,7 @@
 //! Structures and methods to easily manipulate Docker images, especially for LanguageTool
 //! applications.
 
-use crate::error::{exit_status_error, Error, Result};
+use crate::error::{exit_status_error, Result};
 use clap::Parser;
 use std::process::{Command, Output, Stdio};
 
@@ -9,19 +9,19 @@ use std::process::{Command, Output, Stdio};
 #[derive(Debug, Clone)]
 /// Commands to pull, start and stop a LanguageTool using Docker.
 pub struct Docker {
-    #[cfg_attr(feature = "cli", clap(default_value = "erikvl87/languagetool"))]
+    #[cfg_attr(feature = "cli", clap(default_value = "erikvl87/languagetool", env = "LANGUAGETOOL_DOCKER_IMAGE"))]
     /// Image or repository from a registry.
     name: String,
-    #[cfg_attr(feature = "cli", clap(short = 'b', long, default_value = "docker"))]
+    #[cfg_attr(feature = "cli", clap(short = 'b', long, default_value = "docker", env = "LANGUAGETOOL_DOCKER_BIN"))]
     /// Path to Docker's binaries.
     bin: String,
-    #[cfg_attr(feature = "cli", clap(long, default_value = "languagetool"))]
+    #[cfg_attr(feature = "cli", clap(long, default_value = "languagetool", env = "LANGUAGETOOL_DOCKER_NAME"))]
     /// Name assigned to the container.
     container_name: String,
-    #[cfg_attr(feature = "cli", clap(short = 'p', long, default_value = "8010:8010"))]
+    #[cfg_attr(feature = "cli", clap(short = 'p', long, default_value = "8010:8010", env = "LANGUAGETOOL_DOCKER_PORT"))]
     /// Publish a container's port(s) to the host.
     port: String,
-    #[clap(subcommand)]
+    #[cfg_attr(feature = "cli", clap(subcommand))]
     /// Docker action.
     action: Action,
 }
@@ -44,30 +44,7 @@ enum Action {
     Stop,
 }
 
-impl FromStr for Action {
-    type Err = Error;
-
-    fn from_str(s: &str) -> Result<Self> {
-        match s.lowercase().trim_matches(' ') {
-            "pull" => Ok(Action::Pull),
-            "start" => Ok(Action::Start),
-            "stop" => Ok(Action::Stop),
-            _ => Err(Error::ParseAction { s: s.to_string() }),
-        }
-    }
-}
-
 impl Docker {
-    fn from_env() -> Result<Self> {
-        let name = std::env::var("LANGUAGETOOL_DOCKER_NAME")?;
-        let bin = std::env::var("LANGUAGETOOL_DOCKER_IMAGE")?;
-        let name = std::env::var("LANGUAGETOOL_DOCKER_IMAGE")?;
-        let port = std::env::var("LANGUAGETOOL_DOCKER_PORT")?;
-        let name = std::env::var("LANGUAGETOOL_DOCKER_ACTION")?;
-
-        Ok(Self { hostname, port })
-    }
-
     /// Pull a Docker image from the given repository/file/...
     pub fn pull(&self) -> Result<Output> {
         let output = Command::new(&self.bin)

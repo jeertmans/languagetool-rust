@@ -379,7 +379,7 @@ impl ServerClient {
         let resp = self.check(request).await?;
 
         if resp.matches.is_empty() {
-            return Ok("Not error were found in provided text".to_string());
+            return Ok("No error were found in provided text".to_string());
         }
         let replacements: Vec<_> = resp
             .matches
