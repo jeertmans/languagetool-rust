@@ -1,4 +1,4 @@
-//! Structures and methods to easily manipulate Docker images, especially for LanguageTool
+//! Structures and methods to easily manipulate Docker images, especially for `LanguageTool`
 //! applications.
 
 use crate::error::{exit_status_error, Result};
@@ -7,7 +7,7 @@ use std::process::{Command, Output, Stdio};
 
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Debug, Clone)]
-/// Commands to pull, start and stop a LanguageTool using Docker.
+/// Commands to pull, start and stop a `LanguageTool` container using Docker.
 pub struct Docker {
     #[cfg_attr(
         feature = "cli",
