@@ -220,6 +220,60 @@ impl Level {
 
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
+/// Split string into as few fragments as possible, where each fragment contains
+/// (if possible) a maximum of `n` characters.
+///
+/// # Examples
+///
+/// ```
+/// # use languagetool_rust::check::split_len;
+/// let s = "I have so many friends.
+/// They are very funny.
+/// I think I am very lucky to have them.
+/// One day, I will write them a poem.
+/// But, in the meantime, I write code.
+/// ";
+///
+/// let split = split_len(&s, 40);
+///
+/// assert_eq!(split.join(""), s);
+/// assert_eq!(split, vec![
+///     "I have so many friends.\n",
+///     "They are very funny.\n",
+///     "I think I am very lucky to have them.\n",
+///     "One day, I will write them a poem.\n",
+///     "But, in the meantime, I write code.\n"]);
+///
+/// let split = split_len(&s, 80);
+///
+/// assert_eq!(split, vec![
+///     "I have so many friends.\nThey are very funny.\n",
+///     "I think I am very lucky to have them.\nOne day, I will write them a poem.\n",
+///     "But, in the meantime, I write code.\n"]);
+/// ```
+pub fn split_len<'source>(s: &'source str, n: usize) -> Vec<&'source str> {
+    let mut vec: Vec<&'source str> = Vec::new();
+
+    let mut start = 0;
+    let mut end = start;
+
+    for (index, _) in s.match_indices('\n') {
+        if index - start > n {
+            vec.push(&s[start..=end]);
+            start = end + 1;
+        }
+        end = index;
+    }
+
+    if end != s.len() {
+        vec.push(&s[start..]);
+    }
+
+    vec
+}
+
+#[cfg_attr(feature = "cli", derive(Parser))]
+#[derive(Clone, Deserialize, Debug, Default, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// LanguageTool POST check request.
