@@ -149,10 +149,12 @@ impl std::str::FromStr for Level {
 pub struct CheckRequest {
     #[cfg(all(feature = "cli", feature = "annotate"))]
     #[clap(short = 'r', long, takes_value = false)]
+    #[serde(skip_serializing)]
     /// If present, raw JSON output will be printed instead of annotated text.
     pub raw: bool,
     #[cfg(feature = "cli")]
     #[clap(short = 'm', long, takes_value = false)]
+    #[serde(skip_serializing)]
     /// If present, more context (i.e., line number and line offset) will be added to response.
     pub more_context: bool,
     #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
