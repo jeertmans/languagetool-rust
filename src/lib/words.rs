@@ -56,6 +56,7 @@ pub struct WordsRequest {
     /// Login arguments
     pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Comma-separated list of dictionaries to include words from; uses special default dictionary if this is unset
     pub dicts: Option<Vec<String>>,
 }
@@ -74,6 +75,7 @@ pub struct WordsAddRequest {
     /// Login arguments
     pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Name of the dictionary to add the word to; non-existent dictionaries are created after
     /// calling this; if unset, adds to special default dictionary
     dict: Option<String>,
@@ -93,6 +95,7 @@ pub struct WordsDeleteRequest {
     /// Login arguments
     pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Name of the dictionary to add the word to; non-existent dictionaries are created after
     /// calling this; if unset, adds to special default dictionary
     pub dict: Option<String>,
