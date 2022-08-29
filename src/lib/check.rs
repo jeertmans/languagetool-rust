@@ -158,9 +158,11 @@ pub struct CheckRequest {
     /// If present, more context (i.e., line number and line offset) will be added to response.
     pub more_context: bool,
     #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// The text to be checked. This or 'data' is required.
     pub text: Option<String>,
     #[cfg_attr(feature = "cli", clap(short = 'd', long, conflicts_with = "text"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// The text to be checked, given as a JSON document that specifies what's text and what's markup. This or 'text' is required.
     ///
     /// Markup will be ignored when looking for errors. Example text:
@@ -189,32 +191,41 @@ pub struct CheckRequest {
     /// For languages with variants (English, German, Portuguese) spell checking will only be activated when you specify the variant, e.g. `en-GB` instead of just `en`.
     pub language: String,
     #[cfg_attr(feature = "cli", clap(short = 'u', long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Set to get Premium API access: Your username/email as used to log in at languagetool.org.
     pub username: Option<String>,
     #[cfg_attr(feature = "cli", clap(short = 'k', long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Set to get Premium API access: [your API key](https://languagetool.org/editor/settings/api)
     pub api_key: Option<String>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Comma-separated list of dictionaries to include words from; uses special default dictionary if this is unset
     pub dicts: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// A language code of the user's native language, enabling false friends checks for some language pairs.
     pub mother_tongue: Option<String>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Comma-separated list of preferred language variants.
     ///
     /// The language detector used with `language=auto` can detect e.g. English, but it cannot decide whether British English or American English is used. Thus this parameter can be used to specify the preferred variants like `en-GB` and `de-AT`. Only available with `language=auto`. You should set variants for at least German and English, as otherwise the spell checking will not work for those, as no spelling dictionary can be selected for just `en` or `de`.
     pub preferred_variants: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of rules to be enabled, comma-separated
     pub enabled_rules: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of rules to be disabled, comma-separated
     pub disabled_rules: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of categories to be enabled, comma-separated
     pub enabled_categories: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of categories to be disabled, comma-separated
     pub disabled_categories: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
