@@ -270,6 +270,7 @@ impl ServerCli {
     /// Create a new [`ServerCli`] instance from environ variables,
     /// but defaults to [`ServerCli::default`()] if expected environ
     /// variables are not set.
+    #[must_use]
     pub fn from_env_or_default() -> Self {
         ServerCli::from_env().unwrap_or_default()
     }
