@@ -15,7 +15,7 @@ pub struct Language {
     pub long_code: String,
 }
 
-/// `LanguageTool` GET languages response.
+/// LanguageTool GET languages response.
 ///
 /// List of all supported languages.
 pub type LanguagesResponse = Vec<Language>;

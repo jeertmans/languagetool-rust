@@ -122,6 +122,16 @@ impl Default for Level {
 
 impl Level {
     /// Return `true` if current level is the default one.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use languagetool_rust::check::Level;
+    ///
+    /// let level: Level = Default::default();
+    ///
+    /// assert!(level.is_default());
+    /// ```
     pub fn is_default(&self) -> bool {
         *self == Level::default()
     }
@@ -147,9 +157,9 @@ impl std::str::FromStr for Level {
 #[derive(Clone, Deserialize, Debug, Default, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// `LanguageTool` POST check request.
+/// LanguageTool POST check request.
 ///
-/// The main feature - check a text with `LanguageTool` for possible style and grammar issues.
+/// The main feature - check a text with LanguageTool for possible style and grammar issues.
 ///
 /// The structure below tries to follow as closely as possible the JSON API described
 /// [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
@@ -245,8 +255,9 @@ pub struct CheckRequest {
     pub level: Level,
 }
 
+#[inline]
 fn is_false(b: &bool) -> bool {
-    *b == false
+    !(*b)
 }
 
 impl CheckRequest {
@@ -318,6 +329,7 @@ impl CheckRequest {
 
 /// Responses
 
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// Detected language from check request.
@@ -484,7 +496,7 @@ pub struct Match {
 #[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// `LanguageTool` software details.
+/// LanguageTool software details.
 pub struct Software {
     /// LanguageTool API version
     pub api_version: usize,
@@ -516,7 +528,7 @@ pub struct Warnings {
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// `LanguageTool` POST check response.
+/// LanguageTool POST check response.
 pub struct CheckResponse {
     /// Language information
     pub language: LanguageResponse,
@@ -618,6 +630,7 @@ impl CheckResponseWithContext {
 
 #[cfg(feature = "cli")]
 impl From<CheckResponseWithContext> for CheckResponse {
+    #[allow(clippy::needless_borrow)]
     fn from(mut resp: CheckResponseWithContext) -> Self {
         let iter: MatchPositions<'_, std::slice::IterMut<'_, Match>> = (&mut resp).into();
 
