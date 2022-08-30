@@ -120,6 +120,13 @@ impl Default for Level {
     }
 }
 
+impl Level {
+    /// Return `true` if current level is the default one.
+    pub fn is_default(&self) -> bool {
+        *self == Level::default()
+    }
+}
+
 #[cfg(feature = "cli")]
 impl std::str::FromStr for Level {
     type Err = clap::Error;
@@ -229,11 +236,17 @@ pub struct CheckRequest {
     /// IDs of categories to be disabled, comma-separated
     pub disabled_categories: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[serde(skip_serializing_if = "is_false")]
     /// If true, only the rules and categories whose IDs are specified with `enabledRules` or `enabledCategories` are enabled.
     pub enabled_only: bool,
     #[cfg_attr(feature = "cli", clap(long, default_value = "default"))]
+    #[serde(skip_serializing_if = "Level::is_default")]
     /// If set to `picky`, additional rules will be activated, i.e. rules that you might only find useful when checking formal text.
     pub level: Level,
+}
+
+fn is_false(b: &bool) -> bool {
+    *b == false
 }
 
 impl CheckRequest {
