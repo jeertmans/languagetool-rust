@@ -153,6 +153,20 @@ impl std::str::FromStr for Level {
     }
 }
 
+#[cfg(feature = "cli")]
+impl clap::ValueEnum for Level {
+    fn value_variants<'a>() -> &'a [Self] {
+        &[Self::Default, Self::Picky]
+    }
+
+    fn to_possible_value<'a>(&self) -> Option<clap::PossibleValue<'a>> {
+        match self {
+            Self::Default => Some(clap::PossibleValue::new("default")),
+            Self::Picky => Some(clap::PossibleValue::new("picky")),
+        }
+    }
+}
+
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Clone, Deserialize, Debug, Default, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -249,7 +263,7 @@ pub struct CheckRequest {
     #[serde(skip_serializing_if = "is_false")]
     /// If true, only the rules and categories whose IDs are specified with `enabledRules` or `enabledCategories` are enabled.
     pub enabled_only: bool,
-    #[cfg_attr(feature = "cli", clap(long, default_value = "default"))]
+    #[cfg_attr(feature = "cli", clap(long, default_value = "default", value_parser = clap::builder::EnumValueParser::<Level>::new()))]
     #[serde(skip_serializing_if = "Level::is_default")]
     /// If set to `picky`, additional rules will be activated, i.e. rules that you might only find useful when checking formal text.
     pub level: Level,

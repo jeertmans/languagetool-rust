@@ -236,7 +236,7 @@ pub struct ServerCli {
         clap(
             long,
             default_value = "https://api.languagetoolplus.com",
-            env = "LANGUAGETOOL_HOSTNAME"
+            env = "LANGUAGETOOL_HOSTNAME",
         )
     )]
     pub hostname: String,
