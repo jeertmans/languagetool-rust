@@ -1,17 +1,96 @@
 use clap::{CommandFactory, FromArgMatches};
+#[cfg(feature = "cli-complete")]
+use clap_complete::{generate, shells};
 use languagetool_rust::error::Result;
 use languagetool_rust::*;
 use std::io::{BufRead, Write};
 
-#[tokio::main]
-async fn main() {
-    if let Err(e) = try_main().await {
-        eprintln!("{}", e);
-        std::process::exit(2);
-    }
-}
+#[cfg(feature = "cli-complete")]
+pub static COMPLETIONS_HELP: &str =
+r"
+One can generate a completion script for `ltrs` that is compatible with
+a given shell. The script is output on `stdout` allowing one to re-direct
+the output to the file of their choosing. Where you place the file will
+depend on which shell, and which operating system you are using. Your
+particular configuration may also determine where these scripts need
+to be placed.
 
-async fn try_main() -> Result<()> {
+Here are some common set ups for the three supported shells under
+Unix and similar operating systems (such as GNU/Linux).
+
+BASH:
+
+Completion files are commonly stored in `/etc/bash_completion.d/`
+
+Run the command:
+`ltrs generate-completions bash > /etc/bash_completion.d/ltrs.bash-completion`
+
+This installs the completion script. You may have to log out and log
+back in to your shell session for the changes to take affect.
+
+FISH:
+
+Fish completion files are commonly stored in
+`$HOME/.config/fish/completions`
+
+Run the command:
+`ltrs generate-completions fish > ~/.config/fish/completions/ltrs.fish`
+
+This installs the completion script. You may have to log out and log
+back in to your shell session for the changes to take affect.
+
+ZSH:
+
+ZSH completions are commonly stored in any directory listed in your
+`$fpath` variable. To use these completions, you must either add the
+generated script to one of those directories, or add your own
+to this list.
+
+Adding a custom directory is often the safest best if you're unsure
+of which directory to use. First create the directory, for this
+example we'll create a hidden directory inside our `$HOME` directory
+`mkdir ~/.zfunc`
+
+Then add the following lines to your `.zshrc` just before `compinit`
+`fpath+=~/.zfunc`
+
+Now you can install the completions script using the following command
+`ltrs generate-completions zsh > ~/.zfunc/_ltrs`
+
+You must then either log out and log back in, or simply run
+`exec zsh`
+
+For the new completions to take affect.
+
+CUSTOM LOCATIONS:
+
+Alternatively, you could save these files to the place of your choosing,
+such as a custom directory inside your $HOME. Doing so will require you
+to add the proper directives, such as `source`ing inside your login
+script. Consult your shells documentation for how to add such directives.
+
+POWERSHELL:
+
+The powershell completion scripts require PowerShell v5.0+ (which comes
+Windows 10, but can be downloaded separately for windows 7 or 8.1).
+
+First, check if a profile has already been set
+`PS C:\> Test-Path $profile`
+
+If the above command returns `False` run the following
+`PS C:\> New-Item -path $profile -type file --force`
+
+Now open the file provided by `$profile` (if you used the `New-Item` command
+it will be `%USERPROFILE%\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`
+
+Next, we either save the completions file into our profile, or into a separate file
+and source it inside our profile. To save the completions into our profile simply
+use
+`PS C:\> ltrs generate-completions powershell >> %USERPROFILE%\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`
+
+This documentation is directly taken from: https://github.com/rust-lang/rustup/blob/f6cd385fc58008fd78a4514329d5207c4ff42d57/src/rustup-cli/help.rs#L135-L223";
+
+fn build_cli() -> clap::Command<'static> {
     let command = ServerClient::command()
         .author(clap::crate_authors!())
         .about(clap::crate_description!())
@@ -52,11 +131,44 @@ async fn try_main() -> Result<()> {
             .author(clap::crate_authors!()),
     );
 
-    let matches = command.get_matches();
+    #[cfg(feature = "cli-complete")]
+    let command = command.subcommand(
+        clap::Command::new("generate-completions")
+            .author(clap::crate_authors!())
+            .about("Generate completion files for supported shells")
+            .after_long_help(COMPLETIONS_HELP)
+            .arg(
+                clap::Arg::new("shell")
+                    .takes_value(true)
+                    .required(true)
+                    .ignore_case(true)
+                    .value_parser([
+                        clap::PossibleValue::new("bash"),
+                        clap::PossibleValue::new("fish"),
+                        clap::PossibleValue::new("powershell"),
+                        clap::PossibleValue::new("zsh"),
+                    ]),
+            ),
+    );
+
+    command
+}
+
+#[tokio::main]
+async fn main() {
+    if let Err(e) = try_main().await {
+        eprintln!("{}", e);
+        std::process::exit(2);
+    }
+}
+
+async fn try_main() -> Result<()> {
+
+    let matches = build_cli().get_matches();
 
     // TODO: prompt max_suggestion
     let client = ServerClient::from_arg_matches(&matches)?.with_max_suggestions(5);
-    let stdout = std::io::stdout();
+    let mut stdout = std::io::stdout();
 
     #[allow(clippy::significant_drop_in_scrutinee)]
     match matches.subcommand() {
@@ -140,6 +252,36 @@ async fn try_main() -> Result<()> {
         Some(("docker", sub_matches)) => Docker::from_arg_matches(sub_matches)?
             .run_action()
             .map(|_| ())?,
+        #[cfg(feature = "cli-complete")]
+        Some(("generate-completions", sub_matches)) => match sub_matches.value_of("shell").unwrap()
+        {
+            "bash" => generate(
+                shells::Bash,
+                &mut build_cli(),
+                env!("CARGO_BIN_NAME"),
+                &mut stdout,
+            ),
+            "fish" => generate(
+                shells::Fish,
+                &mut build_cli(),
+                env!("CARGO_BIN_NAME"),
+                &mut stdout,
+            ),
+            "powershell" => generate(
+                shells::PowerShell,
+                &mut build_cli(),
+                env!("CARGO_BIN_NAME"),
+                &mut stdout,
+            ),
+            "zsh" => generate(
+                shells::Zsh,
+                &mut build_cli(),
+                env!("CARGO_BIN_NAME"),
+                &mut stdout,
+            ),
+
+            _ => (),
+        },
         _ => unreachable!(), // Can't be None since subcommand is required
     }
 
