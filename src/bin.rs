@@ -6,8 +6,7 @@ use languagetool_rust::*;
 use std::io::{BufRead, Write};
 
 #[cfg(feature = "cli-complete")]
-pub static COMPLETIONS_HELP: &str =
-r"
+pub static COMPLETIONS_HELP: &str = r"
 One can generate a completion script for `ltrs` that is compatible with
 a given shell. The script is output on `stdout` allowing one to re-direct
 the output to the file of their choosing. Where you place the file will
@@ -163,7 +162,6 @@ async fn main() {
 }
 
 async fn try_main() -> Result<()> {
-
     let matches = build_cli().get_matches();
 
     // TODO: prompt max_suggestion
