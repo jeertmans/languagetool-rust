@@ -151,8 +151,7 @@ pub struct CheckRequest {
     #[clap(short = 'r', long, takes_value = false)]
     /// If present, raw JSON output will be printed instead of annotated text.
     pub raw: bool,
-    #[cfg(feature = "cli")]
-    #[clap(short = 'm', long, takes_value = false)]
+    #[cfg_attr(feature = "cli", clap(short = 'm', long, takes_value = false))]
     /// If present, more context (i.e., line number and line offset) will be added to response.
     pub more_context: bool,
     #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
@@ -435,7 +434,6 @@ pub struct Match {
     pub length: usize,
     /// Error message
     pub message: String,
-    #[cfg(feature = "cli")]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// More context to match, post-processed using original text
     pub more_context: Option<MoreContext>,
@@ -590,7 +588,6 @@ impl CheckResponseWithContext {
     }
 }
 
-#[cfg(feature = "cli")]
 impl From<CheckResponseWithContext> for CheckResponse {
     fn from(mut resp: CheckResponseWithContext) -> Self {
         let iter: MatchPositions<'_, std::slice::IterMut<'_, Match>> = (&mut resp).into();
