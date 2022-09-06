@@ -360,7 +360,7 @@ impl ServerClient {
                                         format!("... ({} not shown)", len - max).into();
                                     m.replacements.truncate(max + 1);
                                 }
-                            })
+                            });
                         }
                         resp
                     }),

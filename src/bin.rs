@@ -58,6 +58,7 @@ async fn try_main() -> Result<()> {
     let client = ServerClient::from_arg_matches(&matches)?.with_max_suggestions(5);
     let stdout = std::io::stdout();
 
+    #[allow(clippy::significant_drop_in_scrutinee)]
     match matches.subcommand() {
         Some(("check", sub_matches)) => {
             let mut req = CheckRequest::from_arg_matches(sub_matches)?;
