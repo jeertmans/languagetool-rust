@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created founding link. [#19](https://github.com/jeertmans/languagetool-rust/pull/19)
 - Added two related projets. [#21](https://github.com/jeertmans/languagetool-rust/pull/21)
 
+### Fixed
+
+- Stopped serializing useless fields. [#17](https://github.com/jeertmans/languagetool-rust/pull/17)
+
 ## [1.3.0](https://github.com/jeertmans/languagetool-rust/compare/v1.2.0...v1.3.0)
 
 ### Chore
