@@ -206,6 +206,12 @@ async fn try_main() -> Result<()> {
             if req.text.is_none() && req.data.is_none() {
                 let mut text = String::new();
 
+                #[cfg(windows)]
+                writeln!(stdout, "Reading from STDIN, press [CTRL+Z] when you're done.")?;
+
+                #[cfg(unix)]
+                writeln!(stdout, "Reading from STDIN, press [CTRL+D] when you're done.")?;
+
                 for line in std::io::stdin().lock().lines() {
                     text.push_str(&line?);
                     text.push('\n');

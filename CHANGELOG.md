@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added `cli-complete` feature to generate completion files. [#23](https://github.com/jeertmans/languagetool-rust/pull/23)
+- Added message when reading from STDIN. [#24](https://github.com/jeertmans/languagetool-rust/pull/24)
 
 ### Fixed
 
