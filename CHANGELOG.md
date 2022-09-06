@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created founding link. [#19](https://github.com/jeertmans/languagetool-rust/pull/19)
 - Added two related projets. [#21](https://github.com/jeertmans/languagetool-rust/pull/21)
 
+### Added
+
+- Added `cli-complete` feature to generate completion files. [#23](https://github.com/jeertmans/languagetool-rust/pull/23)
+
 ### Fixed
 
 - Stopped serializing useless fields. [#17](https://github.com/jeertmans/languagetool-rust/pull/17)
