@@ -6,88 +6,115 @@ use languagetool_rust::*;
 use std::io::{BufRead, Write};
 
 #[cfg(feature = "cli-complete")]
-pub static COMPLETIONS_HELP: &str = r"
-One can generate a completion script for `ltrs` that is compatible with
-a given shell. The script is output on `stdout` allowing one to re-direct
-the output to the file of their choosing. Where you place the file will
-depend on which shell, and which operating system you are using. Your
-particular configuration may also determine where these scripts need
-to be placed.
+pub(crate) static COMPLETIONS_HELP: &str = r"DISCUSSION:
+    Enable tab completion for Bash, Fish, Zsh, or PowerShell
+    Elvish shell completion is currently supported, but not documented below.
+    The script is output on `stdout`, allowing one to re-direct the
+    output to the file of their choosing. Where you place the file
+    will depend on which shell, and which operating system you are
+    using. Your particular configuration may also determine where
+    these scripts need to be placed.
 
-Here are some common set ups for the three supported shells under
-Unix and similar operating systems (such as GNU/Linux).
+    Here are some common set ups for the three supported shells under
+    Unix and similar operating systems (such as GNU/Linux).
 
-BASH:
+    BASH:
 
-Completion files are commonly stored in `/etc/bash_completion.d/`
+    Completion files are commonly stored in `/etc/bash_completion.d/` for
+    system-wide commands, but can be stored in
+    `~/.local/share/bash-completion/completions` for user-specific commands.
+    Run the command:
 
-Run the command:
-`ltrs generate-completions bash > /etc/bash_completion.d/ltrs.bash-completion`
+        $ mkdir -p ~/.local/share/bash-completion/completions
+        $ ltrs completions bash >> ~/.local/share/bash-completion/completions/ltrs
 
-This installs the completion script. You may have to log out and log
-back in to your shell session for the changes to take affect.
+    This installs the completion script. You may have to log out and
+    log back in to your shell session for the changes to take effect.
 
-FISH:
+    BASH (macOS/Homebrew):
 
-Fish completion files are commonly stored in
-`$HOME/.config/fish/completions`
+    Homebrew stores bash completion files within the Homebrew directory.
+    With the `bash-completion` brew formula installed, run the command:
 
-Run the command:
-`ltrs generate-completions fish > ~/.config/fish/completions/ltrs.fish`
+        $ mkdir -p $(brew --prefix)/etc/bash_completion.d
+        $ ltrs completions bash > $(brew --prefix)/etc/bash_completion.d/ltrs.bash-completion
 
-This installs the completion script. You may have to log out and log
-back in to your shell session for the changes to take affect.
+    FISH:
 
-ZSH:
+    Fish completion files are commonly stored in
+    `$HOME/.config/fish/completions`. Run the command:
 
-ZSH completions are commonly stored in any directory listed in your
-`$fpath` variable. To use these completions, you must either add the
-generated script to one of those directories, or add your own
-to this list.
+        $ mkdir -p ~/.config/fish/completions
+        $ ltrs completions fish > ~/.config/fish/completions/ltrs.fish
 
-Adding a custom directory is often the safest best if you're unsure
-of which directory to use. First create the directory, for this
-example we'll create a hidden directory inside our `$HOME` directory
-`mkdir ~/.zfunc`
+    This installs the completion script. You may have to log out and
+    log back in to your shell session for the changes to take effect.
 
-Then add the following lines to your `.zshrc` just before `compinit`
-`fpath+=~/.zfunc`
+    ZSH:
 
-Now you can install the completions script using the following command
-`ltrs generate-completions zsh > ~/.zfunc/_ltrs`
+    ZSH completions are commonly stored in any directory listed in
+    your `$fpath` variable. To use these completions, you must either
+    add the generated script to one of those directories, or add your
+    own to this list.
 
-You must then either log out and log back in, or simply run
-`exec zsh`
+    Adding a custom directory is often the safest bet if you are
+    unsure of which directory to use. First create the directory; for
+    this example we'll create a hidden directory inside our `$HOME`
+    directory:
 
-For the new completions to take affect.
+        $ mkdir ~/.zfunc
 
-CUSTOM LOCATIONS:
+    Then add the following lines to your `.zshrc` just before
+    `compinit`:
 
-Alternatively, you could save these files to the place of your choosing,
-such as a custom directory inside your $HOME. Doing so will require you
-to add the proper directives, such as `source`ing inside your login
-script. Consult your shells documentation for how to add such directives.
+        fpath+=~/.zfunc
 
-POWERSHELL:
+    Now you can install the completions script using the following
+    command:
 
-The powershell completion scripts require PowerShell v5.0+ (which comes
-Windows 10, but can be downloaded separately for windows 7 or 8.1).
+        $ ltrs completions zsh > ~/.zfunc/_ltrs
 
-First, check if a profile has already been set
-`PS C:\> Test-Path $profile`
+    You must then either log out and log back in, or simply run
 
-If the above command returns `False` run the following
-`PS C:\> New-Item -path $profile -type file --force`
+        $ exec zsh
 
-Now open the file provided by `$profile` (if you used the `New-Item` command
-it will be `%USERPROFILE%\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`
+    for the new completions to take effect.
 
-Next, we either save the completions file into our profile, or into a separate file
-and source it inside our profile. To save the completions into our profile simply
-use
-`PS C:\> ltrs generate-completions powershell >> %USERPROFILE%\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`
+    CUSTOM LOCATIONS:
 
-This documentation is directly taken from: https://github.com/rust-lang/rustup/blob/f6cd385fc58008fd78a4514329d5207c4ff42d57/src/rustup-cli/help.rs#L135-L223";
+    Alternatively, you could save these files to the place of your
+    choosing, such as a custom directory inside your $HOME. Doing so
+    will require you to add the proper directives, such as `source`ing
+    inside your login script. Consult your shells documentation for
+    how to add such directives.
+
+    POWERSHELL:
+
+    The powershell completion scripts require PowerShell v5.0+ (which
+    comes with Windows 10, but can be downloaded separately for windows 7
+    or 8.1).
+
+    First, check if a profile has already been set
+
+        PS C:\> Test-Path $profile
+
+    If the above command returns `False` run the following
+
+        PS C:\> New-Item -path $profile -type file -force
+
+    Now open the file provided by `$profile` (if you used the
+    `New-Item` command it will be
+    `${env:USERPROFILE}\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1`
+
+    Next, we either save the completions file into our profile, or
+    into a separate file and source it inside our profile. To save the
+    completions into our profile simply use
+
+        PS C:\> ltrs completions powershell >> ${env:USERPROFILE}\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+
+    SOURCE:
+
+        This documentation is directly taken from: https://github.com/rust-lang/rustup/blob/8f6b53628ad996ad86f9c6225fa500cddf860905/src/cli/help.rs#L157";
 
 fn build_cli() -> clap::Command<'static> {
     let command = ServerClient::command()
@@ -132,10 +159,12 @@ fn build_cli() -> clap::Command<'static> {
 
     #[cfg(feature = "cli-complete")]
     let command = command.subcommand(
-        clap::Command::new("generate-completions")
+        clap::Command::new("completions")
             .author(clap::crate_authors!())
-            .about("Generate completion files for supported shells")
+            .about("Generate tab-completion scripts for supported shells")
             .after_long_help(COMPLETIONS_HELP)
+            .after_help("Use --help for installation help.")
+            .arg_required_else_help(true)
             .arg(
                 clap::Arg::new("shell")
                     .takes_value(true)
@@ -143,6 +172,7 @@ fn build_cli() -> clap::Command<'static> {
                     .ignore_case(true)
                     .value_parser([
                         clap::PossibleValue::new("bash"),
+                        clap::PossibleValue::new("elvish"),
                         clap::PossibleValue::new("fish"),
                         clap::PossibleValue::new("powershell"),
                         clap::PossibleValue::new("zsh"),
@@ -251,10 +281,16 @@ async fn try_main() -> Result<()> {
             .run_action()
             .map(|_| ())?,
         #[cfg(feature = "cli-complete")]
-        Some(("generate-completions", sub_matches)) => match sub_matches.value_of("shell").unwrap()
+        Some(("completions", sub_matches)) => match sub_matches.value_of("shell").unwrap()
         {
             "bash" => generate(
                 shells::Bash,
+                &mut build_cli(),
+                env!("CARGO_BIN_NAME"),
+                &mut stdout,
+            ),
+            "elvish" => generate(
+                shells::Elvish,
                 &mut build_cli(),
                 env!("CARGO_BIN_NAME"),
                 &mut stdout,
