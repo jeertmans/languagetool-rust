@@ -281,8 +281,7 @@ async fn try_main() -> Result<()> {
             .run_action()
             .map(|_| ())?,
         #[cfg(feature = "cli-complete")]
-        Some(("completions", sub_matches)) => match sub_matches.value_of("shell").unwrap()
-        {
+        Some(("completions", sub_matches)) => match sub_matches.value_of("shell").unwrap() {
             "bash" => generate(
                 shells::Bash,
                 &mut build_cli(),
