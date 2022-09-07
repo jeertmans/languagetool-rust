@@ -296,7 +296,7 @@ pub struct CheckRequest {
     ///
     /// For languages with variants (English, German, Portuguese) spell checking will only be activated when you specify the variant, e.g. `en-GB` instead of just `en`.
     pub language: String,
-    #[cfg_attr(feature = "clap", clap(short = 'u', long, requires = "api_key"))]
+    #[cfg_attr(feature = "cli", clap(short = 'u', long, requires = "api-key"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Set to get Premium API access: Your username/email as used to log in at languagetool.org.
     pub username: Option<String>,
