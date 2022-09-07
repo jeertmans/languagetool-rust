@@ -38,7 +38,7 @@ annotate = ["annotate-snippets"]
 cli = ["atty", "clap", "lazy_static", "regex", "tokio"]
 cli-complete = ["cli", "clap_complete"]
 docker = []
-full = ["annotate", "cli", "docker", "unstable", "cli-complete"]
+full = ["annotate", "cli-complete", "docker", "unstable"]
 
 native-tls = ["reqwest/native-tls"]
 native-tls-vendored = ["reqwest/native-tls-vendored"]

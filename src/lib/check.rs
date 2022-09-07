@@ -1,6 +1,5 @@
 //! Structures for `check` requests and responses.
 
-use crate::error::Error;
 #[cfg(feature = "clap")]
 use clap::Parser;
 #[cfg(feature = "lazy_static")]
@@ -61,7 +60,7 @@ pub fn is_language_code(v: &str) -> crate::error::Result<()> {
     if v == "auto" || RE.is_match(v) {
         Ok(())
     } else {
-        Err(Error::InvalidValue {
+        Err(crate::error::Error::InvalidValue {
             body: format!(
                 "The value should be `auto` or match regex pattern: {}",
                 RE.as_str()
@@ -281,13 +280,17 @@ pub struct CheckRequest {
     /// The 'data' feature is not limited to HTML or XML, it can be used for any kind of markup. Entities will need to be expanded in this input.
     pub data: Option<Data>,
     #[cfg_attr(
-        feature = "clap",
+        all(feature = "clap", feature = "lazy_static", feature = "regex"),
         clap(
             short = 'l',
             long,
             default_value = "auto",
             validator = is_language_code
         )
+    )]
+    #[cfg_attr(
+        all(feature = "clap", not(all(feature = "lazy_static", feature = "regex"))),
+        clap(short = 'l', long, default_value = "auto",)
     )]
     /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the language automatically (see `preferredVariants` below).
     ///
