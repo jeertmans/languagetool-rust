@@ -1,11 +1,11 @@
 use clap::{CommandFactory, FromArgMatches};
-#[cfg(feature = "cli-complete")]
+#[cfg(feature = "clap-complete")]
 use clap_complete::{generate, shells};
 use languagetool_rust::error::Result;
 use languagetool_rust::*;
 use std::io::{BufRead, Write};
 
-#[cfg(feature = "cli-complete")]
+#[cfg(feature = "clap-complete")]
 pub(crate) static COMPLETIONS_HELP: &str = r"DISCUSSION:
     Enable tab completion for Bash, Fish, Zsh, or PowerShell
     Elvish shell completion is currently supported, but not documented below.
@@ -157,7 +157,7 @@ fn build_cli() -> clap::Command<'static> {
             .author(clap::crate_authors!()),
     );
 
-    #[cfg(feature = "cli-complete")]
+    #[cfg(feature = "clap-complete")]
     let command = command.subcommand(
         clap::Command::new("completions")
             .author(clap::crate_authors!())
@@ -237,7 +237,7 @@ async fn try_main() -> Result<()> {
 
             let mut resp = client.check(&req).await?;
 
-            #[cfg(feature = "cli")]
+            #[cfg(feature = "clap")]
             if req.more_context {
                 use crate::check::CheckResponseWithContext;
                 let text = req.get_text();
