@@ -42,7 +42,7 @@ pub struct LoginArgs {
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// `LanguageTool` GET words request.
+/// LanguageTool GET words request.
 ///
 /// List words in the user's personal dictionaries.
 pub struct WordsRequest {
@@ -56,6 +56,7 @@ pub struct WordsRequest {
     /// Login arguments
     pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Comma-separated list of dictionaries to include words from; uses special default dictionary if this is unset
     pub dicts: Option<Vec<String>>,
 }
@@ -63,7 +64,7 @@ pub struct WordsRequest {
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// `LanguageTool` POST words add request.
+/// LanguageTool POST words add request.
 ///
 /// Add a word to one of the user's personal dictionaries. Please note that this feature is considered to be used for personal dictionaries which must not contain more than 500 words. If this is an issue for you, please contact us.
 pub struct WordsAddRequest {
@@ -74,6 +75,7 @@ pub struct WordsAddRequest {
     /// Login arguments
     pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Name of the dictionary to add the word to; non-existent dictionaries are created after
     /// calling this; if unset, adds to special default dictionary
     dict: Option<String>,
@@ -82,7 +84,7 @@ pub struct WordsAddRequest {
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// `LanguageTool` POST words delete request.
+/// LanguageTool POST words delete request.
 ///
 /// Remove a word from one of the user's personal dictionaries.
 pub struct WordsDeleteRequest {
@@ -93,6 +95,7 @@ pub struct WordsDeleteRequest {
     /// Login arguments
     pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Name of the dictionary to add the word to; non-existent dictionaries are created after
     /// calling this; if unset, adds to special default dictionary
     pub dict: Option<String>,
@@ -100,7 +103,7 @@ pub struct WordsDeleteRequest {
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// `LanguageTool` GET words response.
+/// LanguageTool GET words response.
 pub struct WordsResponse {
     /// List of words
     words: Vec<String>,
@@ -108,7 +111,7 @@ pub struct WordsResponse {
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// `LanguageTool` POST word add response.
+/// LanguageTool POST word add response.
 pub struct WordsAddResponse {
     /// `true` if word was correctly added
     added: bool,
@@ -116,7 +119,7 @@ pub struct WordsAddResponse {
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// `LanguageTool` POST word delete response.
+/// LanguageTool POST word delete response.
 pub struct WordsDeleteResponse {
     /// `true` if word was correctly removed
     deleted: bool,

@@ -1,10 +1,74 @@
 //! Structures for `check` requests and responses.
 
+use crate::error::Error;
 #[cfg(feature = "cli")]
 use clap::Parser;
+#[cfg(feature = "lazy_static")]
+use lazy_static::lazy_static;
+#[cfg(feature = "regex")]
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 /// Requests
+
+/// Check if `v` is a valid language code.
+///
+/// A valid language code is usually
+/// - a two character string matching pattern
+///   `[a-z]{2}
+/// - a five character string matching pattern
+///   `[a-z]{2}-[A-Z]{2}
+/// - or some more complex ascii string (see below)
+///
+/// Language code is case insensitive.
+///
+/// Therefore, a valid language code must match the following:
+///
+/// - `[a-zA-Z]{2,3}(-[a-zA-Z]{2}(-[a-zA-Z]+)*)?`
+///
+/// or
+///
+/// - "auto"
+///
+/// > Note: a valid language code does not mean that it exists.
+///
+/// # Examples
+///
+/// ```
+/// # use languagetool_rust::check::is_language_code;
+/// assert!(is_language_code("en").is_ok());
+///
+/// assert!(is_language_code("en-US").is_ok());
+///
+/// assert!(is_language_code("en-us").is_ok());
+///
+/// assert!(is_language_code("ca-ES-valencia").is_ok());
+///
+/// assert!(is_language_code("abcd").is_err());
+///
+/// assert!(is_language_code("en_US").is_err());
+///
+/// assert!(is_language_code("fr-french").is_err());
+///
+/// assert!(is_language_code("some random text").is_err());
+/// ```
+#[cfg(all(feature = "lazy_static", feature = "regex"))]
+pub fn is_language_code(v: &str) -> crate::error::Result<()> {
+    lazy_static! {
+        static ref RE: Regex = Regex::new("^[a-zA-Z]{2,3}(-[a-zA-Z]{2}(-[a-zA-Z]+)*)?$").unwrap();
+    }
+
+    if v == "auto" || RE.is_match(v) {
+        Ok(())
+    } else {
+        Err(Error::InvalidValue {
+            body: format!(
+                "The value should be `auto` or match regex pattern: {}",
+                RE.as_str()
+            ),
+        })
+    }
+}
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
@@ -154,6 +218,23 @@ impl Default for Level {
     }
 }
 
+impl Level {
+    /// Return `true` if current level is the default one.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use languagetool_rust::check::Level;
+    ///
+    /// let level: Level = Default::default();
+    ///
+    /// assert!(level.is_default());
+    /// ```
+    pub fn is_default(&self) -> bool {
+        *self == Level::default()
+    }
+}
+
 #[cfg(feature = "cli")]
 impl std::str::FromStr for Level {
     type Err = clap::Error;
@@ -170,25 +251,47 @@ impl std::str::FromStr for Level {
     }
 }
 
+#[cfg(feature = "cli")]
+impl clap::ValueEnum for Level {
+    fn value_variants<'a>() -> &'a [Self] {
+        &[Self::Default, Self::Picky]
+    }
+
+    fn to_possible_value<'a>(&self) -> Option<clap::PossibleValue<'a>> {
+        match self {
+            Self::Default => Some(clap::PossibleValue::new("default")),
+            Self::Picky => Some(clap::PossibleValue::new("picky")),
+        }
+    }
+}
+
 #[cfg_attr(feature = "cli", derive(Parser))]
 #[derive(Clone, Deserialize, Debug, Default, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// `LanguageTool` POST check request.
+/// LanguageTool POST check request.
 ///
-/// The main feature - check a text with `LanguageTool` for possible style and grammar issues.
+/// The main feature - check a text with LanguageTool for possible style and grammar issues.
 ///
 /// The structure below tries to follow as closely as possible the JSON API described
 /// [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
 pub struct CheckRequest {
     #[cfg(all(feature = "cli", feature = "annotate"))]
     #[clap(short = 'r', long, takes_value = false)]
+    #[serde(skip_serializing)]
     /// If present, raw JSON output will be printed instead of annotated text.
     pub raw: bool,
-    #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data"))]
+    #[cfg(feature = "cli")]
+    #[clap(short = 'm', long, takes_value = false)]
+    #[serde(skip_serializing)]
+    /// If present, more context (i.e., line number and line offset) will be added to response.
+    pub more_context: bool,
+    #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// The text to be checked. This or 'data' is required.
     pub text: Option<String>,
     #[cfg_attr(feature = "cli", clap(short = 'd', long, conflicts_with = "text"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// The text to be checked, given as a JSON document that specifies what's text and what's markup. This or 'text' is required.
     ///
     /// Markup will be ignored when looking for errors. Example text:
@@ -211,46 +314,70 @@ pub struct CheckRequest {
     /// ```
     /// The 'data' feature is not limited to HTML or XML, it can be used for any kind of markup. Entities will need to be expanded in this input.
     pub data: Option<Data>,
-    #[cfg_attr(feature = "cli", clap(short = 'l', long, default_value = "auto"))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(
+            short = 'l',
+            long,
+            default_value = "auto",
+            validator = is_language_code
+        )
+    )]
     /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the language automatically (see `preferredVariants` below).
     ///
     /// For languages with variants (English, German, Portuguese) spell checking will only be activated when you specify the variant, e.g. `en-GB` instead of just `en`.
     pub language: String,
-    #[cfg_attr(feature = "cli", clap(short = 'u', long))]
+    #[cfg_attr(feature = "cli", clap(short = 'u', long, requires = "api-key"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Set to get Premium API access: Your username/email as used to log in at languagetool.org.
     pub username: Option<String>,
-    #[cfg_attr(feature = "cli", clap(short = 'k', long))]
+    #[cfg_attr(feature = "cli", clap(short = 'k', long, requires = "username"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Set to get Premium API access: [your API key](https://languagetool.org/editor/settings/api)
     pub api_key: Option<String>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Comma-separated list of dictionaries to include words from; uses special default dictionary if this is unset
     pub dicts: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// A language code of the user's native language, enabling false friends checks for some language pairs.
     pub mother_tongue: Option<String>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Comma-separated list of preferred language variants.
     ///
     /// The language detector used with `language=auto` can detect e.g. English, but it cannot decide whether British English or American English is used. Thus this parameter can be used to specify the preferred variants like `en-GB` and `de-AT`. Only available with `language=auto`. You should set variants for at least German and English, as otherwise the spell checking will not work for those, as no spelling dictionary can be selected for just `en` or `de`.
     pub preferred_variants: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of rules to be enabled, comma-separated
     pub enabled_rules: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of rules to be disabled, comma-separated
     pub disabled_rules: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of categories to be enabled, comma-separated
     pub enabled_categories: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of categories to be disabled, comma-separated
     pub disabled_categories: Option<Vec<String>>,
     #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[serde(skip_serializing_if = "is_false")]
     /// If true, only the rules and categories whose IDs are specified with `enabledRules` or `enabledCategories` are enabled.
     pub enabled_only: bool,
-    #[cfg_attr(feature = "cli", clap(long, default_value = "default"))]
+    #[cfg_attr(feature = "cli", clap(long, default_value = "default", value_parser = clap::builder::EnumValueParser::<Level>::new()))]
+    #[serde(skip_serializing_if = "Level::is_default")]
     /// If set to `picky`, additional rules will be activated, i.e. rules that you might only find useful when checking formal text.
     pub level: Level,
+}
+
+#[inline]
+fn is_false(b: &bool) -> bool {
+    !(*b)
 }
 
 impl CheckRequest {
@@ -345,6 +472,7 @@ mod request_tests {
 
 /// Reponses
 
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// Detected language from check request.
@@ -511,7 +639,7 @@ pub struct Match {
 #[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// `LanguageTool` software details.
+/// LanguageTool software details.
 pub struct Software {
     /// LanguageTool API version
     pub api_version: usize,
@@ -543,7 +671,7 @@ pub struct Warnings {
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// `LanguageTool` POST check response.
+/// LanguageTool POST check response.
 pub struct CheckResponse {
     /// Language information
     pub language: LanguageResponse,
@@ -645,6 +773,7 @@ impl CheckResponseWithContext {
 
 #[cfg(feature = "cli")]
 impl From<CheckResponseWithContext> for CheckResponse {
+    #[allow(clippy::needless_borrow)]
     fn from(mut resp: CheckResponseWithContext) -> Self {
         let iter: MatchPositions<'_, std::slice::IterMut<'_, Match>> = (&mut resp).into();
 
