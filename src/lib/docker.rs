@@ -2,16 +2,16 @@
 //! applications.
 
 use crate::error::{exit_status_error, Result};
-#[cfg(feature = "cli")]
+#[cfg(feature = "clap")]
 use clap::Parser;
 use std::process::{Command, Output, Stdio};
 
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "clap", derive(Parser))]
 #[derive(Debug, Clone)]
 /// Commands to pull, start and stop a `LanguageTool` container using Docker.
 pub struct Docker {
     #[cfg_attr(
-        feature = "cli",
+        feature = "clap",
         clap(
             default_value = "erikvl87/languagetool",
             env = "LANGUAGETOOL_DOCKER_IMAGE"
@@ -20,7 +20,7 @@ pub struct Docker {
     /// Image or repository from a registry.
     name: String,
     #[cfg_attr(
-        feature = "cli",
+        feature = "clap",
         clap(
             short = 'b',
             long,
@@ -31,13 +31,13 @@ pub struct Docker {
     /// Path to Docker's binaries.
     bin: String,
     #[cfg_attr(
-        feature = "cli",
+        feature = "clap",
         clap(long, default_value = "languagetool", env = "LANGUAGETOOL_DOCKER_NAME")
     )]
     /// Name assigned to the container.
     container_name: String,
     #[cfg_attr(
-        feature = "cli",
+        feature = "clap",
         clap(
             short = 'p',
             long,
@@ -47,12 +47,12 @@ pub struct Docker {
     )]
     /// Publish a container's port(s) to the host.
     port: String,
-    #[cfg_attr(feature = "cli", clap(subcommand))]
+    #[cfg_attr(feature = "clap", clap(subcommand))]
     /// Docker action.
     action: Action,
 }
 
-#[cfg_attr(feature = "cli", derive(clap::Subcommand))]
+#[cfg_attr(feature = "clap", derive(clap::Subcommand))]
 #[derive(Clone, Debug)]
 /// Enumerate supported Docker actions.
 enum Action {
