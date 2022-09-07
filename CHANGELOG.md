@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Created founding link. [#19](https://github.com/jeertmans/languagetool-rust/pull/19)
 - Added two related projets. [#21](https://github.com/jeertmans/languagetool-rust/pull/21)
+- Added release dates. [#31](https://github.com/jeertmans/languagetool-rust/pull/31)
 - Added `#[must_use]` flag to most structures, to please clippy pendantic. [#29](https://github.com/jeertmans/languagetool-rust/pull/21)
 
 ### Added
@@ -19,13 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `cli-complete` feature to generate completion files. [#23](https://github.com/jeertmans/languagetool-rust/pull/23)
 - Added message when reading from STDIN. [#25](https://github.com/jeertmans/languagetool-rust/pull/25), [#26](https://github.com/jeertmans/languagetool-rust/pull/26)
 - Added (regex) validator for language code. [#27](https://github.com/jeertmans/languagetool-rust/pull/27)
-- Added cli requirements for `username`/`api_key` pair. [#16](https://github.com/jeertmans/languagetool-rust/pull/16)
+- Added cli requirements for `username`/`api_key` pair. [#16](https://github.com/jeertmans/languagetool-rust/pull/16), [#30](https://github.com/jeertmans/languagetool-rust/pull/30)
+
 
 ### Fixed
 
 - Stopped serializing useless fields. [#17](https://github.com/jeertmans/languagetool-rust/pull/17)
 
-## [1.3.0](https://github.com/jeertmans/languagetool-rust/compare/v1.2.0...v1.3.0)
+## [1.3.0](https://github.com/jeertmans/languagetool-rust/compare/v1.2.0...v1.3.0) - 2022-08-25
 
 ### Chore
 
@@ -39,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed typo in message when no error was found. [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
 
-## [1.2.0](https://github.com/jeertmans/languagetool-rust/compare/v1.1.1...v1.2.0)
+## [1.2.0](https://github.com/jeertmans/languagetool-rust/compare/v1.1.1...v1.2.0) - 2022-08-10
 
 ### Chore
 
@@ -50,13 +52,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add 3 new features `native-tls`, `native-tls-vendored` and `full`. [#14](https://github.com/jeertmans/languagetool-rust/pull/14)
 
-## [1.1.1](https://github.com/jeertmans/languagetool-rust/compare/v1.0.1...v1.1.1)
+## [1.1.1](https://github.com/jeertmans/languagetool-rust/compare/v1.0.1...v1.1.1) - 2022-08-09
 
 ### Chore
 
 - Add GitHub action to automate release process. [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
 
-## [1.1.0](https://github.com/jeertmans/languagetool-rust/compare/v1.0.0...v1.1.0)
+## [1.1.0](https://github.com/jeertmans/languagetool-rust/compare/v1.0.0...v1.1.0) - 2022-08-08
 
 ### Chore
 
