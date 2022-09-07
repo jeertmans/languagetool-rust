@@ -592,6 +592,7 @@ name = "languagetool-rust"
 version = "1.3.0"
 dependencies = [
  "annotate-snippets",
+ "atty",
  "clap 3.2.17",
  "clap_complete",
  "criterion",
