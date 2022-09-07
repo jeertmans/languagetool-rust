@@ -1,10 +1,74 @@
 //! Structures for `check` requests and responses.
 
+use crate::error::Error;
 #[cfg(feature = "cli")]
 use clap::Parser;
+#[cfg(feature = "lazy_static")]
+use lazy_static::lazy_static;
+#[cfg(feature = "regex")]
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 /// Requests
+
+/// Check if `v` is a valid language code.
+///
+/// A valid language code is usually
+/// - a two character string matching pattern
+///   `[a-z]{2}
+/// - a five character string matching pattern
+///   `[a-z]{2}-[A-Z]{2}
+/// - or some more complex ascii string (see below)
+///
+/// Language code is case insensitive.
+///
+/// Therefore, a valid language code must match the following:
+///
+/// - `[a-zA-Z]{2,3}(-[a-zA-Z]{2}(-[a-zA-Z]+)*)?`
+///
+/// or
+///
+/// - "auto"
+///
+/// > Note: a valid language code does not mean that it exists.
+///
+/// # Examples
+///
+/// ```
+/// # use languagetool_rust::check::is_language_code;
+/// assert!(is_language_code("en").is_ok());
+///
+/// assert!(is_language_code("en-US").is_ok());
+///
+/// assert!(is_language_code("en-us").is_ok());
+///
+/// assert!(is_language_code("ca-ES-valencia").is_ok());
+///
+/// assert!(is_language_code("abcd").is_err());
+///
+/// assert!(is_language_code("en_US").is_err());
+///
+/// assert!(is_language_code("fr-french").is_err());
+///
+/// assert!(is_language_code("some random text").is_err());
+/// ```
+#[cfg(all(feature = "lazy_static", feature = "regex"))]
+pub fn is_language_code(v: &str) -> crate::error::Result<()> {
+    lazy_static! {
+        static ref RE: Regex = Regex::new("^[a-zA-Z]{2,3}(-[a-zA-Z]{2}(-[a-zA-Z]+)*)?$").unwrap();
+    }
+
+    if v == "auto" || RE.is_match(v) {
+        Ok(())
+    } else {
+        Err(Error::InvalidValue {
+            body: format!(
+                "The value should be `auto` or match regex pattern: {}",
+                RE.as_str()
+            ),
+        })
+    }
+}
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
@@ -216,7 +280,15 @@ pub struct CheckRequest {
     /// ```
     /// The 'data' feature is not limited to HTML or XML, it can be used for any kind of markup. Entities will need to be expanded in this input.
     pub data: Option<Data>,
-    #[cfg_attr(feature = "cli", clap(short = 'l', long, default_value = "auto"))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(
+            short = 'l',
+            long,
+            default_value = "auto",
+            validator = is_language_code
+        )
+    )]
     /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the language automatically (see `preferredVariants` below).
     ///
     /// For languages with variants (English, German, Portuguese) spell checking will only be activated when you specify the variant, e.g. `en-GB` instead of just `en`.
