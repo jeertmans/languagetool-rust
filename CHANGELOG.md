@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created founding link. [#19](https://github.com/jeertmans/languagetool-rust/pull/19)
 - Added two related projets. [#21](https://github.com/jeertmans/languagetool-rust/pull/21)
 - Added release dates. [#31](https://github.com/jeertmans/languagetool-rust/pull/31)
+- Added `#[must_use]` flag to most structures, to please clippy pendantic. [#29](https://github.com/jeertmans/languagetool-rust/pull/29)
 - Changed conditional compilation flags to directly point to dependency, e.g., `"clap"` instead of `"cli"`. [#28](https://github.com/jeertmans/languagetool-rust/pull/28)
 
 ### Added

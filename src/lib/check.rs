@@ -97,6 +97,7 @@ impl Default for DataAnnotation {
 impl DataAnnotation {
     #[inline]
     /// Instantiate a new `DataAnnotation` with text only
+    #[must_use]
     pub fn new_text(text: String) -> Self {
         Self {
             interpret_as: None,
@@ -107,6 +108,7 @@ impl DataAnnotation {
 
     #[inline]
     /// Instantiate a new `DataAnnotation` with markup only
+    #[must_use]
     pub fn new_markup(markup: String) -> Self {
         Self {
             interpret_as: None,
@@ -117,6 +119,7 @@ impl DataAnnotation {
 
     #[inline]
     /// Instantiate a new `DataAnnotation` with markup and its interpretation
+    #[must_use]
     pub fn new_interpreted_markup(markup: String, interpret_as: String) -> Self {
         Self {
             interpret_as: Some(interpret_as),
@@ -195,6 +198,7 @@ impl Level {
     ///
     /// assert!(level.is_default());
     /// ```
+    #[must_use]
     pub fn is_default(&self) -> bool {
         *self == Level::default()
     }
@@ -352,6 +356,7 @@ fn is_false(b: &bool) -> bool {
 impl CheckRequest {
     #[inline]
     /// Create a default check requests that matches default values from CLI options
+    #[must_use]
     pub fn default() -> Self {
         Self {
             language: "auto".to_owned(),
@@ -360,6 +365,7 @@ impl CheckRequest {
     }
 
     /// Set the text to be checked and removed potential data field
+    #[must_use]
     pub fn with_text(mut self, text: String) -> Self {
         self.text = Some(text);
         self.data = None;
@@ -367,6 +373,7 @@ impl CheckRequest {
     }
 
     /// Set the data to be checked and removed potential text field
+    #[must_use]
     pub fn with_data(mut self, data: Data) -> Self {
         self.data = Some(data);
         self.text = None;
@@ -379,6 +386,7 @@ impl CheckRequest {
     }
 
     /// Set the language of the text / data
+    #[must_use]
     pub fn with_language(mut self, language: String) -> Self {
         self.language = language;
         self
@@ -390,6 +398,7 @@ impl CheckRequest {
     ///
     /// Panics if both self.text and self.data are None.
     /// Panics if any data annotation does not contain text or markup.
+    #[must_use]
     pub fn get_text(&self) -> String {
         if let Some(ref text) = self.text {
             text.clone()
@@ -661,6 +670,7 @@ pub struct CheckResponseWithContext {
 
 impl CheckResponseWithContext {
     /// Bind a check response with its original text.
+    #[must_use]
     pub fn new(text: String, response: CheckResponse) -> Self {
         let text_length = text.chars().count();
         Self {
@@ -681,6 +691,7 @@ impl CheckResponseWithContext {
     }
 
     /// Return an iterator over matches and correspondig line number and line offset.
+    #[must_use]
     pub fn iter_match_positions(&self) -> MatchPositions<'_, std::slice::Iter<'_, Match>> {
         self.into()
     }
@@ -689,6 +700,7 @@ impl CheckResponseWithContext {
     /// adjusting the matches' offsets.
     ///
     /// This is especially useful when a text was split in multiple requests.
+    #[must_use]
     pub fn append(mut self, mut other: Self) -> Self {
         let offset = self.text_length;
         for m in other.iter_matches_mut() {
