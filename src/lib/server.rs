@@ -42,7 +42,7 @@ pub fn is_port(v: &str) -> Result<()> {
         return Ok(());
     }
     Err(Error::InvalidValue {
-        body: "The value should be a 4 characters long string with digits only".to_string(),
+        body: "The value should be a 4 characters long string with digits only".to_owned(),
     })
 }
 
@@ -248,8 +248,8 @@ pub struct ServerCli {
 impl Default for ServerCli {
     fn default() -> Self {
         Self {
-            hostname: "https://api.languagetoolplus.com".to_string(),
-            port: "".to_string(),
+            hostname: "https://api.languagetoolplus.com".to_owned(),
+            port: "".to_owned(),
         }
     }
 }
@@ -379,7 +379,7 @@ impl ServerClient {
         let resp = self.check(request).await?;
 
         if resp.matches.is_empty() {
-            return Ok("No error were found in provided text".to_string());
+            return Ok("No error were found in provided text".to_owned());
         }
         let replacements: Vec<_> = resp
             .matches
@@ -572,7 +572,7 @@ mod tests {
     #[tokio::test]
     async fn test_server_check_text() {
         let client = ServerClient::from_env_or_default();
-        let req = CheckRequest::default().with_text("je suis une poupee".to_string());
+        let req = CheckRequest::default().with_text("je suis une poupee".to_owned());
         assert!(client.check(&req).await.is_ok());
     }
 
