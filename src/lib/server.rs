@@ -12,7 +12,7 @@ use annotate_snippets::{
     display_list::{DisplayList, FormatOptions},
     snippet::{Annotation, AnnotationType, Slice, Snippet, SourceAnnotation},
 };
-#[cfg(feature = "cli")]
+#[cfg(feature = "clap")]
 use clap::{CommandFactory, FromArgMatches, Parser};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -180,28 +180,28 @@ impl Default for ConfigFile {
     }
 }
 
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "clap", derive(Parser))]
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// Server parameters that are to be used when instantiating a `LanguageTool` server
 pub struct ServerParameters {
-    #[cfg_attr(feature = "cli", clap(long))]
+    #[cfg_attr(feature = "clap", clap(long))]
     config: Option<PathBuf>,
-    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "8081", validator = is_port))]
+    #[cfg_attr(feature = "clap", clap(short = 'p', long, name = "PRT", default_value = "8081", validator = is_port))]
     port: String,
-    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[cfg_attr(feature = "clap", clap(long, takes_value = false))]
     public: bool,
-    #[cfg_attr(feature = "cli", clap(long, name = "ORIGIN"))]
+    #[cfg_attr(feature = "clap", clap(long, name = "ORIGIN"))]
     allow_origin: Option<String>,
-    #[cfg_attr(feature = "cli", clap(short = 'v', long, takes_value = false))]
+    #[cfg_attr(feature = "clap", clap(short = 'v', long, takes_value = false))]
     verbose: bool,
-    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[cfg_attr(feature = "clap", clap(long, takes_value = false))]
     #[serde(rename = "languageModel")]
     language_model: Option<PathBuf>,
-    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[cfg_attr(feature = "clap", clap(long, takes_value = false))]
     #[serde(rename = "word2vecModel")]
     word2vec_model: Option<PathBuf>,
-    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[cfg_attr(feature = "clap", clap(long, takes_value = false))]
     #[serde(rename = "premiumAlways")]
     premium_always: bool,
 }
@@ -221,7 +221,7 @@ impl Default for ServerParameters {
     }
 }
 
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "clap", derive(Parser))]
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 /// Hostname and (optional) port to connect to a `LanguageTool` server.
 ///
@@ -241,7 +241,7 @@ pub struct ServerCli {
     )]
     pub hostname: String,
     /// Server's port number, with the empty string referring to no specific port
-    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", validator = is_port, env = "LANGUAGETOOL_PORT"))]
+    #[cfg_attr(feature = "clap", clap(short = 'p', long, name = "PRT", default_value = "", validator = is_port, env = "LANGUAGETOOL_PORT"))]
     pub port: String,
 }
 
@@ -324,7 +324,7 @@ impl ServerClient {
         cli.into()
     }
 
-    #[cfg(feature = "cli")]
+    #[cfg(feature = "clap")]
     /// This function has the same sementics as [`ServerCli::from_arg_matches`]
     pub fn from_arg_matches(matches: &clap::ArgMatches) -> Result<Self> {
         let params = ServerCli::from_arg_matches(matches)?;
@@ -332,7 +332,7 @@ impl ServerClient {
     }
 
     /// This function has the same semantics as [`ServerCli::command`]
-    #[cfg(feature = "cli")]
+    #[cfg(feature = "clap")]
     pub fn command<'help>() -> clap::Command<'help> {
         ServerCli::command()
     }

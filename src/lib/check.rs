@@ -1,7 +1,6 @@
 //! Structures for `check` requests and responses.
 
-use crate::error::Error;
-#[cfg(feature = "cli")]
+#[cfg(feature = "clap")]
 use clap::Parser;
 #[cfg(feature = "lazy_static")]
 use lazy_static::lazy_static;
@@ -61,7 +60,7 @@ pub fn is_language_code(v: &str) -> crate::error::Result<()> {
     if v == "auto" || RE.is_match(v) {
         Ok(())
     } else {
-        Err(Error::InvalidValue {
+        Err(crate::error::Error::InvalidValue {
             body: format!(
                 "The value should be `auto` or match regex pattern: {}",
                 RE.as_str()
@@ -157,7 +156,7 @@ impl Serialize for Data {
     }
 }
 
-#[cfg(feature = "cli")]
+#[cfg(feature = "clap")]
 impl std::str::FromStr for Data {
     type Err = clap::Error;
 
@@ -205,7 +204,7 @@ impl Level {
     }
 }
 
-#[cfg(feature = "cli")]
+#[cfg(feature = "clap")]
 impl std::str::FromStr for Level {
     type Err = clap::Error;
 
@@ -221,7 +220,7 @@ impl std::str::FromStr for Level {
     }
 }
 
-#[cfg(feature = "cli")]
+#[cfg(feature = "clap")]
 impl clap::ValueEnum for Level {
     fn value_variants<'a>() -> &'a [Self] {
         &[Self::Default, Self::Picky]
@@ -235,7 +234,7 @@ impl clap::ValueEnum for Level {
     }
 }
 
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "clap", derive(Parser))]
 #[derive(Clone, Deserialize, Debug, Default, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
@@ -246,21 +245,21 @@ impl clap::ValueEnum for Level {
 /// The structure below tries to follow as closely as possible the JSON API described
 /// [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
 pub struct CheckRequest {
-    #[cfg(all(feature = "cli", feature = "annotate"))]
+    #[cfg(all(feature = "clap", feature = "annotate"))]
     #[clap(short = 'r', long, takes_value = false)]
     #[serde(skip_serializing)]
     /// If present, raw JSON output will be printed instead of annotated text.
     pub raw: bool,
-    #[cfg(feature = "cli")]
+    #[cfg(feature = "clap")]
     #[clap(short = 'm', long, takes_value = false)]
     #[serde(skip_serializing)]
     /// If present, more context (i.e., line number and line offset) will be added to response.
     pub more_context: bool,
-    #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
+    #[cfg_attr(feature = "clap", clap(short = 't', long, conflicts_with = "data",))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// The text to be checked. This or 'data' is required.
     pub text: Option<String>,
-    #[cfg_attr(feature = "cli", clap(short = 'd', long, conflicts_with = "text"))]
+    #[cfg_attr(feature = "clap", clap(short = 'd', long, conflicts_with = "text"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// The text to be checked, given as a JSON document that specifies what's text and what's markup. This or 'text' is required.
     ///
@@ -285,13 +284,17 @@ pub struct CheckRequest {
     /// The 'data' feature is not limited to HTML or XML, it can be used for any kind of markup. Entities will need to be expanded in this input.
     pub data: Option<Data>,
     #[cfg_attr(
-        feature = "cli",
+        all(feature = "clap", feature = "lazy_static", feature = "regex"),
         clap(
             short = 'l',
             long,
             default_value = "auto",
             validator = is_language_code
         )
+    )]
+    #[cfg_attr(
+        all(feature = "clap", not(all(feature = "lazy_static", feature = "regex"))),
+        clap(short = 'l', long, default_value = "auto",)
     )]
     /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the language automatically (see `preferredVariants` below).
     ///
@@ -301,45 +304,45 @@ pub struct CheckRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Set to get Premium API access: Your username/email as used to log in at languagetool.org.
     pub username: Option<String>,
-    #[cfg_attr(feature = "cli", clap(short = 'k', long, requires = "username"))]
+    #[cfg_attr(feature = "clap", clap(short = 'k', long, requires = "username"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Set to get Premium API access: [your API key](https://languagetool.org/editor/settings/api)
     pub api_key: Option<String>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "clap", clap(long, multiple_values = true))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Comma-separated list of dictionaries to include words from; uses special default dictionary if this is unset
     pub dicts: Option<Vec<String>>,
-    #[cfg_attr(feature = "cli", clap(long))]
+    #[cfg_attr(feature = "clap", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// A language code of the user's native language, enabling false friends checks for some language pairs.
     pub mother_tongue: Option<String>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "clap", clap(long, multiple_values = true))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Comma-separated list of preferred language variants.
     ///
     /// The language detector used with `language=auto` can detect e.g. English, but it cannot decide whether British English or American English is used. Thus this parameter can be used to specify the preferred variants like `en-GB` and `de-AT`. Only available with `language=auto`. You should set variants for at least German and English, as otherwise the spell checking will not work for those, as no spelling dictionary can be selected for just `en` or `de`.
     pub preferred_variants: Option<Vec<String>>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "clap", clap(long, multiple_values = true))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of rules to be enabled, comma-separated
     pub enabled_rules: Option<Vec<String>>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "clap", clap(long, multiple_values = true))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of rules to be disabled, comma-separated
     pub disabled_rules: Option<Vec<String>>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "clap", clap(long, multiple_values = true))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of categories to be enabled, comma-separated
     pub enabled_categories: Option<Vec<String>>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "clap", clap(long, multiple_values = true))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of categories to be disabled, comma-separated
     pub disabled_categories: Option<Vec<String>>,
-    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[cfg_attr(feature = "clap", clap(long, takes_value = false))]
     #[serde(skip_serializing_if = "is_false")]
     /// If true, only the rules and categories whose IDs are specified with `enabledRules` or `enabledCategories` are enabled.
     pub enabled_only: bool,
-    #[cfg_attr(feature = "cli", clap(long, default_value = "default", value_parser = clap::builder::EnumValueParser::<Level>::new()))]
+    #[cfg_attr(feature = "clap", clap(long, default_value = "default", value_parser = clap::builder::EnumValueParser::<Level>::new()))]
     #[serde(skip_serializing_if = "Level::is_default")]
     /// If set to `picky`, additional rules will be activated, i.e. rules that you might only find useful when checking formal text.
     pub level: Level,
@@ -466,7 +469,7 @@ pub struct Context {
     pub text: String,
 }
 
-#[cfg(feature = "cli")]
+#[cfg(feature = "clap")]
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 /// More context, post-processed in check response.
@@ -568,7 +571,7 @@ pub struct Match {
     pub length: usize,
     /// Error message
     pub message: String,
-    #[cfg(feature = "cli")]
+    #[cfg(feature = "clap")]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// More context to match, post-processed using original text
     pub more_context: Option<MoreContext>,
@@ -726,7 +729,7 @@ impl CheckResponseWithContext {
     }
 }
 
-#[cfg(feature = "cli")]
+#[cfg(feature = "clap")]
 impl From<CheckResponseWithContext> for CheckResponse {
     #[allow(clippy::needless_borrow)]
     fn from(mut resp: CheckResponseWithContext) -> Self {
