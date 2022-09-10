@@ -18,6 +18,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
             toolchain: nightly
+      - run: curl -LsSf https://get.nexte.st/latest/linux | tar zxf - -C ${CARGO_HOME:-~/.cargo}/bin
       - run: docker pull erikvl87/languagetool
       - run: docker run -d --rm -p 8010:8010 erikvl87/languagetool
       - run: cargo install --path . --all-features --debug
@@ -25,4 +26,4 @@ jobs:
       - run: cat README.md | ltrs check
       - run: ltrs languages
       - run: ltrs check -t "Some text with a apparent mistake"
-      - run: cargo test --all-features
+      - run: cargo nextest run --all-features
