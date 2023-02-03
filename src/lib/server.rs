@@ -42,7 +42,7 @@ pub fn is_port(v: &str) -> Result<()> {
         return Ok(());
     }
     Err(Error::InvalidValue {
-        body: "The value should be a 4 characters long string with digits only".to_owned(),
+        body: "The value should be a 4 characters long string with digits only".to_string(),
     })
 }
 
@@ -121,9 +121,9 @@ impl ConfigFile {
         let m = json.as_object().unwrap();
         for (key, value) in m.iter() {
             match value {
-                Value::Bool(b) => writeln!(w, "{}={}", key, b)?,
-                Value::Number(n) => writeln!(w, "{}={}", key, n)?,
-                Value::String(s) => writeln!(w, "{}=\"{}\"", key, s)?,
+                Value::Bool(b) => writeln!(w, "{key}={b}")?,
+                Value::Number(n) => writeln!(w, "{key}={n}")?,
+                Value::String(s) => writeln!(w, "{key}=\"{s}\"")?,
                 Value::Array(a) => writeln!(
                     w,
                     "{}=\"{}\"",
@@ -135,10 +135,10 @@ impl ConfigFile {
                 )?,
                 Value::Object(o) => {
                     for (key, value) in o.iter() {
-                        writeln!(w, "{}=\"{}\"", key, value)?
+                        writeln!(w, "{key}=\"{value}\"")?
                     }
                 }
-                Value::Null => writeln!(w, "# {}=", key)?,
+                Value::Null => writeln!(w, "# {key}=")?,
             }
         }
         Ok(())
@@ -248,14 +248,14 @@ pub struct ServerCli {
 impl Default for ServerCli {
     fn default() -> Self {
         Self {
-            hostname: "https://api.languagetoolplus.com".to_owned(),
-            port: "".to_owned(),
+            hostname: "https://api.languagetoolplus.com".to_string(),
+            port: "".to_string(),
         }
     }
 }
 
 impl ServerCli {
-    /// Create a new [`ServeCli`] instance from environ variables:
+    /// Create a new [`ServerCli`] instance from environ variables:
     /// - `LANGUAGETOOL_HOSTNAME`
     /// - `LANGUAGETOOL_PORT`
     ///
@@ -298,11 +298,12 @@ impl ServerClient {
     ///
     /// An empty string is accepeted as empty port.
     /// For port validation, please use [`is_port`] as this constructor does not check anything.
+    #[must_use]
     pub fn new(hostname: &str, port: &str) -> Self {
         let api = if port.is_empty() {
-            format!("{}/v2", hostname)
+            format!("{hostname}/v2")
         } else {
-            format!("{}:{}/v2", hostname, port)
+            format!("{hostname}:{port}/v2")
         };
         let client = Client::new();
         Self {
@@ -314,18 +315,20 @@ impl ServerClient {
 
     /// Sets the maximum number of suggestions (defaults to -1), a negative number will keep all
     /// replacement suggestions
+    #[must_use]
     pub fn with_max_suggestions(mut self, max_suggestions: isize) -> Self {
         self.max_suggestions = max_suggestions;
         self
     }
 
     /// Converts a [`ServerCli`] into a proper (usable) client
+    #[must_use]
     pub fn from_cli(cli: ServerCli) -> Self {
         cli.into()
     }
 
-    #[cfg(feature = "cli")]
     /// This function has the same sementics as [`ServerCli::from_arg_matches`]
+    #[cfg(feature = "cli")]
     pub fn from_arg_matches(matches: &clap::ArgMatches) -> Result<Self> {
         let params = ServerCli::from_arg_matches(matches)?;
         Ok(Self::from_cli(params))
@@ -333,6 +336,7 @@ impl ServerClient {
 
     /// This function has the same semantics as [`ServerCli::command`]
     #[cfg(feature = "cli")]
+    #[must_use]
     pub fn command<'help>() -> clap::Command<'help> {
         ServerCli::command()
     }
@@ -341,7 +345,7 @@ impl ServerClient {
     pub async fn check(&self, request: &CheckRequest) -> Result<CheckResponse> {
         match self
             .client
-            .post(format!("{}/check", self.api))
+            .post(format!("{0}/check", self.api))
             .query(request)
             .send()
             .await
@@ -380,7 +384,7 @@ impl ServerClient {
         let resp = self.check(request).await?;
 
         if resp.matches.is_empty() {
-            return Ok("No error were found in provided text".to_owned());
+            return Ok("No error were found in provided text".to_string());
         }
         let replacements: Vec<_> = resp
             .matches
@@ -554,6 +558,7 @@ impl ServerClient {
     /// Create a new [`ServerClient`] instance from environ variables,
     /// but defaults to [`ServerClient::default`()] if expected environ
     /// variables are not set.
+    #[must_use]
     pub fn from_env_or_default() -> Self {
         Self::from_cli(ServerCli::from_env_or_default())
     }
@@ -573,7 +578,7 @@ mod tests {
     #[tokio::test]
     async fn test_server_check_text() {
         let client = ServerClient::from_env_or_default();
-        let req = CheckRequest::default().with_text("je suis une poupee".to_owned());
+        let req = CheckRequest::default().with_text("je suis une poupee".to_string());
         assert!(client.check(&req).await.is_ok());
     }
 

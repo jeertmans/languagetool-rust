@@ -161,7 +161,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Here are listed some projects that use LTRS.
 
-- [`null-ls`](https://github.com/jose-elias-alvarez/null-ls.nvim): Neovim plugin with LTRS builtin ([to be merged](https://github.com/jose-elias-alvarez/null-ls.nvim/pull/997))
+- [`null-ls`](https://github.com/jose-elias-alvarez/null-ls.nvim): Neovim plugin with LTRS builtin ([see PR](https://github.com/jose-elias-alvarez/null-ls.nvim/pull/997))
 - [`languagetool-code-comments`](https://github.com/dustinblackman/languagetool-code-comments): uses LTRS to check for grammar errors within code comments
 
 *Do you use LTRS in your project? Contact me so I can add it to the list!*

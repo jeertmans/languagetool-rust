@@ -214,7 +214,7 @@ impl std::str::FromStr for Level {
             "picky" => Ok(Level::Picky),
             _ => Err(clap::Command::new("").error(
                 clap::ErrorKind::InvalidValue,
-                format!("Could not convert `{}` into either `default` or `picky`", s),
+                format!("Could not convert `{s}` into either `default` or `picky`"),
             )),
         }
     }
@@ -235,7 +235,7 @@ impl clap::ValueEnum for Level {
 }
 
 #[cfg_attr(feature = "cli", derive(Parser))]
-#[derive(Clone, Deserialize, Debug, Default, PartialEq, Eq, Serialize)]
+#[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 /// LanguageTool POST check request.
@@ -276,7 +276,7 @@ pub struct CheckRequest {
     ///  {"markup": "</b>"}
     /// ]}
     /// ```
-    /// If you have markup that should be interpreted as whitespace, like <p> in HTML, you can have it interpreted like this:
+    /// If you have markup that should be interpreted as whitespace, like `<p>` in HTML, you can have it interpreted like this:
     ///
     /// ```json
     /// {"markup": "<p>", "interpretAs": "\n\n"}
@@ -348,22 +348,38 @@ pub struct CheckRequest {
     pub level: Level,
 }
 
+impl Default for CheckRequest {
+    #[inline]
+    fn default() -> CheckRequest {
+        CheckRequest {
+            #[cfg(all(feature = "cli", feature = "annotate"))]
+            raw: Default::default(),
+            #[cfg(feature = "cli")]
+            more_context: Default::default(),
+            text: Default::default(),
+            data: Default::default(),
+            language: "auto".to_string(),
+            username: Default::default(),
+            api_key: Default::default(),
+            dicts: Default::default(),
+            mother_tongue: Default::default(),
+            preferred_variants: Default::default(),
+            enabled_rules: Default::default(),
+            disabled_rules: Default::default(),
+            enabled_categories: Default::default(),
+            disabled_categories: Default::default(),
+            enabled_only: Default::default(),
+            level: Default::default(),
+        }
+    }
+}
+
 #[inline]
 fn is_false(b: &bool) -> bool {
     !(*b)
 }
 
 impl CheckRequest {
-    #[inline]
-    /// Create a default check requests that matches default values from CLI options
-    #[must_use]
-    pub fn default() -> Self {
-        Self {
-            language: "auto".to_owned(),
-            ..Default::default()
-        }
-    }
-
     /// Set the text to be checked and removed potential data field
     #[must_use]
     pub fn with_text(mut self, text: String) -> Self {
@@ -410,10 +426,7 @@ impl CheckRequest {
                 } else if let Some(ref t) = da.markup {
                     text.push_str(t.as_str());
                 } else {
-                    panic!(
-                        "request contains some invalid data annotations(s): {:?}",
-                        da
-                    );
+                    panic!("request contains some invalid data annotations(s): {da:?}");
                 }
             }
             text
