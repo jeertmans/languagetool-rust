@@ -6,7 +6,7 @@ path = "benches/bench_main.rs"
 [[bin]]
 name = "ltrs"
 path = "src/bin.rs"
-required-features = ["cli", "tokio"]
+required-features = ["cli"]
 
 [dependencies]
 annotate-snippets = {version = "^0.8.0", features = ["color"], optional = true}
