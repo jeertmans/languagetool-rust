@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed conditional compilation flags to directly point to dependency, e.g., `"clap"` instead of `"cli"`. [#28](https://github.com/jeertmans/languagetool-rust/pull/28)
 - Use `cargo-nextest` instead of `cargo test` for faster CI testing. [#32](https://github.com/jeertmans/languagetool-rust/pull/32)
 - Improve CI testing. [#41](https://github.com/jeertmans/languagetool-rust/pull/41)
+- Added issue templates. [#42](https://github.com/jeertmans/languagetool-rust/pull/42)
 
 ### Added
 
