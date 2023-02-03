@@ -6,6 +6,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/languagetool-rust)](https://crates.io/crates/languagetool-rust)
 [![docs.rs](https://img.shields.io/docsrs/languagetool-rust)](https://docs.rs/languagetool-rust)
+[![codecov](https://codecov.io/gh/jeertmans/languagetool-rust/branch/main/graph/badge.svg?token=ZDZ8YBQTPH)](https://codecov.io/gh/jeertmans/languagetool-rust)
 
 1. [About](#about)
 2. [CLI Reference](#cli-reference)
