@@ -2,10 +2,6 @@
 
 #[cfg(feature = "cli")]
 use clap::Parser;
-#[cfg(feature = "cli")]
-use lazy_static::lazy_static;
-#[cfg(feature = "cli")]
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 /// Requests
@@ -53,18 +49,36 @@ use serde::{Deserialize, Serialize};
 /// ```
 #[cfg(feature = "cli")]
 pub fn is_language_code(v: &str) -> crate::error::Result<()> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new("^[a-zA-Z]{2,3}(-[a-zA-Z]{2}(-[a-zA-Z]+)*)?$").unwrap();
+    #[inline]
+    fn is_match(v: &str) -> bool {
+        let mut splits = v.split('-');
+
+        match splits.next() {
+            Some(s)
+                if (s.len() == 2 || s.len() == 3) && s.chars().all(|c| c.is_ascii_alphabetic()) =>
+            {
+                ()
+            }
+            _ => return false,
+        }
+
+        match splits.next() {
+            Some(s) if s.len() == 2 && s.chars().all(|c| c.is_ascii_alphabetic()) => (),
+            _ => return false,
+        }
+        while let Some(s) = splits.next() {
+            if !s.chars().all(|c| c.is_ascii_alphabetic()) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    if v == "auto" || RE.is_match(v) {
+    if v == "auto" || is_match(v) {
         Ok(())
     } else {
         Err(crate::error::Error::InvalidValue {
-            body: format!(
-                "The value should be `auto` or match regex pattern: {}",
-                RE.as_str()
-            ),
+            body: "The value should be `auto` or match regex pattern: ^[a-zA-Z]{2,3}(-[a-zA-Z]{2}(-[a-zA-Z]+)*)?$".to_string()
         })
     }
 }
