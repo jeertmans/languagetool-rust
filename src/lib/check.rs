@@ -355,10 +355,11 @@ impl ::core::default::Default for CheckRequest {
             CheckRequest {
                 #[cfg(all(feature = "cli", feature = "annotate"))]
                 raw: ::core::default::Default::default(),
+                #[cfg(feature = "cli")]
                 more_context: ::core::default::Default::default(),
                 text: ::core::default::Default::default(),
                 data: ::core::default::Default::default(),
-                language: "auto".to_owned(),
+                language: "auto".to_string(),
                 username: ::core::default::Default::default(),
                 api_key: ::core::default::Default::default(),
                 dicts: ::core::default::Default::default(),
