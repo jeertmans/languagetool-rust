@@ -348,32 +348,31 @@ pub struct CheckRequest {
     pub level: Level,
 }
 
-
 impl ::core::default::Default for CheckRequest {
-        #[inline]
-        fn default() -> CheckRequest {
-            CheckRequest {
-                #[cfg(all(feature = "cli", feature = "annotate"))]
-                raw: ::core::default::Default::default(),
-                #[cfg(feature = "cli")]
-                more_context: ::core::default::Default::default(),
-                text: ::core::default::Default::default(),
-                data: ::core::default::Default::default(),
-                language: "auto".to_string(),
-                username: ::core::default::Default::default(),
-                api_key: ::core::default::Default::default(),
-                dicts: ::core::default::Default::default(),
-                mother_tongue: ::core::default::Default::default(),
-                preferred_variants: ::core::default::Default::default(),
-                enabled_rules: ::core::default::Default::default(),
-                disabled_rules: ::core::default::Default::default(),
-                enabled_categories: ::core::default::Default::default(),
-                disabled_categories: ::core::default::Default::default(),
-                enabled_only: ::core::default::Default::default(),
-                level: ::core::default::Default::default(),
-            }
+    #[inline]
+    fn default() -> CheckRequest {
+        CheckRequest {
+            #[cfg(all(feature = "cli", feature = "annotate"))]
+            raw: ::core::default::Default::default(),
+            #[cfg(feature = "cli")]
+            more_context: ::core::default::Default::default(),
+            text: ::core::default::Default::default(),
+            data: ::core::default::Default::default(),
+            language: "auto".to_string(),
+            username: ::core::default::Default::default(),
+            api_key: ::core::default::Default::default(),
+            dicts: ::core::default::Default::default(),
+            mother_tongue: ::core::default::Default::default(),
+            preferred_variants: ::core::default::Default::default(),
+            enabled_rules: ::core::default::Default::default(),
+            disabled_rules: ::core::default::Default::default(),
+            enabled_categories: ::core::default::Default::default(),
+            disabled_categories: ::core::default::Default::default(),
+            enabled_only: ::core::default::Default::default(),
+            level: ::core::default::Default::default(),
         }
     }
+}
 
 #[inline]
 fn is_false(b: &bool) -> bool {
