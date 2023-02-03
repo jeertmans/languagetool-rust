@@ -4,7 +4,7 @@ use std::process::ExitStatus;
 /// Enumeration of all possible error types.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[cfg(feature = "clap")]
+    #[cfg(feature = "cli")]
     #[error(transparent)]
     /// Error from the command line parsing (see [clap::Error]).
     Cli(#[from] clap::Error),
@@ -80,10 +80,10 @@ pub(crate) fn exit_status_error(exit_status: &ExitStatus) -> Result<()> {
 mod tests {
 
     use crate::error::Error;
-    #[cfg(feature = "clap")]
+    #[cfg(feature = "cli")]
     use clap::Command;
 
-    #[cfg(feature = "clap")]
+    #[cfg(feature = "cli")]
     #[test]
     fn test_error_cli() {
         let result =
