@@ -298,6 +298,7 @@ impl ServerClient {
     ///
     /// An empty string is accepeted as empty port.
     /// For port validation, please use [`is_port`] as this constructor does not check anything.
+    #[must_use]
     pub fn new(hostname: &str, port: &str) -> Self {
         let api = if port.is_empty() {
             format!("{}/v2", hostname)
@@ -314,18 +315,20 @@ impl ServerClient {
 
     /// Sets the maximum number of suggestions (defaults to -1), a negative number will keep all
     /// replacement suggestions
+    #[must_use]
     pub fn with_max_suggestions(mut self, max_suggestions: isize) -> Self {
         self.max_suggestions = max_suggestions;
         self
     }
 
     /// Converts a [`ServerCli`] into a proper (usable) client
+    #[must_use]
     pub fn from_cli(cli: ServerCli) -> Self {
         cli.into()
     }
 
-    #[cfg(feature = "cli")]
     /// This function has the same sementics as [`ServerCli::from_arg_matches`]
+    #[cfg(feature = "cli")]
     pub fn from_arg_matches(matches: &clap::ArgMatches) -> Result<Self> {
         let params = ServerCli::from_arg_matches(matches)?;
         Ok(Self::from_cli(params))
@@ -333,6 +336,7 @@ impl ServerClient {
 
     /// This function has the same semantics as [`ServerCli::command`]
     #[cfg(feature = "cli")]
+    #[must_use]
     pub fn command<'help>() -> clap::Command<'help> {
         ServerCli::command()
     }
@@ -554,6 +558,7 @@ impl ServerClient {
     /// Create a new [`ServerClient`] instance from environ variables,
     /// but defaults to [`ServerClient::default`()] if expected environ
     /// variables are not set.
+    #[must_use]
     pub fn from_env_or_default() -> Self {
         Self::from_cli(ServerCli::from_env_or_default())
     }
