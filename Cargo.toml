@@ -6,7 +6,7 @@ path = "benches/bench_main.rs"
 [[bin]]
 name = "ltrs"
 path = "src/bin.rs"
-required-features = ["cli", "tokio"]
+required-features = ["cli"]
 
 [dependencies]
 annotate-snippets = {version = "^0.8.0", features = ["color"], optional = true}
@@ -27,8 +27,8 @@ futures = "0.3"
 tokio = {version = "^1.0", features = ["macros"]}
 
 [features]
-annotate = ["annotate-snippets"]
-cli = ["atty", "clap", "lazy_static", "regex", "tokio"]
+annotate = ["dep:annotate-snippets"]
+cli = ["dep:atty", "dep:clap", "dep:lazy_static", "dep:regex", "dep:tokio"]
 cli-complete = ["cli", "clap_complete"]
 default = ["cli", "native-tls"]
 docker = []
@@ -51,7 +51,7 @@ license = "MIT"
 name = "languagetool-rust"
 readme = "README.md"
 repository = "https://github.com/jeertmans/languagetool-rust"
-rust-version = "1.57.0"
+rust-version = "1.60.0"
 version = "1.3.0"
 
 [package.metadata.docs.rs]

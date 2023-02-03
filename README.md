@@ -172,15 +172,6 @@ Contributions are more than welcome!
 
 ### Future features
 
-- [x] Use Cargo features to enable Clap and others only in bin.rs
-- [x] Construct a good cli
-- [x] Handle all possible responses from LT
 - [ ] Document installation procedure
-- [x] Document functions
 - [ ] Test commands that need API keys
-- [x] Build test for lib
-- [x] Build automated testing with LT server (GitHub action?)
-- [x] Parse "data" as input to check command
-- [x] Parse parameters from env value with clap/env feature
-- [x] Enhance annotated text
 - [ ] ...
