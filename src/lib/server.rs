@@ -121,9 +121,9 @@ impl ConfigFile {
         let m = json.as_object().unwrap();
         for (key, value) in m.iter() {
             match value {
-                Value::Bool(b) => writeln!(w, "{}={}", key, b)?,
-                Value::Number(n) => writeln!(w, "{}={}", key, n)?,
-                Value::String(s) => writeln!(w, "{}=\"{}\"", key, s)?,
+                Value::Bool(b) => writeln!(w, "{key}={b}")?,
+                Value::Number(n) => writeln!(w, "{key}={n}")?,
+                Value::String(s) => writeln!(w, "{key}=\"{s}\"")?,
                 Value::Array(a) => writeln!(
                     w,
                     "{}=\"{}\"",
@@ -135,10 +135,10 @@ impl ConfigFile {
                 )?,
                 Value::Object(o) => {
                     for (key, value) in o.iter() {
-                        writeln!(w, "{}=\"{}\"", key, value)?
+                        writeln!(w, "{key}=\"{value}\"")?
                     }
                 }
-                Value::Null => writeln!(w, "# {}=", key)?,
+                Value::Null => writeln!(w, "# {key}=")?,
             }
         }
         Ok(())
@@ -301,9 +301,9 @@ impl ServerClient {
     #[must_use]
     pub fn new(hostname: &str, port: &str) -> Self {
         let api = if port.is_empty() {
-            format!("{}/v2", hostname)
+            format!("{hostname}/v2")
         } else {
-            format!("{}:{}/v2", hostname, port)
+            format!("{hostname}:{port}/v2")
         };
         let client = Client::new();
         Self {
@@ -345,7 +345,7 @@ impl ServerClient {
     pub async fn check(&self, request: &CheckRequest) -> Result<CheckResponse> {
         match self
             .client
-            .post(format!("{}/check", self.api))
+            .post(format!("{0}/check", self.api))
             .query(request)
             .send()
             .await

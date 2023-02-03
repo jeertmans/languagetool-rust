@@ -214,7 +214,7 @@ impl std::str::FromStr for Level {
             "picky" => Ok(Level::Picky),
             _ => Err(clap::Command::new("").error(
                 clap::ErrorKind::InvalidValue,
-                format!("Could not convert `{}` into either `default` or `picky`", s),
+                format!("Could not convert `{s}` into either `default` or `picky`"),
             )),
         }
     }
@@ -427,8 +427,7 @@ impl CheckRequest {
                     text.push_str(t.as_str());
                 } else {
                     panic!(
-                        "request contains some invalid data annotations(s): {:?}",
-                        da
+                        "request contains some invalid data annotations(s): {da:?}"
                     );
                 }
             }

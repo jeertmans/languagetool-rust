@@ -67,7 +67,7 @@ pub(crate) fn exit_status_error(exit_status: &ExitStatus) -> Result<()> {
         true => Ok(()),
         false => match exit_status.code() {
             Some(code) => Err(Error::ExitStatus {
-                body: format!("Process terminated with exit code: {}", code),
+                body: format!("Process terminated with exit code: {code}"),
             }),
             None => Err(Error::ExitStatus {
                 body: "Process terminated by signal".to_string(),
