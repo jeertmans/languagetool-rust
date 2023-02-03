@@ -255,7 +255,7 @@ impl Default for ServerCli {
 }
 
 impl ServerCli {
-    /// Create a new [`ServeCli`] instance from environ variables:
+    /// Create a new [`ServerCli`] instance from environ variables:
     /// - `LANGUAGETOOL_HOSTNAME`
     /// - `LANGUAGETOOL_PORT`
     ///

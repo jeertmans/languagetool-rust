@@ -9,7 +9,7 @@ pub enum Error {
     /// Error from the command line parsing (see [clap::Error]).
     Cli(#[from] clap::Error),
     #[error("command failed: {body:?}")]
-    /// Error from a command line process (see [std::process:Command]).
+    /// Error from a command line process (see [std::process::Command]).
     ExitStatus {
         /// Error body.
         body: String,
