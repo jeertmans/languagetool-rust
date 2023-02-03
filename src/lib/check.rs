@@ -348,28 +348,28 @@ pub struct CheckRequest {
     pub level: Level,
 }
 
-impl ::core::default::Default for CheckRequest {
+impl Default for CheckRequest {
     #[inline]
     fn default() -> CheckRequest {
         CheckRequest {
             #[cfg(all(feature = "cli", feature = "annotate"))]
-            raw: ::core::default::Default::default(),
+            raw: Default::default(),
             #[cfg(feature = "cli")]
-            more_context: ::core::default::Default::default(),
-            text: ::core::default::Default::default(),
-            data: ::core::default::Default::default(),
+            more_context: Default::default(),
+            text: Default::default(),
+            data: Default::default(),
             language: "auto".to_string(),
-            username: ::core::default::Default::default(),
-            api_key: ::core::default::Default::default(),
-            dicts: ::core::default::Default::default(),
-            mother_tongue: ::core::default::Default::default(),
-            preferred_variants: ::core::default::Default::default(),
-            enabled_rules: ::core::default::Default::default(),
-            disabled_rules: ::core::default::Default::default(),
-            enabled_categories: ::core::default::Default::default(),
-            disabled_categories: ::core::default::Default::default(),
-            enabled_only: ::core::default::Default::default(),
-            level: ::core::default::Default::default(),
+            username: Default::default(),
+            api_key: Default::default(),
+            dicts: Default::default(),
+            mother_tongue: Default::default(),
+            preferred_variants: Default::default(),
+            enabled_rules: Default::default(),
+            disabled_rules: Default::default(),
+            enabled_categories: Default::default(),
+            disabled_categories: Default::default(),
+            enabled_only: Default::default(),
+            level: Default::default(),
         }
     }
 }
