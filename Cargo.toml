@@ -14,7 +14,7 @@ atty = {version = "^0.2", optional = true}
 clap = {version = "^3.0", features = ["derive", "cargo", "env"], optional = true}
 clap_complete = {version = "^3.0", optional = true}
 lazy_static = {version = "^1.0", optional = true}
-regex = {version = "^1.0", optional = true}
+regex = {version = "^1.7", optional = true}
 reqwest = {version = "^0.11", default-features = false, features = ["json"]}
 serde = {version = "^1.0", features = ["derive"]}
 serde_json = "^1.0"
