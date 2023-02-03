@@ -1,5 +1,7 @@
 on:
   pull_request:
+    path: |
+      "README.md"
   workflow_dispatch:
 
 name: LanguageTool check

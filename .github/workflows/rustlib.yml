@@ -26,7 +26,13 @@ jobs:
 
   test:
     name: Test
+    strategy:
+      matrix:
+        tag: [latest, 5.0, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 6.0]
     runs-on: ubuntu-latest
+    env:
+      LANGUAGETOOL_HOSTNAME: http://localhost
+      LANGUAGETOOL_PORT: 8010
     steps:
     - name: Checkout sources
       uses: actions/checkout@v3
@@ -37,5 +43,13 @@ jobs:
     - name: Cache dependencies
       uses: Swatinem/rust-cache@v2
 
-    - name: Check rustdoc build
-      run: cargo test --lib --all-features
+    - name:
+      run: curl -LsSf https://get.nexte.st/latest/linux | tar zxf - -C ${CARGO_HOME:-~/.cargo}/bin
+    - run: docker pull erikvl87/languagetool@
+    - run: docker run -d --rm -p 8010:8010 erikvl87/languagetool:${{ matrix.tag }}
+    - run: cargo install --path . --all-features --debug
+    - run: function retry { ltrs ping && echo "Server is up and running!" || (echo "Failed to ping server, retrying in 2 seconds" && sleep 2 && retry) }; retry
+    - run: cat README.md | ltrs check
+    - run: ltrs languages
+    - run: ltrs check -t "Some text with a apparent mistake"
+    - run: cargo nextest run --all-features
