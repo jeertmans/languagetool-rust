@@ -426,9 +426,7 @@ impl CheckRequest {
                 } else if let Some(ref t) = da.markup {
                     text.push_str(t.as_str());
                 } else {
-                    panic!(
-                        "request contains some invalid data annotations(s): {da:?}"
-                    );
+                    panic!("request contains some invalid data annotations(s): {da:?}");
                 }
             }
             text
