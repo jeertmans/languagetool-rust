@@ -56,6 +56,10 @@ pub enum Error {
     #[error(transparent)]
     /// Error from reading environ variable (see [std::env::VarError]).
     VarError(#[from] std::env::VarError),
+
+    #[error("command not found: {0}")]
+    /// Error when a process command was not found.
+    CommandNotFound(String),
 }
 
 /// Result type alias with error type defined above (see [Error]).

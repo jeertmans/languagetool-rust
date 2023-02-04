@@ -1,7 +1,7 @@
 //! Structures and methods to easily manipulate Docker images, especially for `LanguageTool`
 //! applications.
 
-use crate::error::{exit_status_error, Result};
+use crate::error::{exit_status_error, Error, Result};
 #[cfg(feature = "cli")]
 use clap::Parser;
 use std::process::{Command, Output, Stdio};
@@ -77,7 +77,8 @@ impl Docker {
             .args(["pull", &self.name])
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
-            .output()?;
+            .output()
+            .map_err(|_| Error::CommandNotFound(self.bin.to_string()))?;
 
         exit_status_error(&output.status)?;
 
@@ -99,7 +100,8 @@ impl Docker {
             ])
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
-            .output()?;
+            .output()
+            .map_err(|_| Error::CommandNotFound(self.bin.to_string()))?;
 
         exit_status_error(&output.status)?;
 
@@ -117,7 +119,8 @@ impl Docker {
                 "-q",
             ])
             .stderr(Stdio::inherit())
-            .output()?;
+            .output()
+            .map_err(|_| Error::CommandNotFound(self.bin.to_string()))?;
 
         exit_status_error(&output.status)?;
 

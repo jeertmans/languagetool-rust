@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added message when reading from STDIN. [#25](https://github.com/jeertmans/languagetool-rust/pull/25), [#26](https://github.com/jeertmans/languagetool-rust/pull/26)
 - Added (regex) validator for language code. [#27](https://github.com/jeertmans/languagetool-rust/pull/27)
 - Added cli requirements for `username`/`api_key` pair. [#16](https://github.com/jeertmans/languagetool-rust/pull/16), [#30](https://github.com/jeertmans/languagetool-rust/pull/30)
+- Added a `CommandNotFound` error variant for when docker is not found. [#52](https://github.com/jeertmans/languagetool-rust/pull/52)
 
 ### Changed
 
