@@ -4,7 +4,6 @@ use super::error::{Error, Result};
 #[cfg(feature = "cli")]
 use clap::{Args, Parser, ValueEnum};
 use serde::{Deserialize, Serialize};
-use std::io;
 use std::path::PathBuf;
 
 /// Requests
@@ -438,39 +437,11 @@ fn parse_filename(s: &str) -> Result<PathBuf> {
 }
 
 #[cfg(feature = "cli")]
-/// Read lines from standard input and write to buffer string.
-///
-/// Standard output is used when waiting for user to input text.
-fn read_from_stdin<W>(stdout: &mut W, buffer: &mut String) -> Result<()>
-where
-    W: io::Write,
-{
-    use is_terminal::IsTerminal;
-    if io::stdin().is_terminal() {
-        #[cfg(windows)]
-        writeln!(
-            stdout,
-            "Reading from STDIN, press [CTRL+Z] when you're done."
-        )?;
-
-        #[cfg(unix)]
-        writeln!(
-            stdout,
-            "Reading from STDIN, press [CTRL+D] when you're done."
-        )?;
-    }
-    let stdin = std::io::stdin();
-
-    while stdin.read_line(buffer)? > 0 {}
-    Ok(())
-}
-
-#[cfg(feature = "cli")]
 #[derive(Debug, Parser)]
 pub struct CheckCommand {
     #[command(flatten)]
     pub request: CheckRequest,
-    #[arg(conflicts_with("text"))]
+    #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
     /// Optional filenames from which input is read.
     pub filenames: Vec<PathBuf>,
 }

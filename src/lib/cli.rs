@@ -12,7 +12,33 @@ use crate::words::WordsSubcommand;
 use clap::{CommandFactory, Parser, Subcommand};
 use is_terminal::IsTerminal;
 use std::io::{self, Write};
-use termcolor::{ColorChoice, StandardStream};
+use termcolor::{ColorChoice, StandardStream, WriteColor};
+
+/// Read lines from standard input and write to buffer string.
+///
+/// Standard output is used when waiting for user to input text.
+fn read_from_stdin<W>(stdout: &mut W, buffer: &mut String) -> Result<()>
+where
+    W: io::Write,
+{
+    if io::stdin().is_terminal() {
+        #[cfg(windows)]
+        writeln!(
+            stdout,
+            "Reading from STDIN, press [CTRL+Z] when you're done."
+        )?;
+
+        #[cfg(unix)]
+        writeln!(
+            stdout,
+            "Reading from STDIN, press [CTRL+D] when you're done."
+        )?;
+    }
+    let stdin = std::io::stdin();
+
+    while stdin.read_line(buffer)? > 0 {}
+    Ok(())
+}
 
 /// Main command line structure. Contains every subcommand.
 #[derive(Parser, Debug)]
@@ -75,37 +101,44 @@ impl Cli {
 
         let server_client: ServerClient = self.server_cli.into();
 
-        match &self.command {
+        match self.command {
             Command::Check(cmd) => {
-                let mut request = &cmd.request;
-                use termcolor::WriteColor;
+                let mut request = cmd.request;
+                #[cfg(feature = "annotate")]
                 let color = stdout.supports_color();
 
-                if request.text.is_none() && request.data.is_none() {
-                    /*
-                    let mut text = String::new();
+                if !cmd.filenames.is_empty() {
+                    for filename in cmd.filenames.iter() {
+                        let text = std::fs::read_to_string(filename)?;
+                        request = request.with_text(text);
+                        #[cfg(feature = "annotate")]
+                        if !request.raw {
+                            writeln!(
+                                &mut stdout,
+                                "{}",
+                                &server_client
+                                    .annotate_check(&request, filename.to_str(), color)
+                                    .await?
+                            )?;
+                        } else {
+                            let mut resp = server_client.check(&request).await?;
 
-                    #[cfg(any(unix, windows))]
-                    if atty::is(atty::Stream::Stdin) {
-                        #[cfg(windows)]
-                        writeln!(
-                            stdout,
-                            "Reading from STDIN, press [CTRL+Z] when you're done."
-                        )?;
+                            if request.more_context {
+                                use crate::check::CheckResponseWithContext;
+                                let text = request.get_text();
+                                resp = CheckResponseWithContext::new(text, resp).into();
+                            }
 
-                        #[cfg(unix)]
-                        writeln!(
-                            stdout,
-                            "Reading from STDIN, press [CTRL+D] when you're done."
-                        )?;
+                            writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&resp)?)?;
+                        }
                     }
+                    return Ok(());
+                }
 
-                    for line in std::io::stdin().lock().lines() {
-                        text.push_str(&line?);
-                        text.push('\n');
-                    }*/
-
-                    //req.text = Some(text);
+                if request.text.is_none() && request.data.is_none() {
+                    let mut text = String::new();
+                    read_from_stdin(&mut stdout, &mut text)?;
+                    request = request.with_text(text);
                 }
 
                 #[cfg(feature = "annotate")]
@@ -113,7 +146,7 @@ impl Cli {
                     writeln!(
                         &mut stdout,
                         "{}",
-                        &server_client.annotate_check(&request, color).await?
+                        &server_client.annotate_check(&request, None, color).await?
                     )?;
                     return Ok(());
                 }
@@ -145,11 +178,11 @@ impl Cli {
             Command::Words(cmd) => {
                 let words = match &cmd.subcommand {
                     Some(WordsSubcommand::Add(request)) => {
-                        let words_response = server_client.words_add(&request).await?;
+                        let words_response = server_client.words_add(request).await?;
                         serde_json::to_string_pretty(&words_response)?
                     }
                     Some(WordsSubcommand::Delete(request)) => {
-                        let words_response = server_client.words_delete(&request).await?;
+                        let words_response = server_client.words_delete(request).await?;
                         serde_json::to_string_pretty(&words_response)?
                     }
                     None => {

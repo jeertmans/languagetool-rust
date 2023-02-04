@@ -363,7 +363,12 @@ impl ServerClient {
 
     /// Send a check request to the server, await for the response and annotate it
     #[cfg(feature = "annotate")]
-    pub async fn annotate_check(&self, request: &CheckRequest, color: bool) -> Result<String> {
+    pub async fn annotate_check(
+        &self,
+        request: &CheckRequest,
+        origin: Option<&str>,
+        color: bool,
+    ) -> Result<String> {
         let text = request.get_text();
         let resp = self.check(request).await?;
 
@@ -398,7 +403,7 @@ impl ServerClient {
                 slices: vec![Slice {
                     source: &m.context.text,
                     line_start: 1 + text.chars().take(m.offset).filter(|c| *c == '\n').count(),
-                    origin: None,
+                    origin,
                     fold: true,
                     annotations: vec![
                         SourceAnnotation {
@@ -414,7 +419,7 @@ impl ServerClient {
                     ],
                 }],
                 opt: FormatOptions {
-                    color: color,
+                    color,
                     ..Default::default()
                 },
             });
