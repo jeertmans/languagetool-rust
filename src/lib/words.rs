@@ -1,31 +1,32 @@
 //! Structures for `words` requests and responses.
 
+use crate::error::{Error, Result};
 #[cfg(feature = "cli")]
-use clap::Parser;
+use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 
-/// Check if `v` is a valid word.
+/// Parse `v` if valid word.
 ///
 /// A valid word is any string slice that does not contain any whitespace
 ///
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::words::is_word;
-/// assert!(is_word("word").is_ok());
+/// # use languagetool_rust::words::parse_word;
+/// assert!(parse_word("word").is_ok());
 ///
-/// assert!(is_word("some words").is_err());
+/// assert!(parse_word("some words").is_err());
 /// ```
-pub fn is_word(v: &str) -> Result<(), String> {
+pub fn parse_word(v: &str) -> Result<String> {
     if !v.contains(' ') {
-        return Ok(());
+        return Ok(v.to_string());
     }
-    Err(String::from(
-        "The value should be a word that does not contain any whitespace",
+    Err(Error::InvalidValue(
+        "The value should be a word that does not contain any whitespace".to_string(),
     ))
 }
 
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
@@ -39,7 +40,7 @@ pub struct LoginArgs {
     pub api_key: String,
 }
 
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// LanguageTool GET words request.
@@ -61,14 +62,14 @@ pub struct WordsRequest {
     pub dicts: Option<Vec<String>>,
 }
 
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// LanguageTool POST words add request.
 ///
 /// Add a word to one of the user's personal dictionaries. Please note that this feature is considered to be used for personal dictionaries which must not contain more than 500 words. If this is an issue for you, please contact us.
 pub struct WordsAddRequest {
-    #[cfg_attr(feature = "cli", clap(required = true, validator = is_word))]
+    #[cfg_attr(feature = "cli", clap(required = true, value_parser = parse_word))]
     /// The word to be added. Must not be a phrase, i.e. cannot contain white space. The word is added to a global dictionary that applies to all languages.
     pub word: String,
     #[cfg_attr(feature = "cli", clap(flatten))]
@@ -81,14 +82,14 @@ pub struct WordsAddRequest {
     dict: Option<String>,
 }
 
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// LanguageTool POST words delete request.
 ///
 /// Remove a word from one of the user's personal dictionaries.
 pub struct WordsDeleteRequest {
-    #[cfg_attr(feature = "cli", clap(required = true, validator = is_word))]
+    #[cfg_attr(feature = "cli", clap(required = true, value_parser = parse_word))]
     /// The word to be removed.
     pub word: String,
     #[cfg_attr(feature = "cli", clap(flatten))]
@@ -99,6 +100,23 @@ pub struct WordsDeleteRequest {
     /// Name of the dictionary to add the word to; non-existent dictionaries are created after
     /// calling this; if unset, adds to special default dictionary
     pub dict: Option<String>,
+}
+
+#[cfg(feature = "cli")]
+#[derive(Clone, Debug, Subcommand)]
+pub enum WordsSubcommand {
+    Add(WordsAddRequest),
+    Delete(WordsDeleteRequest),
+}
+
+#[cfg(feature = "cli")]
+#[derive(Debug, Parser)]
+#[clap(subcommand_negates_reqs(true))]
+pub struct WordsCommand {
+    #[command(flatten)]
+    pub request: WordsRequest,
+    #[command(subcommand)]
+    pub subcommand: Option<WordsSubcommand>,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]

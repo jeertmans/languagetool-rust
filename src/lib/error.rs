@@ -8,51 +8,43 @@ pub enum Error {
     #[error(transparent)]
     /// Error from the command line parsing (see [clap::Error]).
     Cli(#[from] clap::Error),
-    #[error("command failed: {body:?}")]
+
+    #[error("command failed: {0:?}")]
     /// Error from a command line process (see [std::process::Command]).
-    ExitStatus {
-        /// Error body.
-        body: String,
-    },
+    ExitStatus(String),
+
     #[error(transparent)]
     /// Error from parsing JSON (see [serde_json::Error]).
     JSON(#[from] serde_json::Error),
+
     #[error(transparent)]
     /// Error from reading and writing to IO (see [std::io::Error]).
     IO(#[from] std::io::Error),
-    #[error("invalid request: {body:?}")]
+
+    #[error("invalid request: {0}")]
     /// Error specifying an invalid request.
-    InvalidRequest {
-        /// Error body.
-        body: String,
-    },
-    #[error("invalid value: {body:?}")]
+    InvalidRequest(String),
+
+    #[error("invalid value: {0:?}")]
     /// Error specifying an invalid value.
-    InvalidValue {
-        /// Error body.
-        body: String,
-    },
-    #[error("could not parse `{s:?}` in a Docker action")]
+    InvalidValue(String),
+
+    #[error("could not parse {0:?} in a Docker action")]
     /// Error while parsing Action.
-    ParseAction {
-        /// String that could not be parsed.
-        s: String,
-    },
-    #[error("request could not be properly encoded: {source}")]
+    ParseAction(String),
+
+    #[error("request could not be properly encoded: {0}")]
     /// Error from request encoding.
-    RequestEncode {
-        /// Source error.
-        source: reqwest::Error,
-    },
-    #[error("response could not be properly decoded: {source}")]
+    RequestEncode(reqwest::Error),
+
+    #[error("response could not be properly decoded: {0}")]
     /// Error from request decoding.
-    ResponseDecode {
-        /// Source error.
-        source: reqwest::Error,
-    },
+    ResponseDecode(reqwest::Error),
+
     #[error(transparent)]
     /// Any other error from requests (see [reqwest::Error]).
     Reqwest(#[from] reqwest::Error),
+
     #[error(transparent)]
     /// Error from reading environ variable (see [std::env::VarError]).
     VarError(#[from] std::env::VarError),
@@ -60,6 +52,10 @@ pub enum Error {
     #[error("command not found: {0}")]
     /// Error when a process command was not found.
     CommandNotFound(String),
+
+    #[error("invalid filename (got '{0}', does not exist or is not a file)")]
+    /// Error from checking if `filename` exists and is a actualla a file.
+    InvalidFilename(String),
 }
 
 /// Result type alias with error type defined above (see [Error]).
@@ -70,12 +66,12 @@ pub(crate) fn exit_status_error(exit_status: &ExitStatus) -> Result<()> {
     match exit_status.success() {
         true => Ok(()),
         false => match exit_status.code() {
-            Some(code) => Err(Error::ExitStatus {
-                body: format!("Process terminated with exit code: {code}"),
-            }),
-            None => Err(Error::ExitStatus {
-                body: "Process terminated by signal".to_string(),
-            }),
+            Some(code) => Err(Error::ExitStatus(format!(
+                "Process terminated with exit code: {code}"
+            ))),
+            None => Err(Error::ExitStatus(
+                "Process terminated by signal".to_string(),
+            )),
         },
     }
 }
@@ -127,7 +123,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::InvalidRequest { body: _ }));
+        assert!(matches!(error, Error::InvalidRequest(_)));
     }
 
     #[ignore]
@@ -138,7 +134,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::InvalidValue { body: _ }));
+        assert!(matches!(error, Error::InvalidValue(_)));
     }
 
     #[ignore]
@@ -149,7 +145,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::RequestEncode { source: _ }));
+        assert!(matches!(error, Error::RequestEncode(_)));
     }
 
     #[ignore]
@@ -160,7 +156,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::ResponseDecode { source: _ }));
+        assert!(matches!(error, Error::ResponseDecode(_)));
     }
 
     #[ignore]

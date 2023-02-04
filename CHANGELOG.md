@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Cancelled effects of [#28](https://github.com/jeertmans/languagetool-rust/pull/28). [#45](https://github.com/jeertmans/languagetool-rust/pull/45)
 - Removed `regex` and `lazy_static` dependencies. [#51](https://github.com/jeertmans/languagetool-rust/pull/51)
+- **Breaking** Refactored the CLI by upgrading to Clap v4, added input from filenames and changed the library accordingly. [#53](https://github.com/jeertmans/languagetool-rust/pull/53)
 
 ### Fixed
 
