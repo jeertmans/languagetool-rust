@@ -49,7 +49,7 @@ jobs:
     - run: docker run -d --rm -p 8010:8010 erikvl87/languagetool:${{ matrix.tag }}
     - run: cargo install --path . --all-features --debug
     - run: function retry { ltrs ping && echo "Server is up and running!" || (echo "Failed to ping server, retrying in 2 seconds" && sleep 2 && retry) }; retry
-    - run: cat README.md | ltrs check
+    - run: cat LICENSE.md | ltrs check
     - run: ltrs languages
     - run: ltrs check -t "Some text with a apparent mistake"
     - run: cargo nextest run --all-features

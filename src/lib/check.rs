@@ -63,8 +63,9 @@ pub fn parse_language_code(v: &str) -> Result<String> {
         }
 
         match splits.next() {
-            Some(s) if s.len() == 2 && s.chars().all(|c| c.is_ascii_alphabetic()) => (),
-            _ => return false,
+            Some(s) if s.len() != 2 || s.chars().any(|c| !c.is_ascii_alphabetic()) => return false,
+            Some(_) => (),
+            None => return true,
         }
         for s in splits {
             if !s.chars().all(|c| c.is_ascii_alphabetic()) {
@@ -283,7 +284,7 @@ pub struct CheckRequest {
     ///
     /// For languages with variants (English, German, Portuguese) spell checking will only be activated when you specify the variant, e.g. `en-GB` instead of just `en`.
     pub language: String,
-    #[cfg_attr(feature = "cli", clap(short = 'u', long, requires = "api-key"))]
+    #[cfg_attr(feature = "cli", clap(short = 'u', long, requires = "api_key"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Set to get Premium API access: Your username/email as used to log in at languagetool.org.
     pub username: Option<String>,
