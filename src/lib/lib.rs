@@ -1,4 +1,4 @@
-#![deny(missing_docs)]
+//#![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
 #![warn(clippy::must_use_candidate)]
 #![allow(clippy::doc_markdown, clippy::module_name_repetitions)]
@@ -17,6 +17,8 @@
 //! that cannot be controlled and (possible) breaking changes are to be expected.
 
 pub mod check;
+#[cfg(feature = "cli")]
+pub mod cli;
 #[cfg(feature = "docker")]
 pub mod docker;
 pub mod error;

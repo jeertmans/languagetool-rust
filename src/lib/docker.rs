@@ -3,10 +3,10 @@
 
 use crate::error::{exit_status_error, Error, Result};
 #[cfg(feature = "cli")]
-use clap::Parser;
+use clap::{Args, Parser};
 use std::process::{Command, Output, Stdio};
 
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Debug, Clone)]
 /// Commands to pull, start and stop a `LanguageTool` container using Docker.
 pub struct Docker {
@@ -147,5 +147,25 @@ impl Docker {
             Action::Start => self.start(),
             Action::Stop => self.stop(),
         }
+    }
+}
+
+#[cfg(feature = "cli")]
+#[derive(Debug, Parser)]
+pub struct DockerCommand {
+    #[command(flatten)]
+    pub docker: Docker,
+}
+
+#[cfg(feature = "cli")]
+impl DockerCommand {
+    /// Execute a Docker command and write output to stdout.
+    pub fn execute<W>(&self, stdout: &mut W) -> Result<()>
+    where
+        W: std::io::Write,
+    {
+        let result = self.docker.run_action()?;
+        writeln!(stdout, "{result:?}")?;
+        Ok(())
     }
 }

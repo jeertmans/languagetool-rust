@@ -1,12 +1,15 @@
 //! Structures for `check` requests and responses.
 
+use super::error::{Error, Result};
 #[cfg(feature = "cli")]
-use clap::Parser;
+use clap::{Args, Parser, ValueEnum};
 use serde::{Deserialize, Serialize};
+use std::io;
+use std::path::PathBuf;
 
 /// Requests
 
-/// Check if `v` is a valid language code.
+/// Parse `v` is valid language code.
 ///
 /// A valid language code is usually
 /// - a two character string matching pattern
@@ -30,25 +33,25 @@ use serde::{Deserialize, Serialize};
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::check::is_language_code;
-/// assert!(is_language_code("en").is_ok());
+/// # use languagetool_rust::check::parse_language_code;
+/// assert!(parse_language_code("en").is_ok());
 ///
-/// assert!(is_language_code("en-US").is_ok());
+/// assert!(parse_language_code("en-US").is_ok());
 ///
-/// assert!(is_language_code("en-us").is_ok());
+/// assert!(parse_language_code("en-us").is_ok());
 ///
-/// assert!(is_language_code("ca-ES-valencia").is_ok());
+/// assert!(parse_language_code("ca-ES-valencia").is_ok());
 ///
-/// assert!(is_language_code("abcd").is_err());
+/// assert!(parse_language_code("abcd").is_err());
 ///
-/// assert!(is_language_code("en_US").is_err());
+/// assert!(parse_language_code("en_US").is_err());
 ///
-/// assert!(is_language_code("fr-french").is_err());
+/// assert!(parse_language_code("fr-french").is_err());
 ///
-/// assert!(is_language_code("some random text").is_err());
+/// assert!(parse_language_code("some random text").is_err());
 /// ```
 #[cfg(feature = "cli")]
-pub fn is_language_code(v: &str) -> crate::error::Result<()> {
+pub fn parse_language_code(v: &str) -> Result<String> {
     #[inline]
     fn is_match(v: &str) -> bool {
         let mut splits = v.split('-');
@@ -73,11 +76,9 @@ pub fn is_language_code(v: &str) -> crate::error::Result<()> {
     }
 
     if v == "auto" || is_match(v) {
-        Ok(())
+        Ok(v.to_string())
     } else {
-        Err(crate::error::Error::InvalidValue {
-            body: "The value should be `auto` or match regex pattern: ^[a-zA-Z]{2,3}(-[a-zA-Z]{2}(-[a-zA-Z]+)*)?$".to_string()
-        })
+        Err(Error::InvalidValue("The value should be `auto` or match regex pattern: ^[a-zA-Z]{2,3}(-[a-zA-Z]{2}(-[a-zA-Z]+)*)?$".to_string()))
     }
 }
 
@@ -157,7 +158,7 @@ impl<T: Into<DataAnnotation>> FromIterator<T> for Data {
 }
 
 impl Serialize for Data {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
@@ -170,15 +171,16 @@ impl Serialize for Data {
 
 #[cfg(feature = "cli")]
 impl std::str::FromStr for Data {
-    type Err = clap::Error;
+    type Err = Error;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        serde_json::from_str(s)
-            .map_err(|e| clap::Command::new("").error(clap::ErrorKind::InvalidValue, e.to_string()))
+    fn from_str(s: &str) -> Result<Self> {
+        let v: Self = serde_json::from_str(s)?;
+        Ok(v)
     }
 }
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "cli", derive(ValueEnum))]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
 /// Possible levels for additional rules.
@@ -216,37 +218,7 @@ impl Level {
     }
 }
 
-#[cfg(feature = "cli")]
-impl std::str::FromStr for Level {
-    type Err = clap::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match &s.to_lowercase()[..] {
-            "default" => Ok(Level::Default),
-            "picky" => Ok(Level::Picky),
-            _ => Err(clap::Command::new("").error(
-                clap::ErrorKind::InvalidValue,
-                format!("Could not convert `{s}` into either `default` or `picky`"),
-            )),
-        }
-    }
-}
-
-#[cfg(feature = "cli")]
-impl clap::ValueEnum for Level {
-    fn value_variants<'a>() -> &'a [Self] {
-        &[Self::Default, Self::Picky]
-    }
-
-    fn to_possible_value<'a>(&self) -> Option<clap::PossibleValue<'a>> {
-        match self {
-            Self::Default => Some(clap::PossibleValue::new("default")),
-            Self::Picky => Some(clap::PossibleValue::new("picky")),
-        }
-    }
-}
-
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
@@ -258,12 +230,12 @@ impl clap::ValueEnum for Level {
 /// [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
 pub struct CheckRequest {
     #[cfg(all(feature = "cli", feature = "annotate"))]
-    #[clap(short = 'r', long, takes_value = false)]
+    #[clap(short = 'r', long)]
     #[serde(skip_serializing)]
     /// If present, raw JSON output will be printed instead of annotated text.
     pub raw: bool,
     #[cfg(feature = "cli")]
-    #[clap(short = 'm', long, takes_value = false)]
+    #[clap(short = 'm', long)]
     #[serde(skip_serializing)]
     /// If present, more context (i.e., line number and line offset) will be added to response.
     pub more_context: bool,
@@ -301,7 +273,7 @@ pub struct CheckRequest {
             short = 'l',
             long,
             default_value = "auto",
-            validator = is_language_code
+            value_parser = parse_language_code
         )
     )]
     #[cfg_attr(
@@ -320,7 +292,7 @@ pub struct CheckRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Set to get Premium API access: [your API key](https://languagetool.org/editor/settings/api)
     pub api_key: Option<String>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Comma-separated list of dictionaries to include words from; uses special default dictionary if this is unset
     pub dicts: Option<Vec<String>>,
@@ -328,33 +300,36 @@ pub struct CheckRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     /// A language code of the user's native language, enabling false friends checks for some language pairs.
     pub mother_tongue: Option<String>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Comma-separated list of preferred language variants.
     ///
     /// The language detector used with `language=auto` can detect e.g. English, but it cannot decide whether British English or American English is used. Thus this parameter can be used to specify the preferred variants like `en-GB` and `de-AT`. Only available with `language=auto`. You should set variants for at least German and English, as otherwise the spell checking will not work for those, as no spelling dictionary can be selected for just `en` or `de`.
     pub preferred_variants: Option<Vec<String>>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of rules to be enabled, comma-separated
     pub enabled_rules: Option<Vec<String>>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of rules to be disabled, comma-separated
     pub disabled_rules: Option<Vec<String>>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of categories to be enabled, comma-separated
     pub enabled_categories: Option<Vec<String>>,
-    #[cfg_attr(feature = "cli", clap(long, multiple_values = true))]
+    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     /// IDs of categories to be disabled, comma-separated
     pub disabled_categories: Option<Vec<String>>,
-    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "is_false")]
     /// If true, only the rules and categories whose IDs are specified with `enabledRules` or `enabledCategories` are enabled.
     pub enabled_only: bool,
-    #[cfg_attr(feature = "cli", clap(long, default_value = "default", value_parser = clap::builder::EnumValueParser::<Level>::new()))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(long, default_value = "default", ignore_case = true, value_enum)
+    )]
     #[serde(skip_serializing_if = "Level::is_default")]
     /// If set to `picky`, additional rules will be activated, i.e. rules that you might only find useful when checking formal text.
     pub level: Level,
@@ -448,6 +423,56 @@ impl CheckRequest {
             );
         }
     }
+}
+
+#[cfg(feature = "cli")]
+/// Parse a string slice into a [`PathBuf`], and error if the file does not exist.
+fn parse_filename(s: &str) -> Result<PathBuf> {
+    let path_buf: PathBuf = s.parse().unwrap();
+
+    if path_buf.is_file() {
+        Ok(path_buf)
+    } else {
+        Err(Error::InvalidFilename(s.to_string()))
+    }
+}
+
+#[cfg(feature = "cli")]
+/// Read lines from standard input and write to buffer string.
+///
+/// Standard output is used when waiting for user to input text.
+fn read_from_stdin<W>(stdout: &mut W, buffer: &mut String) -> Result<()>
+where
+    W: io::Write,
+{
+    use is_terminal::IsTerminal;
+    if io::stdin().is_terminal() {
+        #[cfg(windows)]
+        writeln!(
+            stdout,
+            "Reading from STDIN, press [CTRL+Z] when you're done."
+        )?;
+
+        #[cfg(unix)]
+        writeln!(
+            stdout,
+            "Reading from STDIN, press [CTRL+D] when you're done."
+        )?;
+    }
+    let stdin = std::io::stdin();
+
+    while stdin.read_line(buffer)? > 0 {}
+    Ok(())
+}
+
+#[cfg(feature = "cli")]
+#[derive(Debug, Parser)]
+pub struct CheckCommand {
+    #[command(flatten)]
+    pub request: CheckRequest,
+    #[arg(conflicts_with("text"))]
+    /// Optional filenames from which input is read.
+    pub filenames: Vec<PathBuf>,
 }
 
 /// Responses

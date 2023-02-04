@@ -13,7 +13,7 @@ use annotate_snippets::{
     snippet::{Annotation, AnnotationType, Slice, Snippet, SourceAnnotation},
 };
 #[cfg(feature = "cli")]
-use clap::{CommandFactory, FromArgMatches, Parser};
+use clap::Args;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -21,7 +21,7 @@ use std::io;
 use std::path::PathBuf;
 use std::time::Instant;
 
-/// Check if `v` is a valid port.
+/// Parse `v` if valid port.
 ///
 /// A valid port is either
 /// - an empty string
@@ -30,20 +30,20 @@ use std::time::Instant;
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::server::is_port;
-/// assert!(is_port("8081").is_ok());
+/// # use languagetool_rust::server::parse_port;
+/// assert!(parse_port("8081").is_ok());
 ///
-/// assert!(is_port("").is_ok());  // No port specified, which is accepted
+/// assert!(parse_port("").is_ok());  // No port specified, which is accepted
 ///
-/// assert!(is_port("abcd").is_err());
+/// assert!(parse_port("abcd").is_err());
 /// ```
-pub fn is_port(v: &str) -> Result<()> {
+pub fn parse_port(v: &str) -> Result<String> {
     if v.is_empty() || (v.len() == 4 && v.chars().all(char::is_numeric)) {
-        return Ok(());
+        return Ok(v.to_string());
     }
-    Err(Error::InvalidValue {
-        body: "The value should be a 4 characters long string with digits only".to_string(),
-    })
+    Err(Error::InvalidValue(
+        "The value should be a 4 characters long string with digits only".to_string(),
+    ))
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -180,28 +180,28 @@ impl Default for ConfigFile {
     }
 }
 
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 /// Server parameters that are to be used when instantiating a `LanguageTool` server
 pub struct ServerParameters {
     #[cfg_attr(feature = "cli", clap(long))]
     config: Option<PathBuf>,
-    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "8081", validator = is_port))]
+    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "8081", value_parser = parse_port))]
     port: String,
-    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[cfg_attr(feature = "cli", clap(long))]
     public: bool,
     #[cfg_attr(feature = "cli", clap(long, name = "ORIGIN"))]
     allow_origin: Option<String>,
-    #[cfg_attr(feature = "cli", clap(short = 'v', long, takes_value = false))]
+    #[cfg_attr(feature = "cli", clap(short = 'v', long))]
     verbose: bool,
-    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(rename = "languageModel")]
     language_model: Option<PathBuf>,
-    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(rename = "word2vecModel")]
     word2vec_model: Option<PathBuf>,
-    #[cfg_attr(feature = "cli", clap(long, takes_value = false))]
+    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(rename = "premiumAlways")]
     premium_always: bool,
 }
@@ -221,7 +221,7 @@ impl Default for ServerParameters {
     }
 }
 
-#[cfg_attr(feature = "cli", derive(Parser))]
+#[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 /// Hostname and (optional) port to connect to a `LanguageTool` server.
 ///
@@ -241,7 +241,7 @@ pub struct ServerCli {
     )]
     pub hostname: String,
     /// Server's port number, with the empty string referring to no specific port
-    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", validator = is_port, env = "LANGUAGETOOL_PORT"))]
+    #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", value_parser = parse_port, env = "LANGUAGETOOL_PORT"))]
     pub port: String,
 }
 
@@ -289,7 +289,7 @@ pub struct ServerClient {
 impl From<ServerCli> for ServerClient {
     #[inline]
     fn from(cli: ServerCli) -> Self {
-        Self::new(&cli.hostname[..], &cli.port[..])
+        Self::new(cli.hostname.as_str(), cli.port.as_str())
     }
 }
 
@@ -297,7 +297,7 @@ impl ServerClient {
     /// Construct a new server client using hostname and (optional) port
     ///
     /// An empty string is accepeted as empty port.
-    /// For port validation, please use [`is_port`] as this constructor does not check anything.
+    /// For port validation, please use [`parse_port`] as this constructor does not check anything.
     #[must_use]
     pub fn new(hostname: &str, port: &str) -> Self {
         let api = if port.is_empty() {
@@ -327,20 +327,6 @@ impl ServerClient {
         cli.into()
     }
 
-    /// This function has the same sementics as [`ServerCli::from_arg_matches`]
-    #[cfg(feature = "cli")]
-    pub fn from_arg_matches(matches: &clap::ArgMatches) -> Result<Self> {
-        let params = ServerCli::from_arg_matches(matches)?;
-        Ok(Self::from_cli(params))
-    }
-
-    /// This function has the same semantics as [`ServerCli::command`]
-    #[cfg(feature = "cli")]
-    #[must_use]
-    pub fn command<'help>() -> clap::Command<'help> {
-        ServerCli::command()
-    }
-
     /// Send a check request to the server and await for the response
     pub async fn check(&self, request: &CheckRequest) -> Result<CheckResponse> {
         match self
@@ -354,7 +340,7 @@ impl ServerClient {
                 Ok(_) => resp
                     .json::<CheckResponse>()
                     .await
-                    .map_err(|e| Error::ResponseDecode { source: e })
+                    .map_err(Error::ResponseDecode)
                     .map(|mut resp| {
                         if self.max_suggestions > 0 {
                             let max = self.max_suggestions as usize;
@@ -369,17 +355,15 @@ impl ServerClient {
                         }
                         resp
                     }),
-                Err(_) => Err(Error::InvalidRequest {
-                    body: resp.text().await?,
-                }),
+                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
             },
-            Err(e) => Err(Error::RequestEncode { source: e }),
+            Err(e) => Err(Error::RequestEncode(e)),
         }
     }
 
     /// Send a check request to the server, await for the response and annotate it
     #[cfg(feature = "annotate")]
-    pub async fn annotate_check(&self, request: &CheckRequest) -> Result<String> {
+    pub async fn annotate_check(&self, request: &CheckRequest, color: bool) -> Result<String> {
         let text = request.get_text();
         let resp = self.check(request).await?;
 
@@ -430,7 +414,7 @@ impl ServerClient {
                     ],
                 }],
                 opt: FormatOptions {
-                    color: true,
+                    color: color,
                     ..Default::default()
                 },
             });
@@ -446,7 +430,7 @@ impl ServerClient {
         Ok(annotation)
     }
 
-    /// Send a languages request to the server and await for the response
+    /// Send a languages request to the server and await for the response.
     pub async fn languages(&self) -> Result<LanguagesResponse> {
         match self
             .client
@@ -458,16 +442,14 @@ impl ServerClient {
                 Ok(_) => resp
                     .json::<LanguagesResponse>()
                     .await
-                    .map_err(|e| Error::ResponseDecode { source: e }),
-                Err(_) => Err(Error::InvalidRequest {
-                    body: resp.text().await?,
-                }),
+                    .map_err(Error::ResponseDecode),
+                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
             },
-            Err(e) => Err(Error::RequestEncode { source: e }),
+            Err(e) => Err(Error::RequestEncode(e)),
         }
     }
 
-    /// Send a words request to the server and await for the response
+    /// Send a words request to the server and await for the response.
     pub async fn words(&self, request: &WordsRequest) -> Result<WordsResponse> {
         match self
             .client
@@ -480,12 +462,10 @@ impl ServerClient {
                 Ok(_) => resp
                     .json::<WordsResponse>()
                     .await
-                    .map_err(|e| Error::ResponseDecode { source: e }),
-                Err(_) => Err(Error::InvalidRequest {
-                    body: resp.text().await?,
-                }),
+                    .map_err(Error::ResponseDecode),
+                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
             },
-            Err(e) => Err(Error::RequestEncode { source: e }),
+            Err(e) => Err(Error::RequestEncode(e)),
         }
     }
 
@@ -502,12 +482,10 @@ impl ServerClient {
                 Ok(_) => resp
                     .json::<WordsAddResponse>()
                     .await
-                    .map_err(|e| Error::ResponseDecode { source: e }),
-                Err(_) => Err(Error::InvalidRequest {
-                    body: resp.text().await?,
-                }),
+                    .map_err(Error::ResponseDecode),
+                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
             },
-            Err(e) => Err(Error::RequestEncode { source: e }),
+            Err(e) => Err(Error::RequestEncode(e)),
         }
     }
 
@@ -524,12 +502,10 @@ impl ServerClient {
                 Ok(_) => resp
                     .json::<WordsDeleteResponse>()
                     .await
-                    .map_err(|e| Error::ResponseDecode { source: e }),
-                Err(_) => Err(Error::InvalidRequest {
-                    body: resp.text().await?,
-                }),
+                    .map_err(Error::ResponseDecode),
+                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
             },
-            Err(e) => Err(Error::RequestEncode { source: e }),
+            Err(e) => Err(Error::RequestEncode(e)),
         }
     }
 
