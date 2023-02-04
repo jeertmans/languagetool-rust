@@ -55,9 +55,7 @@ pub fn is_language_code(v: &str) -> crate::error::Result<()> {
 
         match splits.next() {
             Some(s)
-                if (s.len() == 2 || s.len() == 3) && s.chars().all(|c| c.is_ascii_alphabetic()) =>
-            {
-                ()
+                if (s.len() == 2 || s.len() == 3) && s.chars().all(|c| c.is_ascii_alphabetic()) => {
             }
             _ => return false,
         }
@@ -66,12 +64,12 @@ pub fn is_language_code(v: &str) -> crate::error::Result<()> {
             Some(s) if s.len() == 2 && s.chars().all(|c| c.is_ascii_alphabetic()) => (),
             _ => return false,
         }
-        while let Some(s) = splits.next() {
+        for s in splits {
             if !s.chars().all(|c| c.is_ascii_alphabetic()) {
                 return false;
             }
         }
-        return true;
+        true
     }
 
     if v == "auto" || is_match(v) {
