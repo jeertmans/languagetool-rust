@@ -218,6 +218,81 @@ impl Level {
     }
 }
 
+/// Split string into as few fragments as possible, where each fragment contains
+/// (if possible) a maximum of `n` characters. Pattern str `Pat` is used for splitting.
+///
+/// # Examples
+///
+/// ```
+/// # use languagetool_rust::check::split_len;
+/// let s = "I have so many friends.
+/// They are very funny.
+/// I think I am very lucky to have them.
+/// One day, I will write them a poem.
+/// But, in the meantime, I write code.
+/// ";
+///
+/// let split = split_len(&s, 40, "\n");
+///
+/// assert_eq!(split.join(""), s);
+/// assert_eq!(split, vec![
+///     "I have so many friends.\n",
+///     "They are very funny.\n",
+///     "I think I am very lucky to have them.\n",
+///     "One day, I will write them a poem.\n",
+///     "But, in the meantime, I write code.\n"]);
+///
+/// let split = split_len(&s, 80, "\n");
+///
+/// assert_eq!(split, vec![
+///     "I have so many friends.\nThey are very funny.\n",
+///     "I think I am very lucky to have them.\nOne day, I will write them a poem.\n",
+///     "But, in the meantime, I write code.\n"]);
+///
+/// let s = "I have so many friends.
+/// They are very funny.
+/// I think I am very lucky to have them.
+///
+/// One day, I will write them a poem.
+/// But, in the meantime, I write code.
+/// ";
+///
+/// let split = split_len(&s, 80, "\n\n");
+///
+/// println!("{:?}", split);
+///
+/// assert_eq!(split, vec![
+///     "I have so many friends.\nThey are very funny.\nI think I am very lucky to have them.\n\n",
+///     "One day, I will write them a poem.\nBut, in the meantime, I write code.\n"]);
+/// ```
+#[must_use]
+pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source str> {
+    let mut vec: Vec<&'source str> = Vec::with_capacity(s.len() / n);
+    let mut splits = s.split_inclusive(pat);
+
+    let mut start = 0;
+    let mut i = 0;
+
+    if let Some(split) = splits.next() {
+        vec.push(split);
+    } else {
+        return Vec::new();
+    }
+
+    for split in splits {
+        let new_len = vec[i].len() + split.len();
+        if new_len < n {
+            vec[i] = &s[start..start + new_len];
+        } else {
+            vec.push(split);
+            start += vec[i].len();
+            i += 1;
+        }
+    }
+
+    vec
+}
+
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
