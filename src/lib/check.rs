@@ -265,6 +265,7 @@ impl Level {
 ///     "I have so many friends.\nThey are very funny.\nI think I am very lucky to have them.\n\n",
 ///     "One day, I will write them a poem.\nBut, in the meantime, I write code.\n"]);
 /// ```
+#[must_use]
 pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source str> {
     let mut vec: Vec<&'source str> = Vec::with_capacity(s.len() / n);
     let mut splits = s.split_inclusive(pat);
