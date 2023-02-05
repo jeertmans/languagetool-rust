@@ -12,7 +12,9 @@ use crate::words::WordsSubcommand;
 use clap::{CommandFactory, Parser, Subcommand};
 use is_terminal::IsTerminal;
 use std::io::{self, Write};
-use termcolor::{ColorChoice, StandardStream, WriteColor};
+use termcolor::{ColorChoice, StandardStream};
+#[cfg(feature = "annotate")]
+use termcolor::WriteColor;
 
 /// Read lines from standard input and write to buffer string.
 ///
