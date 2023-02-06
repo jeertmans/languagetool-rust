@@ -36,7 +36,7 @@ The command line interface of LTRS allows to very quickly use any LanguageTool s
 
 The reference for the CLI can be accessed via `ltrs --help`.
 
-By default, LTRS uses LanguageTool public API.
+By default, LTRS uses the LanguageTool public API.
 
 ### Example
 
@@ -99,7 +99,7 @@ PONG! Delay: 110 ms
 
 ### Docker
 
-Since LanguageTool's installation might not be straighforward, we provide a basic Docker integration that allows to `pull`, `start`, and `stop` LanguageTool Docker containers in a few lines:
+Since LanguageTool's installation might not be straightforward, we provide a basic Docker integration that allows to `pull`, `start`, and `stop` LanguageTool Docker containers in a few lines:
 
 ```bash
 ltrs docker pull # only once
@@ -119,7 +119,7 @@ To use LanguageTool-Rust in your Rust project, add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-languagetool_rust = "version"
+languagetool_rust = "2.0"
 ```
 
 ### Example
@@ -152,7 +152,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 #### Optional Features
 
 - **annotate**: Adds method(s) to annotate results from check request. If **cli** feature is also enabled, the CLI will by default print an annotated output.
-- **cli-complete**: Adds commands to generate completion files for various shells. This feature also activates the **cli** feature. Enter `ltrs completions --help` for get help with installing completion files.
+- **cli-complete**: Adds commands to generate completion files for various shells. This feature also activates the **cli** feature. Enter `ltrs completions --help` to get help with installing completion files.
 - **color**: Enables color outputting in the terminal. If **cli** feature is also enable, the `--color=<WHEN>` option will be available.
 - **full**: Enables all features that are mutually compatible (i.e., `annotate`, `cli`, `cli-complete`, `color`, `docker`, and `unstable`).
 - **native-tls-vendored**: Enables the `vendored` feature of `native-tls`. This or `native-tls` should be activated if you are planning to use HTTPS servers.
@@ -169,10 +169,4 @@ Here are listed some projects that use LTRS.
 
 ## Contributing
 
-Contributions are more than welcome!
-
-### Future features
-
-- [ ] Document installation procedure
-- [ ] Test commands that need API keys
-- [ ] ...
+Contributions are more than welcome! Please reach me via GitHub for any questions: [Issues](https://github.com/jeertmans/languagetool-rust/issues), [Pull requests](https://github.com/jeertmans/languagetool-rust/pulls) or [Discussions](https://github.com/jeertmans/languagetool-rust/discussions).

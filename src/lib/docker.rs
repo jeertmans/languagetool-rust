@@ -1,5 +1,5 @@
 //! Structures and methods to easily manipulate Docker images, especially for
-//! `LanguageTool` applications.
+//! LanguageTool applications.
 
 use crate::error::{exit_status_error, Error, Result};
 #[cfg(feature = "cli")]
