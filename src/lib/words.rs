@@ -58,7 +58,8 @@ pub struct WordsRequest {
     pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// Comma-separated list of dictionaries to include words from; uses special default dictionary if this is unset
+    /// Comma-separated list of dictionaries to include words from; uses special
+    /// default dictionary if this is unset
     pub dicts: Option<Vec<String>>,
 }
 
@@ -67,18 +68,23 @@ pub struct WordsRequest {
 #[non_exhaustive]
 /// LanguageTool POST words add request.
 ///
-/// Add a word to one of the user's personal dictionaries. Please note that this feature is considered to be used for personal dictionaries which must not contain more than 500 words. If this is an issue for you, please contact us.
+/// Add a word to one of the user's personal dictionaries. Please note that this
+/// feature is considered to be used for personal dictionaries which must not
+/// contain more than 500 words. If this is an issue for you, please contact us.
 pub struct WordsAddRequest {
     #[cfg_attr(feature = "cli", clap(required = true, value_parser = parse_word))]
-    /// The word to be added. Must not be a phrase, i.e. cannot contain white space. The word is added to a global dictionary that applies to all languages.
+    /// The word to be added. Must not be a phrase, i.e. cannot contain white
+    /// space. The word is added to a global dictionary that applies to all
+    /// languages.
     pub word: String,
     #[cfg_attr(feature = "cli", clap(flatten))]
     /// Login arguments
     pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// Name of the dictionary to add the word to; non-existent dictionaries are created after
-    /// calling this; if unset, adds to special default dictionary
+    /// Name of the dictionary to add the word to; non-existent dictionaries are
+    /// created after calling this; if unset, adds to special default
+    /// dictionary
     dict: Option<String>,
 }
 
@@ -97,8 +103,9 @@ pub struct WordsDeleteRequest {
     pub login: LoginArgs,
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// Name of the dictionary to add the word to; non-existent dictionaries are created after
-    /// calling this; if unset, adds to special default dictionary
+    /// Name of the dictionary to add the word to; non-existent dictionaries are
+    /// created after calling this; if unset, adds to special default
+    /// dictionary
     pub dict: Option<String>,
 }
 

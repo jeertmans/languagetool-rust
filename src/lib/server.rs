@@ -1,11 +1,13 @@
 //! Structure to communite with some `LanguageTool` server through the API.
 
-use crate::check::{CheckRequest, CheckResponse};
-use crate::error::{Error, Result};
-use crate::languages::LanguagesResponse;
-use crate::words::{
-    WordsAddRequest, WordsAddResponse, WordsDeleteRequest, WordsDeleteResponse, WordsRequest,
-    WordsResponse,
+use crate::{
+    check::{CheckRequest, CheckResponse},
+    error::{Error, Result},
+    languages::LanguagesResponse,
+    words::{
+        WordsAddRequest, WordsAddResponse, WordsDeleteRequest, WordsDeleteResponse, WordsRequest,
+        WordsResponse,
+    },
 };
 #[cfg(feature = "annotate")]
 use annotate_snippets::{
@@ -17,9 +19,7 @@ use clap::Args;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::io;
-use std::path::PathBuf;
-use std::time::Instant;
+use std::{io, path::PathBuf, time::Instant};
 
 /// Parse `v` if valid port.
 ///
@@ -33,7 +33,7 @@ use std::time::Instant;
 /// # use languagetool_rust::server::parse_port;
 /// assert!(parse_port("8081").is_ok());
 ///
-/// assert!(parse_port("").is_ok());  // No port specified, which is accepted
+/// assert!(parse_port("").is_ok()); // No port specified, which is accepted
 ///
 /// assert!(parse_port("abcd").is_err());
 /// ```
@@ -49,68 +49,92 @@ pub fn parse_port(v: &str) -> Result<String> {
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// A Java property file (one key=value entry per line) with values listed below.
+/// A Java property file (one `key = value` entry per line) with values listed
+/// below.
 pub struct ConfigFile {
-    /// Maximum text length, longer texts will cause an error (optional)
+    /// Maximum text length, longer texts will cause an error (optional).
     pub max_text_length: Option<isize>,
-    /// Maximum text length, applies even to users with a special secret 'token' parameter (optional)
+    /// Maximum text length, applies even to users with a special secret 'token'
+    /// parameter (optional).
     pub max_text_hard_length: Option<isize>,
-    /// Secret JWT token key, if set by user and valid, maxTextLength can be increased by the user (optional)
+    /// Secret JWT token key, if set by user and valid, maxTextLength can be
+    /// increased by the user (optional).
     pub secret_token_key: Option<isize>,
-    /// Maximum time in milliseconds allowed per check (optional)
+    /// Maximum time in milliseconds allowed per check (optional).
     pub max_check_time_millis: Option<isize>,
-    /// Checking will stop with error if there are more rules matches per word (optional)
+    /// Checking will stop with error if there are more rules matches per word
+    /// (optional).
     pub max_errors_per_word_rate: Option<isize>,
-    /// Only this many spelling errors will have suggestions for performance reasons (optional, affects Hunspell-based languages only)
+    /// Only this many spelling errors will have suggestions for performance
+    /// reasons (optional, affects Hunspell-based languages only).
     pub max_spelling_suggestions: Option<isize>,
-    /// Maximum number of threads working in parallel (optional)
+    /// Maximum number of threads working in parallel (optional).
     pub max_check_threads: Option<isize>,
-    /// Size of internal cache in number of sentences (optional, default: 0)
+    /// Size of internal cache in number of sentences (optional, default: 0).
     pub cache_size: Option<isize>,
-    /// How many seconds sentences are kept in cache (optional, default: 300 if 'cacheSize' is set)
+    /// How many seconds sentences are kept in cache (optional, default: 300 if
+    /// 'cacheSize' is set).
     pub cache_ttl_seconds: Option<isize>,
-    /// Maximum number of requests per requestLimitPeriodInSeconds (optional)
+    /// Maximum number of requests per requestLimitPeriodInSeconds (optional).
     pub request_limit: Option<isize>,
-    /// Maximum aggregated size of requests per requestLimitPeriodInSeconds (optional)
+    /// Maximum aggregated size of requests per requestLimitPeriodInSeconds
+    /// (optional).
     pub request_limit_in_bytes: Option<isize>,
-    /// Maximum number of timeout request (optional)
+    /// Maximum number of timeout request (optional).
     pub timeout_request_limit: Option<isize>,
-    /// Time period to which requestLimit and timeoutRequestLimit applies (optional)
+    /// Time period to which requestLimit and timeoutRequestLimit applies
+    /// (optional).
     pub request_limit_period_in_seconds: Option<isize>,
-    /// A directory with '1grams', '2grams', '3grams' sub directories which contain a Lucene index each with ngram occurrence counts; activates the confusion rule if supported (optional)
+    /// A directory with '1grams', '2grams', '3grams' sub directories which
+    /// contain a Lucene index each with ngram occurrence counts; activates the
+    /// confusion rule if supported (optional).
     pub language_model: Option<PathBuf>,
-    /// A directory with word2vec data (optional), see <https://github.com/languagetool-org/languagetool/blob/master/languagetool-standalone/CHANGES.md#word2vec>
+    /// A directory with word2vec data (optional), see <https://github.com/languagetool-org/languagetool/blob/master/languagetool-standalone/CHANGES.md#word2vec>.
     pub word2vec_model: Option<PathBuf>,
     /// A model file for better language detection (optional), see
-    /// <https://fasttext.cc/docs/en/language-identification.html>
+    /// <https://fasttext.cc/docs/en/language-identification.html>.
     pub fasttext_model: Option<PathBuf>,
     /// Compiled fasttext executable for language detection (optional), see
-    /// <https://fasttext.cc/docs/en/support.html>
+    /// <https://fasttext.cc/docs/en/support.html>.
     pub fasttext_binary: Option<PathBuf>,
-    /// Reject request if request queue gets larger than this (optional)
+    /// Reject request if request queue gets larger than this (optional).
     pub max_work_queue_size: Option<isize>,
-    /// A file containing rules configuration, such as .langugagetool.cfg (optional)
+    /// A file containing rules configuration, such as .langugagetool.cfg
+    /// (optional).
     pub rules_file: Option<PathBuf>,
-    /// Set to 'true' to warm up server at start, i.e. run a short check with all languages (optional)
+    /// Set to 'true' to warm up server at start, i.e. run a short check with
+    /// all languages (optional).
     pub warm_up: Option<bool>,
-    /// A comma-separated list of HTTP referrers (and 'Origin' headers) that are blocked and will not be served (optional)
+    /// A comma-separated list of HTTP referrers (and 'Origin' headers) that are
+    /// blocked and will not be served (optional).
     pub blocked_referrers: Option<Vec<String>>,
-    /// Activate only the premium rules (optional)
+    /// Activate only the premium rules (optional).
     pub premium_only: Option<bool>,
-    /// A comma-separated list of rule ids that are turned off for this server (optional)
+    /// A comma-separated list of rule ids that are turned off for this server
+    /// (optional).
     pub disable_rule_ids: Option<Vec<String>>,
-    /// Set to 'true' to enable caching of internal pipelines to improve performance
+    /// Set to 'true' to enable caching of internal pipelines to improve
+    /// performance.
     pub pipeline_caching: Option<bool>,
-    /// Cache size if 'pipelineCaching' is set
+    /// Cache size if 'pipelineCaching' is set.
     pub max_pipeline_pool_size: Option<isize>,
-    /// Time after which pipeline cache items expire
+    /// Time after which pipeline cache items expire.
     pub pipeline_expire_time_in_seconds: Option<isize>,
-    /// Set to 'true' to fill pipeline cache on start (can slow down start a lot)
+    /// Set to 'true' to fill pipeline cache on start (can slow down start a
+    /// lot).
     pub pipeline_prewarming: Option<bool>,
-    /// Spellcheck-only languages: You can add simple spellcheck-only support for languages that LT
-    /// doesn't support by defining two optional properties:
-    ///     'lang-xx' - set name of the language, use language code instead of 'xx', e.g. lang-tr=Turkish
-    ///     'lang-xx-dictPath' - absolute path to the hunspell .dic file, use language code instead of 'xx', e.g. lang-tr-dictPath=/path/to/tr.dic. Note that the same directory also needs to
+    /// Spellcheck-only languages: You can add simple spellcheck-only support
+    /// for languages that LT doesn't support by defining two optional
+    /// properties:
+    ///
+    /// * 'lang-xx' - set name of the language, use language code instead of
+    ///   'xx', e.g. lang-tr=Turkish;
+    ///
+    /// * 'lang-xx-dictPath' - absolute path to the hunspell .dic file, use
+    ///   language code instead of 'xx', e.g. lang-tr-dictPath=/path/to/tr.dic.
+    ///   Note that the same directory also needs to contain a common_words.txt
+    ///   file with the most common 10,000 words (used for better language
+    ///   detection).
     pub spellcheck_only: Option<std::collections::HashMap<String, String>>,
 }
 
@@ -124,20 +148,22 @@ impl ConfigFile {
                 Value::Bool(b) => writeln!(w, "{key}={b}")?,
                 Value::Number(n) => writeln!(w, "{key}={n}")?,
                 Value::String(s) => writeln!(w, "{key}=\"{s}\"")?,
-                Value::Array(a) => writeln!(
-                    w,
-                    "{}=\"{}\"",
-                    key,
-                    a.iter()
-                        .map(std::string::ToString::to_string)
-                        .collect::<Vec<String>>()
-                        .join(",")
-                )?,
+                Value::Array(a) => {
+                    writeln!(
+                        w,
+                        "{}=\"{}\"",
+                        key,
+                        a.iter()
+                            .map(std::string::ToString::to_string)
+                            .collect::<Vec<String>>()
+                            .join(",")
+                    )?
+                },
                 Value::Object(o) => {
                     for (key, value) in o.iter() {
                         writeln!(w, "{key}=\"{value}\"")?
                     }
-                }
+                },
                 Value::Null => writeln!(w, "# {key}=")?,
             }
         }
@@ -180,27 +206,44 @@ impl Default for ConfigFile {
     }
 }
 
+/// Server parameters that are to be used when instantiating a `LanguageTool`
+/// server
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// Server parameters that are to be used when instantiating a `LanguageTool` server
 pub struct ServerParameters {
+    /// A Java property file (one `key = value` entry per line) with values
+    /// listed in [`ConfigFile`].
     #[cfg_attr(feature = "cli", clap(long))]
     config: Option<PathBuf>,
+    /// Port to bind to, defaults to 8081 if not specified.
     #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "8081", value_parser = parse_port))]
     port: String,
+    /// Allow this server process to be connected from anywhere; if not set, it
+    /// can only be connected from the computer it was started on.
     #[cfg_attr(feature = "cli", clap(long))]
     public: bool,
+    /// set the Access-Control-Allow-Origin header in the HTTP response, used
+    /// for direct (non-proxy) JavaScript-based access from browsers. Example: --allow-origin "https://my-website.org".
+    /// Don't set a parameter for `*`, i.e. access from all websites.
     #[cfg_attr(feature = "cli", clap(long, name = "ORIGIN"))]
+    #[allow(rustdoc::bare_urls)]
     allow_origin: Option<String>,
+    /// In case of exceptions, log the input text (up to 500 characters).
     #[cfg_attr(feature = "cli", clap(short = 'v', long))]
     verbose: bool,
+    /// A directory with '1grams', '2grams', '3grams' sub directories (per
+    /// language) which contain a Lucene index (optional, overwrites
+    /// 'languageModel' parameter in properties files).
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(rename = "languageModel")]
     language_model: Option<PathBuf>,
+    /// A directory with word2vec data (optional), see <https://github.com/languagetool-org/languagetool/blob/master/languagetool-standalone/CHANGES.md#word2vec>.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(rename = "word2vecModel")]
     word2vec_model: Option<PathBuf>,
+    /// Activate the premium rules even when user has no username/password -
+    /// useful for API servers.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(rename = "premiumAlways")]
     premium_always: bool,
@@ -210,7 +253,7 @@ impl Default for ServerParameters {
     fn default() -> Self {
         Self {
             config: None,
-            port: String::from("8081"),
+            port: "8081".to_string(),
             public: false,
             allow_origin: None,
             verbose: false,
@@ -221,14 +264,14 @@ impl Default for ServerParameters {
     }
 }
 
-#[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 /// Hostname and (optional) port to connect to a `LanguageTool` server.
 ///
 /// To use your local server instead of online api, set:
 /// - `hostname` to "http://localhost"
 /// - `port` to "8081"
 /// if you used the default configuration to start the server.
+#[cfg_attr(feature = "cli", derive(Args))]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub struct ServerCli {
     /// Server's hostname
     #[cfg_attr(
@@ -240,7 +283,8 @@ pub struct ServerCli {
         )
     )]
     pub hostname: String,
-    /// Server's port number, with the empty string referring to no specific port
+    /// Server's port number, with the empty string referring to no specific
+    /// port
     #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", value_parser = parse_port, env = "LANGUAGETOOL_PORT"))]
     pub port: String,
 }
@@ -297,7 +341,8 @@ impl ServerClient {
     /// Construct a new server client using hostname and (optional) port
     ///
     /// An empty string is accepeted as empty port.
-    /// For port validation, please use [`parse_port`] as this constructor does not check anything.
+    /// For port validation, please use [`parse_port`] as this constructor does
+    /// not check anything.
     #[must_use]
     pub fn new(hostname: &str, port: &str) -> Self {
         let api = if port.is_empty() {
@@ -313,8 +358,8 @@ impl ServerClient {
         }
     }
 
-    /// Sets the maximum number of suggestions (defaults to -1), a negative number will keep all
-    /// replacement suggestions
+    /// Sets the maximum number of suggestions (defaults to -1), a negative
+    /// number will keep all replacement suggestions
     #[must_use]
     pub fn with_max_suggestions(mut self, max_suggestions: isize) -> Self {
         self.max_suggestions = max_suggestions;
@@ -336,32 +381,36 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => match resp.error_for_status_ref() {
-                Ok(_) => resp
-                    .json::<CheckResponse>()
-                    .await
-                    .map_err(Error::ResponseDecode)
-                    .map(|mut resp| {
-                        if self.max_suggestions > 0 {
-                            let max = self.max_suggestions as usize;
-                            resp.matches.iter_mut().for_each(|m| {
-                                let len = m.replacements.len();
-                                if max < len {
-                                    m.replacements[max] =
-                                        format!("... ({} not shown)", len - max).into();
-                                    m.replacements.truncate(max + 1);
+            Ok(resp) => {
+                match resp.error_for_status_ref() {
+                    Ok(_) => {
+                        resp.json::<CheckResponse>()
+                            .await
+                            .map_err(Error::ResponseDecode)
+                            .map(|mut resp| {
+                                if self.max_suggestions > 0 {
+                                    let max = self.max_suggestions as usize;
+                                    resp.matches.iter_mut().for_each(|m| {
+                                        let len = m.replacements.len();
+                                        if max < len {
+                                            m.replacements[max] =
+                                                format!("... ({} not shown)", len - max).into();
+                                            m.replacements.truncate(max + 1);
+                                        }
+                                    });
                                 }
-                            });
-                        }
-                        resp
-                    }),
-                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                                resp
+                            })
+                    },
+                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                }
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
     }
 
-    /// Send a check request to the server, await for the response and annotate it
+    /// Send a check request to the server, await for the response and annotate
+    /// it
     #[cfg(feature = "annotate")]
     pub async fn annotate_check(
         &self,
@@ -389,11 +438,8 @@ impl ServerClient {
             })
             .collect();
 
-        let snippets = resp
-            .matches
-            .iter()
-            .zip(replacements.iter())
-            .map(|(m, r)| Snippet {
+        let snippets = resp.matches.iter().zip(replacements.iter()).map(|(m, r)| {
+            Snippet {
                 title: Some(Annotation {
                     label: Some(&m.message),
                     id: Some(&m.rule.id),
@@ -422,7 +468,8 @@ impl ServerClient {
                     color,
                     ..Default::default()
                 },
-            });
+            }
+        });
 
         let mut annotation = String::new();
 
@@ -443,12 +490,15 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => match resp.error_for_status_ref() {
-                Ok(_) => resp
-                    .json::<LanguagesResponse>()
-                    .await
-                    .map_err(Error::ResponseDecode),
-                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+            Ok(resp) => {
+                match resp.error_for_status_ref() {
+                    Ok(_) => {
+                        resp.json::<LanguagesResponse>()
+                            .await
+                            .map_err(Error::ResponseDecode)
+                    },
+                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                }
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
@@ -463,12 +513,15 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => match resp.error_for_status_ref() {
-                Ok(_) => resp
-                    .json::<WordsResponse>()
-                    .await
-                    .map_err(Error::ResponseDecode),
-                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+            Ok(resp) => {
+                match resp.error_for_status_ref() {
+                    Ok(_) => {
+                        resp.json::<WordsResponse>()
+                            .await
+                            .map_err(Error::ResponseDecode)
+                    },
+                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                }
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
@@ -483,12 +536,15 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => match resp.error_for_status_ref() {
-                Ok(_) => resp
-                    .json::<WordsAddResponse>()
-                    .await
-                    .map_err(Error::ResponseDecode),
-                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+            Ok(resp) => {
+                match resp.error_for_status_ref() {
+                    Ok(_) => {
+                        resp.json::<WordsAddResponse>()
+                            .await
+                            .map_err(Error::ResponseDecode)
+                    },
+                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                }
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
@@ -503,18 +559,22 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => match resp.error_for_status_ref() {
-                Ok(_) => resp
-                    .json::<WordsDeleteResponse>()
-                    .await
-                    .map_err(Error::ResponseDecode),
-                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+            Ok(resp) => {
+                match resp.error_for_status_ref() {
+                    Ok(_) => {
+                        resp.json::<WordsDeleteResponse>()
+                            .await
+                            .map_err(Error::ResponseDecode)
+                    },
+                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                }
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
     }
 
-    /// Ping the server and return the elapsed time in milliseconds if the server responded
+    /// Ping the server and return the elapsed time in milliseconds if the
+    /// server responded
     pub async fn ping(&self) -> Result<u128> {
         let start = Instant::now();
         self.client.get(&self.api).send().await?;
@@ -547,8 +607,7 @@ impl ServerClient {
 
 #[cfg(test)]
 mod tests {
-    use crate::check::CheckRequest;
-    use crate::ServerClient;
+    use crate::{check::CheckRequest, ServerClient};
 
     #[tokio::test]
     async fn test_server_ping() {

@@ -65,13 +65,19 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub(crate) fn exit_status_error(exit_status: &ExitStatus) -> Result<()> {
     match exit_status.success() {
         true => Ok(()),
-        false => match exit_status.code() {
-            Some(code) => Err(Error::ExitStatus(format!(
-                "Process terminated with exit code: {code}"
-            ))),
-            None => Err(Error::ExitStatus(
-                "Process terminated by signal".to_string(),
-            )),
+        false => {
+            match exit_status.code() {
+                Some(code) => {
+                    Err(Error::ExitStatus(format!(
+                        "Process terminated with exit code: {code}"
+                    )))
+                },
+                None => {
+                    Err(Error::ExitStatus(
+                        "Process terminated by signal".to_string(),
+                    ))
+                },
+            }
         },
     }
 }

@@ -2,13 +2,12 @@
 //!
 //! This module is specifically designed to be used by LTRS's binary target.
 //! It contains all the content needed to create LTRS's command line interface.
-//!
-//! Each subcommand of the CLI should be runnable only using its arguments.
-//! This is why subcommands derive the [`clap::Parser`] trait.
 
-use crate::error::Result;
-use crate::server::{ServerCli, ServerClient};
-use crate::words::WordsSubcommand;
+use crate::{
+    error::Result,
+    server::{ServerCli, ServerClient},
+    words::WordsSubcommand,
+};
 use clap::{CommandFactory, Parser, Subcommand};
 use is_terminal::IsTerminal;
 use std::io::{self, Write};
@@ -56,8 +55,10 @@ pub struct Cli {
     /// Specify WHEN to colorize output.
     #[arg(short, long, value_name = "WHEN", default_value = "auto", default_missing_value = "always", num_args(0..=1), require_equals(true))]
     pub color: clap::ColorChoice,
+    /// [`ServerCli`] arguments.
     #[command(flatten)]
     pub server_cli: ServerCli,
+    /// Subcommand.
     #[command(subcommand)]
     #[allow(missing_docs)]
     pub command: Command,
@@ -67,15 +68,19 @@ pub struct Cli {
 #[derive(Subcommand, Debug)]
 #[allow(missing_docs)]
 pub enum Command {
+    /// Check command.
     Check(crate::check::CheckCommand),
+    /// Docker commands.
     #[cfg(feature = "docker")]
     Docker(crate::docker::DockerCommand),
-    #[clap(visible_alias = "lang")]
     /// LanguageTool GET languages request.
+    #[clap(visible_alias = "lang")]
     Languages,
     /// Ping the LanguageTool server and return time elapsed in ms if success.
     Ping,
+    /// Words commands.
     Words(crate::words::WordsCommand),
+    /// Completions command.
     #[cfg(feature = "cli-complete")]
     Completions(complete::CompleteCommand),
 }
@@ -109,96 +114,88 @@ impl Cli {
                 #[cfg(feature = "annotate")]
                 let color = stdout.supports_color();
 
-                if !cmd.filenames.is_empty() {
-                    for filename in cmd.filenames.iter() {
-                        let text = std::fs::read_to_string(filename)?;
-                        request = request.with_text(text);
-                        #[cfg(feature = "annotate")]
-                        if !request.raw {
-                            writeln!(
-                                &mut stdout,
-                                "{}",
-                                &server_client
-                                    .annotate_check(&request, filename.to_str(), color)
-                                    .await?
-                            )?;
-                        } else {
-                            let mut resp = server_client.check(&request).await?;
-
-                            if request.more_context {
-                                use crate::check::CheckResponseWithContext;
-                                let text = request.get_text();
-                                resp = CheckResponseWithContext::new(text, resp).into();
+                let sources_iter: Box<dyn Iterator<Item = Result<(Option<String>, Option<&str>)>>> =
+                    if cmd.filenames.is_empty() {
+                        if request.text.is_none() && request.data.is_none() {
+                            let mut text = String::new();
+                            match read_from_stdin(&mut stdout, &mut text) {
+                                Ok(_) => Box::new(vec![Ok((Some(text), None))].into_iter()),
+                                Err(e) => Box::new(vec![Err(e.into())].into_iter()),
                             }
-
-                            writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&resp)?)?;
+                        } else {
+                            Box::new(vec![Ok((None, None))].into_iter())
                         }
+                    } else {
+                        Box::new(cmd.filenames.iter().map(|filename| {
+                            let text = std::fs::read_to_string(filename)?;
+                            Ok((Some(text), filename.to_str()))
+                        }))
+                    };
+
+                for source in sources_iter {
+                    let (text, _filename) = source?;
+                    if let Some(text) = text {
+                        request = request.with_text(text);
                     }
-                    return Ok(());
+
+                    #[cfg(feature = "annotate")]
+                    if !cmd.raw {
+                        writeln!(
+                            &mut stdout,
+                            "{}",
+                            &server_client
+                                .annotate_check(&request, _filename, color)
+                                .await?
+                        )?;
+                    } else {
+                        let mut resp = server_client.check(&request).await?;
+
+                        if cmd.more_context {
+                            use crate::check::CheckResponseWithContext;
+                            let text = request.get_text();
+                            resp = CheckResponseWithContext::new(text, resp).into();
+                        }
+
+                        writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&resp)?)?;
+                    }
                 }
-
-                if request.text.is_none() && request.data.is_none() {
-                    let mut text = String::new();
-                    read_from_stdin(&mut stdout, &mut text)?;
-                    request = request.with_text(text);
-                }
-
-                #[cfg(feature = "annotate")]
-                if !request.raw {
-                    writeln!(
-                        &mut stdout,
-                        "{}",
-                        &server_client.annotate_check(&request, None, color).await?
-                    )?;
-                    return Ok(());
-                }
-
-                let mut resp = server_client.check(&request).await?;
-
-                if request.more_context {
-                    use crate::check::CheckResponseWithContext;
-                    let text = request.get_text();
-                    resp = CheckResponseWithContext::new(text, resp).into();
-                }
-
-                writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&resp)?)?;
-            }
+            },
             #[cfg(feature = "docker")]
             Command::Docker(cmd) => {
                 cmd.execute(&mut stdout)?;
-            }
+            },
             Command::Languages => {
                 let languages_response = server_client.languages().await?;
                 let languages = serde_json::to_string_pretty(&languages_response)?;
 
                 writeln!(&mut stdout, "{languages}")?;
-            }
+            },
             Command::Ping => {
                 let ping = server_client.ping().await?;
                 writeln!(&mut stdout, "PONG! Delay: {ping} ms")?;
-            }
+            },
             Command::Words(cmd) => {
                 let words = match &cmd.subcommand {
                     Some(WordsSubcommand::Add(request)) => {
                         let words_response = server_client.words_add(request).await?;
                         serde_json::to_string_pretty(&words_response)?
-                    }
+                    },
                     Some(WordsSubcommand::Delete(request)) => {
                         let words_response = server_client.words_delete(request).await?;
                         serde_json::to_string_pretty(&words_response)?
-                    }
+                    },
                     None => {
                         let words_response = server_client.words(&cmd.request).await?;
                         serde_json::to_string_pretty(&words_response)?
-                    }
+                    },
                 };
 
                 writeln!(&mut stdout, "{words}")?;
-            }
+            },
             #[cfg(feature = "cli-complete")]
             Command::Completions(cmd) => {
                 cmd.execute(&mut stdout)?;
-            }
+            },
         }
         Ok(())
     }

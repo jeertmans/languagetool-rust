@@ -1,5 +1,5 @@
-//! Structures and methods to easily manipulate Docker images, especially for `LanguageTool`
-//! applications.
+//! Structures and methods to easily manipulate Docker images, especially for
+//! `LanguageTool` applications.
 
 use crate::error::{exit_status_error, Error, Result};
 #[cfg(feature = "cli")]
@@ -66,7 +66,8 @@ enum Action {
     Start,
     /// Stop a docker container.
     ///
-    /// Alias to `{docker.bin} kill $({docker.bin} ps -l -f "name={docker.container_name}")`.
+    /// Alias to `{docker.bin} kill $({docker.bin} ps -l -f
+    /// "name={docker.container_name}")`.
     Stop,
 }
 
