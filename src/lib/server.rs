@@ -1,18 +1,13 @@
 //! Structure to communite with some `LanguageTool` server through the API.
 
 use crate::{
-    check::{CheckRequest, CheckResponse},
+    check::{CheckRequest, CheckResponse, CheckResponseWithContext},
     error::{Error, Result},
     languages::LanguagesResponse,
     words::{
         WordsAddRequest, WordsAddResponse, WordsDeleteRequest, WordsDeleteResponse, WordsRequest,
         WordsResponse,
     },
-};
-#[cfg(feature = "annotate")]
-use annotate_snippets::{
-    display_list::{DisplayList, FormatOptions},
-    snippet::{Annotation, AnnotationType, Slice, Snippet, SourceAnnotation},
 };
 #[cfg(feature = "cli")]
 use clap::Args;
@@ -409,6 +404,42 @@ impl ServerClient {
         }
     }
 
+    /// Send multiple check requests and join them into a single response.
+    ///
+    /// # Panics
+    ///
+    /// If any of the requests has `self.text` field which is none.
+    pub async fn check_multiple_and_join(
+        &self,
+        requests: Vec<CheckRequest>,
+    ) -> Result<CheckResponse> {
+        let mut tasks = Vec::with_capacity(requests.len());
+
+        for request in requests.into_iter() {
+            let server_client = self.clone();
+            tasks.push(tokio::spawn(async move {
+                let response = server_client.check(&request).await?;
+                let text = request.text.unwrap();
+                Result::<(String, CheckResponse)>::Ok((text, response))
+            }));
+        }
+
+        let mut response_with_context: Option<CheckResponseWithContext> = None;
+
+        for task in tasks {
+            let (text, response) = task.await.unwrap()?;
+            match response_with_context {
+                Some(resp) => {
+                    response_with_context =
+                        Some(resp.append(CheckResponseWithContext::new(text, response)))
+                },
+                None => response_with_context = Some(CheckResponseWithContext::new(text, response)),
+            }
+        }
+
+        Ok(response_with_context.unwrap().into())
+    }
+
     /// Send a check request to the server, await for the response and annotate
     /// it.
     #[cfg(feature = "annotate")]
@@ -421,65 +452,7 @@ impl ServerClient {
         let text = request.get_text();
         let resp = self.check(request).await?;
 
-        if resp.matches.is_empty() {
-            return Ok("No error were found in provided text".to_string());
-        }
-        let replacements: Vec<_> = resp
-            .matches
-            .iter()
-            .map(|m| {
-                m.replacements.iter().fold(String::new(), |mut acc, r| {
-                    if !acc.is_empty() {
-                        acc.push_str(", ");
-                    }
-                    acc.push_str(&r.value);
-                    acc
-                })
-            })
-            .collect();
-
-        let snippets = resp.matches.iter().zip(replacements.iter()).map(|(m, r)| {
-            Snippet {
-                title: Some(Annotation {
-                    label: Some(&m.message),
-                    id: Some(&m.rule.id),
-                    annotation_type: AnnotationType::Error,
-                }),
-                footer: vec![],
-                slices: vec![Slice {
-                    source: &m.context.text,
-                    line_start: 1 + text.chars().take(m.offset).filter(|c| *c == '\n').count(),
-                    origin,
-                    fold: true,
-                    annotations: vec![
-                        SourceAnnotation {
-                            label: &m.rule.description,
-                            annotation_type: AnnotationType::Error,
-                            range: (m.context.offset, m.context.offset + m.context.length),
-                        },
-                        SourceAnnotation {
-                            label: r,
-                            annotation_type: AnnotationType::Help,
-                            range: (m.context.offset, m.context.offset + m.context.length),
-                        },
-                    ],
-                }],
-                opt: FormatOptions {
-                    color,
-                    ..Default::default()
-                },
-            }
-        });
-
-        let mut annotation = String::new();
-
-        for snippet in snippets {
-            if !annotation.is_empty() {
-                annotation.push('\n');
-            }
-            annotation.push_str(&DisplayList::from(snippet).to_string());
-        }
-        Ok(annotation)
+        Ok(resp.annotate(text.as_str(), origin, color))
     }
 
     /// Send a languages request to the server and await for the response.

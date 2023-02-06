@@ -56,6 +56,10 @@ pub enum Error {
     /// Error from checking if `filename` exists and is a actualla a file.
     #[error("invalid filename (got '{0}', does not exist or is not a file)")]
     InvalidFilename(String),
+
+    /// Error when joining multiple futures.
+    #[error(transparent)]
+    JoinError(#[from] tokio::task::JoinError),
 }
 
 /// Result type alias with error type defined above (see [`Error`]]).

@@ -150,7 +150,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #### Optional Features
 
-- **annotate**: Adds method(s) to annotate results from check request. If **cli** feature is also enabled, the CLI will by default print an annotated output.
+- **annotate**: Adds method(s) to annotate results from check request.
 - **cli-complete**: Adds commands to generate completion files for various shells. This feature also activates the **cli** feature. Enter `ltrs completions --help` to get help with installing completion files.
 - **color**: Enables color outputting in the terminal. If **cli** feature is also enable, the `--color=<WHEN>` option will be available.
 - **full**: Enables all features that are mutually compatible (i.e., `annotate`, `cli`, `cli-complete`, `color`, `docker`, and `unstable`).
