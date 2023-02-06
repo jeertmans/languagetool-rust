@@ -17,9 +17,10 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
 
     - name: Install Cargo MSRV
-      uses: dtolnay/install@master
+      uses: actions-rs/install@v0.1
       with:
         crate: cargo-msrv
+        version: 0.15.1
 
     - name: Check MSRV
       run: cargo msrv verify -- cargo check --all-features
