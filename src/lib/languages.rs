@@ -7,11 +7,11 @@ use serde::{Deserialize, Serialize};
 #[non_exhaustive]
 /// Language information
 pub struct Language {
-    /// Language name, e.g., `"Ukrainian"`
+    /// Language name, e.g., `"Ukrainian"`.
     pub name: String,
-    /// Language (short) code, e.g., `"uk"`
+    /// Language (short) code, e.g., `"uk"`.
     pub code: String,
-    /// Language long code, e.g., `"uk-UA"`
+    /// Language long code, e.g., `"uk-UA"`.
     pub long_code: String,
 }
 

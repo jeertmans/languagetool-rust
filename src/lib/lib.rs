@@ -1,4 +1,4 @@
-//#![deny(missing_docs)]
+#![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
 #![warn(clippy::must_use_candidate)]
 #![allow(clippy::doc_markdown, clippy::module_name_repetitions)]
@@ -14,7 +14,8 @@
 //! to indicate that they are likely to change in the future.
 //!
 //! This is a consequence of using an external API (i.e., the LanguageTool API)
-//! that cannot be controlled and (possible) breaking changes are to be expected.
+//! that cannot be controlled and (possible) breaking changes are to be
+//! expected.
 
 pub mod check;
 #[cfg(feature = "cli")]
@@ -26,12 +27,14 @@ pub mod languages;
 pub mod server;
 pub mod words;
 
-pub use crate::check::{CheckRequest, CheckResponse};
 #[cfg(feature = "docker")]
 pub use crate::docker::Docker;
-pub use crate::languages::LanguagesResponse;
-pub use crate::server::ServerClient;
-pub use crate::words::{
-    WordsAddRequest, WordsAddResponse, WordsDeleteRequest, WordsDeleteResponse, WordsRequest,
-    WordsResponse,
+pub use crate::{
+    check::{CheckRequest, CheckResponse},
+    languages::LanguagesResponse,
+    server::ServerClient,
+    words::{
+        WordsAddRequest, WordsAddResponse, WordsDeleteRequest, WordsDeleteResponse, WordsRequest,
+        WordsResponse,
+    },
 };

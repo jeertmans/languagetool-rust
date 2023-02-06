@@ -11,10 +11,8 @@ use std::path::PathBuf;
 /// Parse `v` is valid language code.
 ///
 /// A valid language code is usually
-/// - a two character string matching pattern
-///   `[a-z]{2}
-/// - a five character string matching pattern
-///   `[a-z]{2}-[A-Z]{2}
+/// - a two character string matching pattern `[a-z]{2}
+/// - a five character string matching pattern `[a-z]{2}-[A-Z]{2}
 /// - or some more complex ascii string (see below)
 ///
 /// Language code is case insensitive.
@@ -58,7 +56,7 @@ pub fn parse_language_code(v: &str) -> Result<String> {
         match splits.next() {
             Some(s)
                 if (s.len() == 2 || s.len() == 3) && s.chars().all(|c| c.is_ascii_alphabetic()) => {
-            }
+            },
             _ => return false,
         }
 
@@ -78,7 +76,11 @@ pub fn parse_language_code(v: &str) -> Result<String> {
     if v == "auto" || is_match(v) {
         Ok(v.to_string())
     } else {
-        Err(Error::InvalidValue("The value should be `auto` or match regex pattern: ^[a-zA-Z]{2,3}(-[a-zA-Z]{2}(-[a-zA-Z]+)*)?$".to_string()))
+        Err(Error::InvalidValue(
+            "The value should be `\"auto\"` or match regex pattern: \
+             ^[a-zA-Z]{2,3}(-[a-zA-Z]{2}(-[a-zA-Z]+)*)?$"
+                .to_string(),
+        ))
     }
 }
 
@@ -86,14 +88,14 @@ pub fn parse_language_code(v: &str) -> Result<String> {
 #[non_exhaustive]
 /// A portion of text to be checked.
 pub struct DataAnnotation {
+    /// If set, the markup will be interpreted as this.
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// If set, the markup will be interpreted as this
     pub interpret_as: Option<String>,
-    /// Text that should be treated as markup
     #[serde(skip_serializing_if = "Option::is_none")]
+    /// Text that should be treated as markup.
     pub markup: Option<String>,
-    /// Text that should be treated as normal text
     #[serde(skip_serializing_if = "Option::is_none")]
+    /// Text that should be treated as normal text.
     pub text: Option<String>,
 }
 
@@ -108,8 +110,8 @@ impl Default for DataAnnotation {
 }
 
 impl DataAnnotation {
+    /// Instantiate a new `DataAnnotation` with text only.
     #[inline]
-    /// Instantiate a new `DataAnnotation` with text only
     #[must_use]
     pub fn new_text(text: String) -> Self {
         Self {
@@ -119,8 +121,8 @@ impl DataAnnotation {
         }
     }
 
+    /// Instantiate a new `DataAnnotation` with markup only.
     #[inline]
-    /// Instantiate a new `DataAnnotation` with markup only
     #[must_use]
     pub fn new_markup(markup: String) -> Self {
         Self {
@@ -130,8 +132,8 @@ impl DataAnnotation {
         }
     }
 
+    /// Instantiate a new `DataAnnotation` with markup and its interpretation.
     #[inline]
-    /// Instantiate a new `DataAnnotation` with markup and its interpretation
     #[must_use]
     pub fn new_interpreted_markup(markup: String, interpret_as: String) -> Self {
         Self {
@@ -142,11 +144,11 @@ impl DataAnnotation {
     }
 }
 
+/// Alternative text to be checked.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 #[non_exhaustive]
-/// Alternative text to be checked.
 pub struct Data {
-    /// Vector of markup text, see [DataAnnotation]
+    /// Vector of markup text, see [`DataAnnotation`].
     pub annotation: Vec<DataAnnotation>,
 }
 
@@ -179,18 +181,18 @@ impl std::str::FromStr for Data {
     }
 }
 
+/// Possible levels for additional rules.
+///
+/// Currently, `Level::Picky` adds additional rules
+/// with respect to `Level::Default`.
 #[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
 #[cfg_attr(feature = "cli", derive(ValueEnum))]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
-/// Possible levels for additional rules.
-///
-/// Currently, `Level::Picky` adds additional rules
-/// with respect to `Level::Default`
 pub enum Level {
-    /// Default level
+    /// Default level.
     Default,
-    /// Picky level
+    /// Picky level.
     Picky,
 }
 
@@ -218,8 +220,9 @@ impl Level {
     }
 }
 
-/// Split string into as few fragments as possible, where each fragment contains
-/// (if possible) a maximum of `n` characters. Pattern str `Pat` is used for splitting.
+/// Split a string into as few fragments as possible, where each fragment
+/// contains (if possible) a maximum of `n` characters. Pattern str `pat` is
+/// used for splitting.
 ///
 /// # Examples
 ///
@@ -235,19 +238,27 @@ impl Level {
 /// let split = split_len(&s, 40, "\n");
 ///
 /// assert_eq!(split.join(""), s);
-/// assert_eq!(split, vec![
-///     "I have so many friends.\n",
-///     "They are very funny.\n",
-///     "I think I am very lucky to have them.\n",
-///     "One day, I will write them a poem.\n",
-///     "But, in the meantime, I write code.\n"]);
+/// assert_eq!(
+///     split,
+///     vec![
+///         "I have so many friends.\n",
+///         "They are very funny.\n",
+///         "I think I am very lucky to have them.\n",
+///         "One day, I will write them a poem.\n",
+///         "But, in the meantime, I write code.\n"
+///     ]
+/// );
 ///
 /// let split = split_len(&s, 80, "\n");
 ///
-/// assert_eq!(split, vec![
-///     "I have so many friends.\nThey are very funny.\n",
-///     "I think I am very lucky to have them.\nOne day, I will write them a poem.\n",
-///     "But, in the meantime, I write code.\n"]);
+/// assert_eq!(
+///     split,
+///     vec![
+///         "I have so many friends.\nThey are very funny.\n",
+///         "I think I am very lucky to have them.\nOne day, I will write them a poem.\n",
+///         "But, in the meantime, I write code.\n"
+///     ]
+/// );
 ///
 /// let s = "I have so many friends.
 /// They are very funny.
@@ -261,9 +272,14 @@ impl Level {
 ///
 /// println!("{:?}", split);
 ///
-/// assert_eq!(split, vec![
-///     "I have so many friends.\nThey are very funny.\nI think I am very lucky to have them.\n\n",
-///     "One day, I will write them a poem.\nBut, in the meantime, I write code.\n"]);
+/// assert_eq!(
+///     split,
+///     vec![
+///         "I have so many friends.\nThey are very funny.\nI think I am very lucky to have \
+///          them.\n\n",
+///         "One day, I will write them a poem.\nBut, in the meantime, I write code.\n"
+///     ]
+/// );
 /// ```
 #[must_use]
 pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source str> {
@@ -293,34 +309,24 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
     vec
 }
 
+/// LanguageTool POST check request.
+///
+/// The main feature - check a text with LanguageTool for possible style and
+/// grammar issues.
+///
+/// The structure below tries to follow as closely as possible the JSON API
+/// described [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// LanguageTool POST check request.
-///
-/// The main feature - check a text with LanguageTool for possible style and grammar issues.
-///
-/// The structure below tries to follow as closely as possible the JSON API described
-/// [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
 pub struct CheckRequest {
-    #[cfg(all(feature = "cli", feature = "annotate"))]
-    #[clap(short = 'r', long)]
-    #[serde(skip_serializing)]
-    /// If present, raw JSON output will be printed instead of annotated text.
-    pub raw: bool,
-    #[cfg(feature = "cli")]
-    #[clap(short = 'm', long)]
-    #[serde(skip_serializing)]
-    /// If present, more context (i.e., line number and line offset) will be added to response.
-    pub more_context: bool,
+    /// The text to be checked. This or 'data' is required.
     #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// The text to be checked. This or 'data' is required.
     pub text: Option<String>,
-    #[cfg_attr(feature = "cli", clap(short = 'd', long, conflicts_with = "text"))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    /// The text to be checked, given as a JSON document that specifies what's text and what's markup. This or 'text' is required.
+    /// The text to be checked, given as a JSON document that specifies what's
+    /// text and what's markup. This or 'text' is required.
     ///
     /// Markup will be ignored when looking for errors. Example text:
     /// ```html
@@ -335,13 +341,23 @@ pub struct CheckRequest {
     ///  {"markup": "</b>"}
     /// ]}
     /// ```
-    /// If you have markup that should be interpreted as whitespace, like `<p>` in HTML, you can have it interpreted like this:
+    /// If you have markup that should be interpreted as whitespace, like `<p>`
+    /// in HTML, you can have it interpreted like this:
     ///
     /// ```json
     /// {"markup": "<p>", "interpretAs": "\n\n"}
     /// ```
-    /// The 'data' feature is not limited to HTML or XML, it can be used for any kind of markup. Entities will need to be expanded in this input.
+    /// The 'data' feature is not limited to HTML or XML, it can be used for any
+    /// kind of markup. Entities will need to be expanded in this input.
+    #[cfg_attr(feature = "cli", clap(short = 'd', long, conflicts_with = "text"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<Data>,
+    /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the
+    /// language automatically (see `preferredVariants` below).
+    ///
+    /// For languages with variants (English, German, Portuguese) spell checking
+    /// will only be activated when you specify the variant, e.g. `en-GB`
+    /// instead of just `en`.
     #[cfg_attr(
         all(feature = "cli", feature = "cli", feature = "cli"),
         clap(
@@ -355,58 +371,67 @@ pub struct CheckRequest {
         all(feature = "cli", not(all(feature = "cli", feature = "cli"))),
         clap(short = 'l', long, default_value = "auto",)
     )]
-    /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the language automatically (see `preferredVariants` below).
-    ///
-    /// For languages with variants (English, German, Portuguese) spell checking will only be activated when you specify the variant, e.g. `en-GB` instead of just `en`.
     pub language: String,
+    /// Set to get Premium API access: Your username/email as used to log in at
+    /// languagetool.org.
     #[cfg_attr(feature = "cli", clap(short = 'u', long, requires = "api_key"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// Set to get Premium API access: Your username/email as used to log in at languagetool.org.
     pub username: Option<String>,
+    /// Set to get Premium API access: [your API
+    /// key](https://languagetool.org/editor/settings/api).
     #[cfg_attr(feature = "cli", clap(short = 'k', long, requires = "username"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// Set to get Premium API access: [your API key](https://languagetool.org/editor/settings/api)
     pub api_key: Option<String>,
+    /// Comma-separated list of dictionaries to include words from; uses special
+    /// default dictionary if this is unset.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// Comma-separated list of dictionaries to include words from; uses special default dictionary if this is unset
     pub dicts: Option<Vec<String>>,
+    /// A language code of the user's native language, enabling false friends
+    /// checks for some language pairs.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// A language code of the user's native language, enabling false friends checks for some language pairs.
     pub mother_tongue: Option<String>,
-    #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "Option::is_none")]
     /// Comma-separated list of preferred language variants.
     ///
-    /// The language detector used with `language=auto` can detect e.g. English, but it cannot decide whether British English or American English is used. Thus this parameter can be used to specify the preferred variants like `en-GB` and `de-AT`. Only available with `language=auto`. You should set variants for at least German and English, as otherwise the spell checking will not work for those, as no spelling dictionary can be selected for just `en` or `de`.
+    /// The language detector used with `language=auto` can detect e.g. English,
+    /// but it cannot decide whether British English or American English is
+    /// used. Thus this parameter can be used to specify the preferred variants
+    /// like `en-GB` and `de-AT`. Only available with `language=auto`. You
+    /// should set variants for at least German and English, as otherwise the
+    /// spell checking will not work for those, as no spelling dictionary can be
+    /// selected for just `en` or `de`.
+    #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub preferred_variants: Option<Vec<String>>,
+    /// IDs of rules to be enabled, comma-separated.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// IDs of rules to be enabled, comma-separated
     pub enabled_rules: Option<Vec<String>>,
+    /// IDs of rules to be disabled, comma-separated.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// IDs of rules to be disabled, comma-separated
     pub disabled_rules: Option<Vec<String>>,
+    /// IDs of categories to be enabled, comma-separated.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// IDs of categories to be enabled, comma-separated
     pub enabled_categories: Option<Vec<String>>,
+    /// IDs of categories to be disabled, comma-separated.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// IDs of categories to be disabled, comma-separated
     pub disabled_categories: Option<Vec<String>>,
+    /// If true, only the rules and categories whose IDs are specified with
+    /// `enabledRules` or `enabledCategories` are enabled.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "is_false")]
-    /// If true, only the rules and categories whose IDs are specified with `enabledRules` or `enabledCategories` are enabled.
     pub enabled_only: bool,
+    /// If set to `picky`, additional rules will be activated, i.e. rules that
+    /// you might only find useful when checking formal text.
     #[cfg_attr(
         feature = "cli",
         clap(long, default_value = "default", ignore_case = true, value_enum)
     )]
     #[serde(skip_serializing_if = "Level::is_default")]
-    /// If set to `picky`, additional rules will be activated, i.e. rules that you might only find useful when checking formal text.
     pub level: Level,
 }
 
@@ -414,10 +439,6 @@ impl Default for CheckRequest {
     #[inline]
     fn default() -> CheckRequest {
         CheckRequest {
-            #[cfg(all(feature = "cli", feature = "annotate"))]
-            raw: Default::default(),
-            #[cfg(feature = "cli")]
-            more_context: Default::default(),
             text: Default::default(),
             data: Default::default(),
             language: "auto".to_string(),
@@ -442,7 +463,7 @@ fn is_false(b: &bool) -> bool {
 }
 
 impl CheckRequest {
-    /// Set the text to be checked and removed potential data field
+    /// Set the text to be checked and remove potential data field.
     #[must_use]
     pub fn with_text(mut self, text: String) -> Self {
         self.text = Some(text);
@@ -450,7 +471,7 @@ impl CheckRequest {
         self
     }
 
-    /// Set the data to be checked and removed potential text field
+    /// Set the data to be checked and remove potential text field.
     #[must_use]
     pub fn with_data(mut self, data: Data) -> Self {
         self.data = Some(data);
@@ -458,12 +479,13 @@ impl CheckRequest {
         self
     }
 
-    /// Set the data (obtained from string) to be checked and removed potential text field
+    /// Set the data (obtained from string) to be checked and remove potential
+    /// text field
     pub fn with_data_str(self, data: &str) -> serde_json::Result<Self> {
         Ok(self.with_data(serde_json::from_str(data)?))
     }
 
-    /// Set the language of the text / data
+    /// Set the language of the text / data.
     #[must_use]
     pub fn with_language(mut self, language: String) -> Self {
         self.language = language;
@@ -474,7 +496,7 @@ impl CheckRequest {
     ///
     /// # Panics
     ///
-    /// Panics if both self.text and self.data are None.
+    /// Panics if both `self.text` and `self.data` are [`None`].
     /// Panics if any data annotation does not contain text or markup.
     #[must_use]
     pub fn get_text(&self) -> String {
@@ -500,8 +522,9 @@ impl CheckRequest {
     }
 }
 
+/// Parse a string slice into a [`PathBuf`], and error if the file does not
+/// exist.
 #[cfg(feature = "cli")]
-/// Parse a string slice into a [`PathBuf`], and error if the file does not exist.
 fn parse_filename(s: &str) -> Result<PathBuf> {
     let path_buf: PathBuf = s.parse().unwrap();
 
@@ -512,76 +535,92 @@ fn parse_filename(s: &str) -> Result<PathBuf> {
     }
 }
 
+/// Check text using LanguageTool server.
 #[cfg(feature = "cli")]
 #[derive(Debug, Parser)]
 pub struct CheckCommand {
+    /// If present, raw JSON output will be printed instead of annotated text.
+    #[cfg(feature = "annotate")]
+    #[clap(short = 'r', long)]
+    pub raw: bool,
+    /// If present, more context (i.e., line number and line offset) will be
+    /// added to response.
+    #[clap(short = 'm', long)]
+    pub more_context: bool,
+    /// Sets the maximum number of characters before splitting.
+    #[clap(long, default_value_t = 1500)]
+    pub maximum_length: isize,
+    /// If text is too long, will split on this pattern.
+    #[clap(long, default_value = "\n\n")]
+    pub split_pattern: String,
+    /// Inner [`CheckRequest`].
     #[command(flatten)]
     pub request: CheckRequest,
-    #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
     /// Optional filenames from which input is read.
+    #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
     pub filenames: Vec<PathBuf>,
 }
 
 /// Responses
 
+/// Detected language from check request.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[non_exhaustive]
-/// Detected language from check request.
 pub struct DetectedLanguage {
-    /// Language code, e.g., `"sk-SK"` for Slovak
+    /// Language code, e.g., `"sk-SK"` for Slovak.
     pub code: String,
+    /// Confidence level, from 0 to 1.
     #[cfg(feature = "unstable")]
-    /// Confidence level, from 0 to 1
     pub confidence: Option<f64>,
-    /// Language name, e.g., `"Slovak"`
+    /// Language name, e.g., `"Slovak"`.
     pub name: String,
+    /// Source (file) for the language detection.
     #[cfg(feature = "unstable")]
-    /// Source (file) for the language detection
     pub source: Option<String>,
 }
 
+/// Language information in check response.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// Language information in check response.
 pub struct LanguageResponse {
-    /// Language code, e.g., `"sk-SK"` for Slovak
+    /// Language code, e.g., `"sk-SK"` for Slovak.
     pub code: String,
-    /// Detected language from provided request
+    /// Detected language from provided request.
     pub detected_language: DetectedLanguage,
-    /// Language name, e.g., `"Slovak"`
+    /// Language name, e.g., `"Slovak"`.
     pub name: String,
 }
 
+/// Match context in check response.
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
-/// Match context in check response.
 pub struct Context {
-    /// Length of the match
+    /// Length of the match.
     pub length: usize,
-    /// Char index at which the match starts
+    /// Char index at which the match starts.
     pub offset: usize,
-    /// Contextual text around the match
+    /// Contextual text around the match.
     pub text: String,
 }
 
+/// More context, post-processed in check response.
 #[cfg(feature = "cli")]
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
-/// More context, post-processed in check response.
 pub struct MoreContext {
-    /// Line number where match occured
+    /// Line number where match occured.
     pub line_number: usize,
-    /// Char index at which the match starts on the current line
+    /// Char index at which the match starts on the current line.
     pub line_offset: usize,
 }
 
+/// Possible replacement for a given match in check response.
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
-/// Possible replacement for a given match in check response.
 pub struct Replacement {
-    /// Possible replacement value
+    /// Possible replacement value.
     pub value: String,
 }
 
@@ -597,145 +636,145 @@ impl From<&str> for Replacement {
     }
 }
 
+/// A rule category.
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
-/// A rule category.
 pub struct Category {
-    /// Category id
+    /// Category id.
     pub id: String,
-    /// Category name
+    /// Category name.
     pub name: String,
 }
 
+/// A possible url of a rule in a check response.
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
-/// A possible url of a rule in a check response.
 pub struct Url {
-    /// Url value
+    /// Url value.
     pub value: String,
 }
 
+/// The rule that was not satisfied in a given match.
 #[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// The rule that was not satisfied in a given match.
 pub struct Rule {
-    /// Rule category
+    /// Rule category.
     pub category: Category,
-    /// Rule description
+    /// Rule description.
     pub description: String,
-    /// Rule id
+    /// Rule id.
     pub id: String,
+    /// Indicate if the rule is from the premium API.
     #[cfg(feature = "unstable")]
-    /// Indicate if the rule is from the premium API
     pub is_premium: Option<bool>,
-    /// Issue type
+    /// Issue type.
     pub issue_type: String,
+    /// Rule source file.
     #[cfg(feature = "unstable")]
-    /// Rule source file
     pub source_file: Option<String>,
-    /// Rule sub id
+    /// Rule sub id.
     pub sub_id: Option<String>,
-    /// Rule list of urls
+    /// Rule list of urls.
     pub urls: Option<Vec<Url>>,
 }
 
+/// Type of a given match.
 #[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// Type of a given match.
 pub struct Type {
-    /// Type name
+    /// Type name.
     pub type_name: String,
 }
 
+/// Grammatical error match.
 #[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// Grammatical error match.
 pub struct Match {
-    /// Match context
+    /// Match context.
     pub context: Context,
-    #[cfg(feature = "unstable")]
     /// Unknown: please fill a [PR](https://github.com/jeertmans/languagetool-rust/pulls) of your
-    /// know that this attribute is used for
+    /// know that this attribute is used for.
+    #[cfg(feature = "unstable")]
     pub context_for_sure_match: isize,
-    #[cfg(feature = "unstable")]
     /// Unknown: please fill a [PR](https://github.com/jeertmans/languagetool-rust/pulls) of your
-    /// know that this attribute is used for
+    /// know that this attribute is used for.
+    #[cfg(feature = "unstable")]
     pub ignore_for_incomplete_sentence: bool,
-    /// Match length
+    /// Match length.
     pub length: usize,
-    /// Error message
+    /// Error message.
     pub message: String,
+    /// More context to match, post-processed using original text.
     #[cfg(feature = "cli")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    /// More context to match, post-processed using original text
     pub more_context: Option<MoreContext>,
-    /// Char index at which the match start
+    /// Char index at which the match start.
     pub offset: usize,
-    /// List of possible replacements (if applies)
+    /// List of possible replacements (if applies).
     pub replacements: Vec<Replacement>,
-    /// Match rule that was not satisfied
+    /// Match rule that was not satisfied.
     pub rule: Rule,
-    /// Sentence in which the error was found
+    /// Sentence in which the error was found.
     pub sentence: String,
-    /// Short message about the error
+    /// Short message about the error.
     pub short_message: String,
+    /// Match type.
     #[cfg(feature = "unstable")]
     #[serde(rename = "type")]
-    /// Match type
     pub type_: Type,
 }
 
+/// LanguageTool software details.
 #[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// LanguageTool software details.
 pub struct Software {
-    /// LanguageTool API version
+    /// LanguageTool API version.
     pub api_version: usize,
-    /// Some information about build date
+    /// Some information about build date.
     pub build_date: String,
-    /// Name (should be `"LanguageTool"`)
+    /// Name (should be `"LanguageTool"`).
     pub name: String,
-    /// Tell whether the server uses premium API or not
+    /// Tell whether the server uses premium API or not.
     pub premium: bool,
+    /// Sentence that indicates if using premium API would find more errors.
     #[cfg(feature = "unstable")]
-    /// Sentence that indicates if using premium API would find more errors
     pub premium_hint: Option<String>,
     /// Unknown: please fill a [PR](https://github.com/jeertmans/languagetool-rust/pulls) of your
-    /// know that this attribute is used for
+    /// know that this attribute is used for.
     pub status: String,
-    /// LanguageTool version
+    /// LanguageTool version.
     pub version: String,
 }
 
+/// Warnings about check response.
 #[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// Warnings about check response.
 pub struct Warnings {
-    /// Indicate if results are incomplete
+    /// Indicate if results are incomplete.
     pub incomplete_results: bool,
 }
 
+/// LanguageTool POST check response.
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-/// LanguageTool POST check response.
 pub struct CheckResponse {
-    /// Language information
+    /// Language information.
     pub language: LanguageResponse,
-    /// List of error matches
+    /// List of error matches.
     pub matches: Vec<Match>,
+    /// Ranges ([start, end]) of sentences.
     #[cfg(feature = "unstable")]
-    /// Ranges ([start, end]) of sentences
     pub sentence_ranges: Option<Vec<[usize; 2]>>,
-    /// LanguageTool software information
+    /// LanguageTool software information.
     pub software: Software,
+    /// Possible warnings.
     #[cfg(feature = "unstable")]
-    /// Possible warnings
     pub warnings: Option<Warnings>,
 }
 
@@ -751,17 +790,17 @@ impl CheckResponse {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
 /// Check response with additional context.
 ///
 /// This structure exists to keep a link between a check response
 /// and the original text that was checked.
+#[derive(Debug, Clone, PartialEq)]
 pub struct CheckResponseWithContext {
-    /// Original text that was checked by LT
+    /// Original text that was checked by LT.
     pub text: String,
-    /// Check response
+    /// Check response.
     pub response: CheckResponse,
-    /// Text's length
+    /// Text's length.
     pub text_length: usize,
 }
 
@@ -787,7 +826,8 @@ impl CheckResponseWithContext {
         self.response.iter_matches_mut()
     }
 
-    /// Return an iterator over matches and correspondig line number and line offset.
+    /// Return an iterator over matches and correspondig line number and line
+    /// offset.
     #[must_use]
     pub fn iter_match_positions(&self) -> MatchPositions<'_, std::slice::Iter<'_, Match>> {
         self.into()
@@ -809,13 +849,13 @@ impl CheckResponseWithContext {
             match self.response.sentence_ranges {
                 Some(ref mut sr_self) => {
                     sr_self.append(sr_other);
-                }
+                },
                 None => {
                     std::mem::swap(
                         &mut self.response.sentence_ranges,
                         &mut other.response.sentence_ranges,
                     );
-                }
+                },
             }
         }
 
@@ -894,13 +934,18 @@ impl<'source, T> MatchPositions<'source, T> {
         let n = m.offset - self.offset;
         for _ in 0..n {
             match self.text_chars.next() {
-                    Some('\n') => {
-                        self.line_number += 1;
-                        self.line_offset = 0;
-                    }
-                    None => panic!("text is shorter than expected, are you sure this text was the one used for the check request?"),
-                    _ => self.line_offset += 1,
-                }
+                Some('\n') => {
+                    self.line_number += 1;
+                    self.line_offset = 0;
+                },
+                None => {
+                    panic!(
+                        "text is shorter than expected, are you sure this text was the one used \
+                         for the check request?"
+                    )
+                },
+                _ => self.line_offset += 1,
+            }
         }
         self.offset = m.offset;
     }

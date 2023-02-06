@@ -1,6 +1,5 @@
 use clap::Parser;
-use languagetool_rust::cli::Cli;
-use languagetool_rust::error::Result;
+use languagetool_rust::{cli::Cli, error::Result};
 
 #[tokio::main]
 async fn main() {
