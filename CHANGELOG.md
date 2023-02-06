@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added PR template and codecov badge. [#44](https://github.com/jeertmans/languagetool-rust/pull/44)
 - Added missing `#[must_use]`. [#50](https://github.com/jeertmans/languagetool-rust/pull/50)
 - Upgraded formatting options, using nightly, and improved documentation. [#55](https://github.com/jeertmans/languagetool-rust/pull/55)
+- Change example image to be SVG. [#57](https://github.com/jeertmans/languagetool-rust/pull/57)
 
 ### Added
 
