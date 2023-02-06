@@ -1,4 +1,4 @@
-//#![deny(missing_docs)]
+#![deny(missing_docs)]
 #![deny(missing_debug_implementations)]
 #![warn(clippy::must_use_candidate)]
 #![allow(clippy::doc_markdown, clippy::module_name_repetitions)]
