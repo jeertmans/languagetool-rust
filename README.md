@@ -16,7 +16,6 @@
 4. [CHANGELOG](https://github.com/jeertmans/languagetool-rust/blob/main/CHANGELOG.md)
 5. [Related Projects](#related-projects)
 6. [Contributing](#contributing)
-    - [Future features](#future-features)
 
 ## About
 
