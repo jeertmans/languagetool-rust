@@ -4,61 +4,61 @@ use std::process::ExitStatus;
 /// Enumeration of all possible error types.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// Error from the command line parsing (see [`clap::Error`]).
     #[cfg(feature = "cli")]
     #[error(transparent)]
-    /// Error from the command line parsing (see [clap::Error]).
     Cli(#[from] clap::Error),
 
+    /// Error from a command line process (see [`std::process::Command`]).
     #[error("command failed: {0:?}")]
-    /// Error from a command line process (see [std::process::Command]).
     ExitStatus(String),
 
+    /// Error from parsing JSON (see [`serde_json::Error`]).
     #[error(transparent)]
-    /// Error from parsing JSON (see [serde_json::Error]).
     JSON(#[from] serde_json::Error),
 
+    /// Error from reading and writing to IO (see [`std::io::Error`]).
     #[error(transparent)]
-    /// Error from reading and writing to IO (see [std::io::Error]).
     IO(#[from] std::io::Error),
 
-    #[error("invalid request: {0}")]
     /// Error specifying an invalid request.
+    #[error("invalid request: {0}")]
     InvalidRequest(String),
 
-    #[error("invalid value: {0:?}")]
     /// Error specifying an invalid value.
+    #[error("invalid value: {0:?}")]
     InvalidValue(String),
 
-    #[error("could not parse {0:?} in a Docker action")]
     /// Error while parsing Action.
+    #[error("could not parse {0:?} in a Docker action")]
     ParseAction(String),
 
-    #[error("request could not be properly encoded: {0}")]
     /// Error from request encoding.
+    #[error("request could not be properly encoded: {0}")]
     RequestEncode(reqwest::Error),
 
-    #[error("response could not be properly decoded: {0}")]
     /// Error from request decoding.
+    #[error("response could not be properly decoded: {0}")]
     ResponseDecode(reqwest::Error),
 
+    /// Any other error from requests (see [`reqwest::Error`]).
     #[error(transparent)]
-    /// Any other error from requests (see [reqwest::Error]).
     Reqwest(#[from] reqwest::Error),
 
+    /// Error from reading environ variable (see [`std::env::VarError`]).
     #[error(transparent)]
-    /// Error from reading environ variable (see [std::env::VarError]).
     VarError(#[from] std::env::VarError),
 
-    #[error("command not found: {0}")]
     /// Error when a process command was not found.
+    #[error("command not found: {0}")]
     CommandNotFound(String),
 
-    #[error("invalid filename (got '{0}', does not exist or is not a file)")]
     /// Error from checking if `filename` exists and is a actualla a file.
+    #[error("invalid filename (got '{0}', does not exist or is not a file)")]
     InvalidFilename(String),
 }
 
-/// Result type alias with error type defined above (see [Error]).
+/// Result type alias with error type defined above (see [`Error`]]).
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[allow(dead_code)]

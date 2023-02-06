@@ -72,7 +72,7 @@ pub struct WordsRequest {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct WordsAddRequest {
-    /// The word to be added. Must not be a phrase, i.e. cannot contain white
+    /// The word to be added. Must not be a phrase, i.e., cannot contain white
     /// space. The word is added to a global dictionary that applies to all
     /// languages.
     #[cfg_attr(feature = "cli", clap(required = true, value_parser = parse_word))]
@@ -98,12 +98,12 @@ pub struct WordsDeleteRequest {
     /// The word to be removed.
     #[cfg_attr(feature = "cli", clap(required = true, value_parser = parse_word))]
     pub word: String,
-    /// Login arguments
+    /// Login arguments.
     #[cfg_attr(feature = "cli", clap(flatten))]
     pub login: LoginArgs,
     /// Name of the dictionary to add the word to; non-existent dictionaries are
     /// created after calling this; if unset, adds to special default
-    /// dictionary
+    /// dictionary.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dict: Option<String>,

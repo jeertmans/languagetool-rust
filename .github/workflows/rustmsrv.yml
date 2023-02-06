@@ -20,7 +20,8 @@ jobs:
       uses: actions-rs/install@v0.1
       with:
         crate: cargo-msrv
-        version: 0.15.1
+        version: latest
+        use-tool-cache: true
 
     - name: Check MSRV
       run: cargo msrv verify -- cargo check --all-features

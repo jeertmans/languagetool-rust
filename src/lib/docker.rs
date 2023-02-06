@@ -141,7 +141,7 @@ impl Docker {
         Ok(output)
     }
 
-    /// Run a Docker command according to self.action.
+    /// Run a Docker command according to `self.action`.
     pub fn run_action(&self) -> Result<Output> {
         match self.action {
             Action::Pull => self.pull(),

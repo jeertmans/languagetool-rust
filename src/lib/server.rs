@@ -139,7 +139,7 @@ pub struct ConfigFile {
 }
 
 impl ConfigFile {
-    /// Write the config file in a `key = value` format
+    /// Write the config file in a `key = value` format.
     pub fn write_to<T: io::Write>(&self, w: &mut T) -> io::Result<()> {
         let json = serde_json::to_value(self.clone()).unwrap();
         let m = json.as_object().unwrap();
@@ -207,7 +207,7 @@ impl Default for ConfigFile {
 }
 
 /// Server parameters that are to be used when instantiating a `LanguageTool`
-/// server
+/// server.
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -267,13 +267,13 @@ impl Default for ServerParameters {
 /// Hostname and (optional) port to connect to a `LanguageTool` server.
 ///
 /// To use your local server instead of online api, set:
-/// - `hostname` to "http://localhost"
-/// - `port` to "8081"
+/// * `hostname` to "http://localhost"
+/// * `port` to "8081"
 /// if you used the default configuration to start the server.
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub struct ServerCli {
-    /// Server's hostname
+    /// Server's hostname.
     #[cfg_attr(
         feature = "cli",
         clap(
@@ -284,7 +284,7 @@ pub struct ServerCli {
     )]
     pub hostname: String,
     /// Server's port number, with the empty string referring to no specific
-    /// port
+    /// port.
     #[cfg_attr(feature = "cli", clap(short = 'p', long, name = "PRT", default_value = "", value_parser = parse_port, env = "LANGUAGETOOL_PORT"))]
     pub port: String,
 }
@@ -323,9 +323,9 @@ impl ServerCli {
 /// Client to communicate with the `LanguageTool` server using async requests.
 #[derive(Clone, Debug)]
 pub struct ServerClient {
-    /// API string: hostname and, optionally, port number (see [ServerCli])
+    /// API string: hostname and, optionally, port number (see [`ServerCli`]).
     pub api: String,
-    /// Reqwest client that can send requests to the server
+    /// Reqwest client that can send requests to the server.
     pub client: Client,
     max_suggestions: isize,
 }
@@ -358,21 +358,21 @@ impl ServerClient {
         }
     }
 
-    /// Sets the maximum number of suggestions (defaults to -1), a negative
-    /// number will keep all replacement suggestions
+    /// Set the maximum number of suggestions (defaults to -1), a negative
+    /// number will keep all replacement suggestions.
     #[must_use]
     pub fn with_max_suggestions(mut self, max_suggestions: isize) -> Self {
         self.max_suggestions = max_suggestions;
         self
     }
 
-    /// Converts a [`ServerCli`] into a proper (usable) client
+    /// Convert a [`ServerCli`] into a proper (usable) client.
     #[must_use]
     pub fn from_cli(cli: ServerCli) -> Self {
         cli.into()
     }
 
-    /// Send a check request to the server and await for the response
+    /// Send a check request to the server and await for the response.
     pub async fn check(&self, request: &CheckRequest) -> Result<CheckResponse> {
         match self
             .client
@@ -410,7 +410,7 @@ impl ServerClient {
     }
 
     /// Send a check request to the server, await for the response and annotate
-    /// it
+    /// it.
     #[cfg(feature = "annotate")]
     pub async fn annotate_check(
         &self,
@@ -527,7 +527,7 @@ impl ServerClient {
         }
     }
 
-    /// Send a words/add request to the server and await for the response
+    /// Send a words/add request to the server and await for the response.
     pub async fn words_add(&self, request: &WordsAddRequest) -> Result<WordsAddResponse> {
         match self
             .client
@@ -550,7 +550,7 @@ impl ServerClient {
         }
     }
 
-    /// Send a words/delete request to the server and await for the response
+    /// Send a words/delete request to the server and await for the response.
     pub async fn words_delete(&self, request: &WordsDeleteRequest) -> Result<WordsDeleteResponse> {
         match self
             .client
@@ -574,7 +574,7 @@ impl ServerClient {
     }
 
     /// Ping the server and return the elapsed time in milliseconds if the
-    /// server responded
+    /// server responded.
     pub async fn ping(&self) -> Result<u128> {
         let start = Instant::now();
         self.client.get(&self.api).send().await?;
@@ -597,7 +597,7 @@ impl ServerClient {
     }
 
     /// Create a new [`ServerClient`] instance from environ variables,
-    /// but defaults to [`ServerClient::default`()] if expected environ
+    /// but defaults to [`ServerClient::default()`] if expected environ
     /// variables are not set.
     #[must_use]
     pub fn from_env_or_default() -> Self {
