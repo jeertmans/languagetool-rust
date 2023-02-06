@@ -114,13 +114,15 @@ impl Cli {
                 #[cfg(feature = "annotate")]
                 let color = stdout.supports_color();
 
-                let sources_iter: Box<dyn Iterator<Item = Result<(Option<String>, Option<&str>)>>> =
+                type Item<'a> = Result<(Option<String>, Option<&'a str>)>;
+
+                let sources_iter: Box<dyn Iterator<Item = Item>> =
                     if cmd.filenames.is_empty() {
                         if request.text.is_none() && request.data.is_none() {
                             let mut text = String::new();
                             match read_from_stdin(&mut stdout, &mut text) {
                                 Ok(_) => Box::new(vec![Ok((Some(text), None))].into_iter()),
-                                Err(e) => Box::new(vec![Err(e.into())].into_iter()),
+                                Err(e) => Box::new(vec![Err(e)].into_iter()),
                             }
                         } else {
                             Box::new(vec![Ok((None, None))].into_iter())
