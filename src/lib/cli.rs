@@ -123,7 +123,13 @@ impl Cli {
                         read_from_stdin(&mut stdout, &mut text)?;
                         request = request.with_text(text);
                     }
-                    let mut response = server_client.check(&request).await?;
+
+                    let mut response = if request.text.is_some() {
+                        let requests = request.split(cmd.max_length, cmd.split_pattern.as_str());
+                        server_client.check_multiple_and_join(requests).await?
+                    } else {
+                        server_client.check(&request).await?
+                    };
 
                     if request.text.is_some() && !cmd.raw {
                         let text = request.text.unwrap();
