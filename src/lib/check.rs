@@ -175,7 +175,8 @@ mod data_annotation_tests {
 
     #[test]
     fn test_interpreted_markup() {
-        let da = DataAnnotation::new_interpreted_markup("<a>Hello</a>".to_string(), "Hello".to_string());
+        let da =
+            DataAnnotation::new_interpreted_markup("<a>Hello</a>".to_string(), "Hello".to_string());
 
         assert!(da.text.is_none());
         assert_eq!(da.markup.unwrap(), "<a>Hello</a>".to_string());
@@ -651,7 +652,6 @@ pub struct CheckCommand {
     #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
     pub filenames: Vec<PathBuf>,
 }
-
 
 #[cfg(test)]
 mod request_tests {

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v1.3.0...HEAD)
+## [2.0.0](https://github.com/jeertmans/languagetool-rust/compare/v1.3.0...v2.0.0) 2023-02-07
 
 ### Chore
 
@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added missing `#[must_use]`. [#50](https://github.com/jeertmans/languagetool-rust/pull/50)
 - Upgraded formatting options, using nightly, and improved documentation. [#55](https://github.com/jeertmans/languagetool-rust/pull/55)
 - Change example image to be SVG. [#57](https://github.com/jeertmans/languagetool-rust/pull/57)
+- Added more tests. [#22](https://github.com/jeertmans/languagetool-rust/pull/22)
 
 ### Added
 
