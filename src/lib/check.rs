@@ -500,14 +500,13 @@ impl CheckRequest {
 
     /// Return a copy of the text within the request.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if both `self.text` and `self.data` are [`None`].
-    /// Panics if any data annotation does not contain text or markup.
-    #[must_use]
-    pub fn get_text(&self) -> String {
+    /// If both `self.text` and `self.data` are [`None`].
+    /// If any data annotation does not contain text or markup.
+    pub fn try_get_text(&self) -> Result<String> {
         if let Some(ref text) = self.text {
-            text.clone()
+            Ok(text.clone())
         } else if let Some(ref data) = self.data {
             let mut text = String::new();
             for da in data.annotation.iter() {
@@ -516,31 +515,59 @@ impl CheckRequest {
                 } else if let Some(ref t) = da.markup {
                     text.push_str(t.as_str());
                 } else {
-                    panic!("request contains some invalid data annotations(s): {da:?}");
+                    return Err(Error::InvalidDataAnnotation(
+                        "missing either text or markup field in {da:?}".to_string(),
+                    ));
                 }
             }
-            text
+            Ok(text)
         } else {
-            panic!(
-                "impossible to retrieve text from request if both data and text fields are None"
-            );
+            Err(Error::InvalidRequest(
+                "missing either text or data field".to_string(),
+            ))
         }
+    }
+
+    /// Return a copy of the text within the request.
+    /// Call [`CheckRequest::try_get_text`] but panic on error.
+    ///
+    /// # Panics
+    ///
+    /// If both `self.text` and `self.data` are [`None`].
+    /// If any data annotation does not contain text or markup.
+    #[must_use]
+    pub fn get_text(&self) -> String {
+        self.try_get_text().unwrap()
     }
 
     /// Split this request into multiple, using [`split_len`] function to split
     /// text.
+    ///
+    /// # Errors
+    ///
+    /// If `self.text` is none.
+    pub fn try_split(&self, n: usize, pat: &str) -> Result<Vec<Self>> {
+        let text = self
+            .text
+            .as_ref()
+            .ok_or(Error::InvalidRequest("missing text field".to_string()))?;
+
+        Ok(split_len(text.as_str(), n, pat)
+            .iter()
+            .map(|text_fragment| self.clone().with_text(text_fragment.to_string()))
+            .collect())
+    }
+
+    /// Split this request into multiple, using [`split_len`] function to split
+    /// text.
+    /// Call [`CheckRequest::try_split`] but panic on error.
     ///
     /// # Panics
     ///
     /// If `self.text` is none.
     #[must_use]
     pub fn split(&self, n: usize, pat: &str) -> Vec<Self> {
-        let text = self.text.as_ref().unwrap();
-
-        split_len(text.as_str(), n, pat)
-            .iter()
-            .map(|text_fragment| self.clone().with_text(text_fragment.to_string()))
-            .collect()
+        self.try_split(n, pat).unwrap()
     }
 }
 
@@ -567,6 +594,14 @@ pub struct CheckCommand {
     #[cfg(feature = "cli")]
     #[clap(short = 'r', long)]
     pub raw: bool,
+    /// If present, more context (i.e., line number and line offset) will be
+    /// added to response.
+    #[clap(short = 'm', long, hide = true)]
+    #[deprecated(
+        since = "2.0.0",
+        note = "Do not use this, it is only kept for backwards compatibility with v1"
+    )]
+    pub more_context: bool,
     /// Sets the maximum number of characters before splitting.
     #[clap(long, default_value_t = 1500)]
     pub max_length: usize,

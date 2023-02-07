@@ -9,17 +9,22 @@ pub enum Error {
     #[error(transparent)]
     Cli(#[from] clap::Error),
 
+    /// Error when a process command was not found.
+    #[error("command not found: {0}")]
+    CommandNotFound(String),
+
     /// Error from a command line process (see [`std::process::Command`]).
     #[error("command failed: {0:?}")]
     ExitStatus(String),
 
-    /// Error from parsing JSON (see [`serde_json::Error`]).
-    #[error(transparent)]
-    JSON(#[from] serde_json::Error),
+    /// Error specifying an invalid
+    /// [`DataAnnotation`](`crate::check::DataAnnotation`).
+    #[error("invalid request: {0}")]
+    InvalidDataAnnotation(String),
 
-    /// Error from reading and writing to IO (see [`std::io::Error`]).
-    #[error(transparent)]
-    IO(#[from] std::io::Error),
+    /// Error from checking if `filename` exists and is a actualla a file.
+    #[error("invalid filename (got '{0}', does not exist or is not a file)")]
+    InvalidFilename(String),
 
     /// Error specifying an invalid request.
     #[error("invalid request: {0}")]
@@ -29,6 +34,19 @@ pub enum Error {
     #[error("invalid value: {0:?}")]
     InvalidValue(String),
 
+    /// Error from reading and writing to IO (see [`std::io::Error`]).
+    #[error(transparent)]
+    IO(#[from] std::io::Error),
+
+    /// Error when joining multiple futures.
+    #[cfg(feature = "multithreaded")]
+    #[error(transparent)]
+    JoinError(#[from] tokio::task::JoinError),
+
+    /// Error from parsing JSON (see [`serde_json::Error`]).
+    #[error(transparent)]
+    JSON(#[from] serde_json::Error),
+
     /// Error while parsing Action.
     #[error("could not parse {0:?} in a Docker action")]
     ParseAction(String),
@@ -37,30 +55,17 @@ pub enum Error {
     #[error("request could not be properly encoded: {0}")]
     RequestEncode(reqwest::Error),
 
-    /// Error from request decoding.
-    #[error("response could not be properly decoded: {0}")]
-    ResponseDecode(reqwest::Error),
-
     /// Any other error from requests (see [`reqwest::Error`]).
     #[error(transparent)]
     Reqwest(#[from] reqwest::Error),
 
+    /// Error from request decoding.
+    #[error("response could not be properly decoded: {0}")]
+    ResponseDecode(reqwest::Error),
+
     /// Error from reading environ variable (see [`std::env::VarError`]).
     #[error(transparent)]
     VarError(#[from] std::env::VarError),
-
-    /// Error when a process command was not found.
-    #[error("command not found: {0}")]
-    CommandNotFound(String),
-
-    /// Error from checking if `filename` exists and is a actualla a file.
-    #[error("invalid filename (got '{0}', does not exist or is not a file)")]
-    InvalidFilename(String),
-
-    /// Error when joining multiple futures.
-    #[cfg(feature = "multithreaded")]
-    #[error(transparent)]
-    JoinError(#[from] tokio::task::JoinError),
 }
 
 /// Result type alias with error type defined above (see [`Error`]]).
