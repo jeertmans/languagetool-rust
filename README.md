@@ -6,16 +6,16 @@
 
 [![Crates.io](https://img.shields.io/crates/v/languagetool-rust)](https://crates.io/crates/languagetool-rust)
 [![docs.rs](https://img.shields.io/docsrs/languagetool-rust)](https://docs.rs/languagetool-rust)
+[![codecov](https://codecov.io/gh/jeertmans/languagetool-rust/branch/main/graph/badge.svg?token=ZDZ8YBQTPH)](https://codecov.io/gh/jeertmans/languagetool-rust)
 
 1. [About](#about)
 2. [CLI Reference](#cli-reference)
     - [Docker](#docker)
 3. [API Reference](#api-reference)
     - [Feature Flags](#feature-flags)
-4. [CHANGELOG](CHANGELOG.md)
+4. [CHANGELOG](https://github.com/jeertmans/languagetool-rust/blob/main/CHANGELOG.md)
 5. [Related Projects](#related-projects)
 6. [Contributing](#contributing)
-    - [Future features](#future-features)
 
 ## About
 
@@ -25,7 +25,7 @@ LanguageTool-Rust (LTRS) is both an executable and a Rust library that aims to p
 
 ## CLI Reference
 
-![Screenshot from CLI](https://raw.githubusercontent.com/jeertmans/languagetool-rust/main/img/screenshot.png)
+![Screenshot from CLI](https://raw.githubusercontent.com/jeertmans/languagetool-rust/main/img/screenshot.svg)
 
 The command line interface of LTRS allows to very quickly use any LanguageTool server to check for grammar and style errors. You can install the latest version with `cargo`:
 
@@ -35,7 +35,7 @@ The command line interface of LTRS allows to very quickly use any LanguageTool s
 
 The reference for the CLI can be accessed via `ltrs --help`.
 
-By default, LTRS uses LanguageTool public API.
+By default, LTRS uses the LanguageTool public API.
 
 ### Example
 
@@ -98,7 +98,7 @@ PONG! Delay: 110 ms
 
 ### Docker
 
-Since LanguageTool's installation might not be straighforward, we provide a basic Docker integration that allows to `pull`, `start`, and `stop` LanguageTool Docker containers in a few lines:
+Since LanguageTool's installation might not be straightforward, we provide a basic Docker integration that allows to `pull`, `start`, and `stop` LanguageTool Docker containers in a few lines:
 
 ```bash
 ltrs docker pull # only once
@@ -118,7 +118,7 @@ To use LanguageTool-Rust in your Rust project, add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-languagetool_rust = "version"
+languagetool_rust = "2.0"
 ```
 
 ### Example
@@ -150,9 +150,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #### Optional Features
 
-- **annotate**: Adds method(s) to annotate results from check request. If **cli** feature is also enabled, the CLI will by default print an annotated output.
-- **cli-complete**: Adds commands to generate completion files for various shells. This feature also activates the **cli** feature. Enter `ltrs completions --help` for get help with installing completion files.
-- **full**: Enables all features that are mutually compatible (i.e., `annotate`, `cli`, `cli-complete`, `docker`, and `unstable`).
+- **annotate**: Adds method(s) to annotate results from check request.
+- **cli-complete**: Adds commands to generate completion files for various shells. This feature also activates the **cli** feature. Enter `ltrs completions --help` to get help with installing completion files.
+- **color**: Enables color outputting in the terminal. If **cli** feature is also enable, the `--color=<WHEN>` option will be available.
+- **full**: Enables all features that are mutually compatible (i.e., `annotate`, `cli`, `cli-complete`, `color`, `docker`, and `unstable`).
+- **multithreaded**: Enables multithreaded requests.
 - **native-tls-vendored**: Enables the `vendored` feature of `native-tls`. This or `native-tls` should be activated if you are planning to use HTTPS servers.
 - **unstable**: Adds more fields to JSON responses that are not present in the [Model | Example Value](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All added fields are optional, hence the `Option` around them.
 
@@ -160,26 +162,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Here are listed some projects that use LTRS.
 
-- [`null-ls`](https://github.com/jose-elias-alvarez/null-ls.nvim): Neovim plugin with LTRS builtin ([to be merged](https://github.com/jose-elias-alvarez/null-ls.nvim/pull/997))
+- [`null-ls`](https://github.com/jose-elias-alvarez/null-ls.nvim): Neovim plugin with LTRS builtin ([see PR](https://github.com/jose-elias-alvarez/null-ls.nvim/pull/997))
 - [`languagetool-code-comments`](https://github.com/dustinblackman/languagetool-code-comments): uses LTRS to check for grammar errors within code comments
 
 *Do you use LTRS in your project? Contact me so I can add it to the list!*
 
 ## Contributing
 
-Contributions are more than welcome!
-
-### Future features
-
-- [x] Use Cargo features to enable Clap and others only in bin.rs
-- [x] Construct a good cli
-- [x] Handle all possible responses from LT
-- [ ] Document installation procedure
-- [x] Document functions
-- [ ] Test commands that need API keys
-- [x] Build test for lib
-- [x] Build automated testing with LT server (GitHub action?)
-- [x] Parse "data" as input to check command
-- [x] Parse parameters from env value with clap/env feature
-- [x] Enhance annotated text
-- [ ] ...
+Contributions are more than welcome! Please reach me via GitHub for any questions: [Issues](https://github.com/jeertmans/languagetool-rust/issues), [Pull requests](https://github.com/jeertmans/languagetool-rust/pulls) or [Discussions](https://github.com/jeertmans/languagetool-rust/discussions).

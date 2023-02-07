@@ -5,7 +5,7 @@
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![doc = include_str!("../../README.md")]
 //!
-//! # Note
+//! ## Note
 //!
 //! Most structures in this library are marked with
 //! ```ignore
@@ -14,9 +14,12 @@
 //! to indicate that they are likely to change in the future.
 //!
 //! This is a consequence of using an external API (i.e., the LanguageTool API)
-//! that cannot be controlled and (possible) breaking changes are to be expected.
+//! that cannot be controlled and (possible) breaking changes are to be
+//! expected.
 
 pub mod check;
+#[cfg(feature = "cli")]
+pub mod cli;
 #[cfg(feature = "docker")]
 pub mod docker;
 pub mod error;
@@ -24,12 +27,14 @@ pub mod languages;
 pub mod server;
 pub mod words;
 
-pub use crate::check::{CheckRequest, CheckResponse};
 #[cfg(feature = "docker")]
 pub use crate::docker::Docker;
-pub use crate::languages::LanguagesResponse;
-pub use crate::server::ServerClient;
-pub use crate::words::{
-    WordsAddRequest, WordsAddResponse, WordsDeleteRequest, WordsDeleteResponse, WordsRequest,
-    WordsResponse,
+pub use crate::{
+    check::{CheckRequest, CheckResponse},
+    languages::LanguagesResponse,
+    server::ServerClient,
+    words::{
+        WordsAddRequest, WordsAddResponse, WordsDeleteRequest, WordsDeleteResponse, WordsRequest,
+        WordsResponse,
+    },
 };

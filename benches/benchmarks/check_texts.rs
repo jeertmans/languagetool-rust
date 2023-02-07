@@ -13,8 +13,8 @@ async fn request_until_success(req: &CheckRequest, client: &ServerClient) -> Che
             Err(Error::InvalidRequest { body })
                 if body == *"Error: Server overloaded, please try again later" =>
             {
-                continue
-            }
+                continue;
+            },
             Err(e) => panic!("Some unexpected error occured: {}", e),
         }
     }
@@ -32,10 +32,12 @@ async fn check_text_split(text: &str) -> CheckResponse {
     let client = ServerClient::from_env().unwrap();
     let lines = text.lines();
 
-    let resps = join_all(lines.map(|line| async {
-        let req = CheckRequest::default().with_text(line.to_string());
-        let resp = request_until_success(&req, &client).await;
-        CheckResponseWithContext::new(req.get_text(), resp)
+    let resps = join_all(lines.map(|line| {
+        async {
+            let req = CheckRequest::default().with_text(line.to_string());
+            let resp = request_until_success(&req, &client).await;
+            CheckResponseWithContext::new(req.get_text(), resp)
+        }
     }))
     .await;
 

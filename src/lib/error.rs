@@ -4,74 +4,85 @@ use std::process::ExitStatus;
 /// Enumeration of all possible error types.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// Error from the command line parsing (see [`clap::Error`]).
     #[cfg(feature = "cli")]
     #[error(transparent)]
-    /// Error from the command line parsing (see [clap::Error]).
     Cli(#[from] clap::Error),
-    #[error("command failed: {body:?}")]
-    /// Error from a command line process (see [std::process:Command]).
-    ExitStatus {
-        /// Error body.
-        body: String,
-    },
+
+    /// Error from a command line process (see [`std::process::Command`]).
+    #[error("command failed: {0:?}")]
+    ExitStatus(String),
+
+    /// Error from parsing JSON (see [`serde_json::Error`]).
     #[error(transparent)]
-    /// Error from parsing JSON (see [serde_json::Error]).
     JSON(#[from] serde_json::Error),
+
+    /// Error from reading and writing to IO (see [`std::io::Error`]).
     #[error(transparent)]
-    /// Error from reading and writing to IO (see [std::io::Error]).
     IO(#[from] std::io::Error),
-    #[error("invalid request: {body:?}")]
+
     /// Error specifying an invalid request.
-    InvalidRequest {
-        /// Error body.
-        body: String,
-    },
-    #[error("invalid value: {body:?}")]
+    #[error("invalid request: {0}")]
+    InvalidRequest(String),
+
     /// Error specifying an invalid value.
-    InvalidValue {
-        /// Error body.
-        body: String,
-    },
-    #[error("could not parse `{s:?}` in a Docker action")]
+    #[error("invalid value: {0:?}")]
+    InvalidValue(String),
+
     /// Error while parsing Action.
-    ParseAction {
-        /// String that could not be parsed.
-        s: String,
-    },
-    #[error("request could not be properly encoded: {source}")]
+    #[error("could not parse {0:?} in a Docker action")]
+    ParseAction(String),
+
     /// Error from request encoding.
-    RequestEncode {
-        /// Source error.
-        source: reqwest::Error,
-    },
-    #[error("response could not be properly decoded: {source}")]
+    #[error("request could not be properly encoded: {0}")]
+    RequestEncode(reqwest::Error),
+
     /// Error from request decoding.
-    ResponseDecode {
-        /// Source error.
-        source: reqwest::Error,
-    },
+    #[error("response could not be properly decoded: {0}")]
+    ResponseDecode(reqwest::Error),
+
+    /// Any other error from requests (see [`reqwest::Error`]).
     #[error(transparent)]
-    /// Any other error from requests (see [reqwest::Error]).
     Reqwest(#[from] reqwest::Error),
+
+    /// Error from reading environ variable (see [`std::env::VarError`]).
     #[error(transparent)]
-    /// Error from reading environ variable (see [std::env::VarError]).
     VarError(#[from] std::env::VarError),
+
+    /// Error when a process command was not found.
+    #[error("command not found: {0}")]
+    CommandNotFound(String),
+
+    /// Error from checking if `filename` exists and is a actualla a file.
+    #[error("invalid filename (got '{0}', does not exist or is not a file)")]
+    InvalidFilename(String),
+
+    /// Error when joining multiple futures.
+    #[cfg(feature = "multithreaded")]
+    #[error(transparent)]
+    JoinError(#[from] tokio::task::JoinError),
 }
 
-/// Result type alias with error type defined above (see [Error]).
+/// Result type alias with error type defined above (see [`Error`]]).
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[allow(dead_code)]
 pub(crate) fn exit_status_error(exit_status: &ExitStatus) -> Result<()> {
     match exit_status.success() {
         true => Ok(()),
-        false => match exit_status.code() {
-            Some(code) => Err(Error::ExitStatus {
-                body: format!("Process terminated with exit code: {}", code),
-            }),
-            None => Err(Error::ExitStatus {
-                body: "Process terminated by signal".to_string(),
-            }),
+        false => {
+            match exit_status.code() {
+                Some(code) => {
+                    Err(Error::ExitStatus(format!(
+                        "Process terminated with exit code: {code}"
+                    )))
+                },
+                None => {
+                    Err(Error::ExitStatus(
+                        "Process terminated by signal".to_string(),
+                    ))
+                },
+            }
         },
     }
 }
@@ -123,7 +134,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::InvalidRequest { body: _ }));
+        assert!(matches!(error, Error::InvalidRequest(_)));
     }
 
     #[ignore]
@@ -134,7 +145,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::InvalidValue { body: _ }));
+        assert!(matches!(error, Error::InvalidValue(_)));
     }
 
     #[ignore]
@@ -145,7 +156,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::RequestEncode { source: _ }));
+        assert!(matches!(error, Error::RequestEncode(_)));
     }
 
     #[ignore]
@@ -156,7 +167,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::ResponseDecode { source: _ }));
+        assert!(matches!(error, Error::ResponseDecode(_)));
     }
 
     #[ignore]

@@ -1,8 +1,8 @@
 on:
   pull_request:
     paths:
-      - '**.rs'
-      - 'Cargo.toml'
+    - '**.rs'
+    - Cargo.toml
   workflow_dispatch:
 
 name: Cargo check
@@ -11,6 +11,6 @@ jobs:
   cargo_check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: taiki-e/install-action@cargo-hack
-      - run: cargo hack check --feature-powerset --no-dev-deps
+    - uses: actions/checkout@v3
+    - uses: taiki-e/install-action@cargo-hack
+    - run: cargo hack check --feature-powerset --no-dev-deps
