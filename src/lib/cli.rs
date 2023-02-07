@@ -4,6 +4,7 @@
 //! It contains all the content needed to create LTRS's command line interface.
 
 use crate::{
+    check::CheckResponseWithContext,
     error::Result,
     server::{ServerCli, ServerClient},
     words::WordsSubcommand,
@@ -114,50 +115,47 @@ impl Cli {
                 #[cfg(feature = "annotate")]
                 let color = stdout.supports_color();
 
-                type Item<'a> = Result<(Option<String>, Option<&'a str>)>;
+                let server_client = server_client.with_max_suggestions(cmd.max_suggestions);
 
-                let sources_iter: Box<dyn Iterator<Item = Item>> = if cmd.filenames.is_empty() {
+                if cmd.filenames.is_empty() {
                     if request.text.is_none() && request.data.is_none() {
                         let mut text = String::new();
-                        match read_from_stdin(&mut stdout, &mut text) {
-                            Ok(_) => Box::new(vec![Ok((Some(text), None))].into_iter()),
-                            Err(e) => Box::new(vec![Err(e)].into_iter()),
-                        }
-                    } else {
-                        Box::new(vec![Ok((None, None))].into_iter())
-                    }
-                } else {
-                    Box::new(cmd.filenames.iter().map(|filename| {
-                        let text = std::fs::read_to_string(filename)?;
-                        Ok((Some(text), filename.to_str()))
-                    }))
-                };
-
-                for source in sources_iter {
-                    let (text, _filename) = source?;
-                    if let Some(text) = text {
+                        read_from_stdin(&mut stdout, &mut text)?;
                         request = request.with_text(text);
                     }
+                    let mut response = server_client.check(&request).await?;
 
-                    #[cfg(feature = "annotate")]
+                    if request.text.is_some() && !cmd.raw {
+                        let text = request.text.unwrap();
+                        response = CheckResponseWithContext::new(text.clone(), response).into();
+                        writeln!(
+                            &mut stdout,
+                            "{}",
+                            &response.annotate(text.as_str(), None, color)
+                        )?;
+                    } else {
+                        writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&response)?)?;
+                    }
+
+                    return Ok(());
+                }
+
+                for filename in cmd.filenames.iter() {
+                    let text = std::fs::read_to_string(filename)?;
+                    let requests = request
+                        .clone()
+                        .with_text(text.clone())
+                        .split(cmd.max_length, cmd.split_pattern.as_str());
+                    let response = server_client.check_multiple_and_join(requests).await?;
+
                     if !cmd.raw {
                         writeln!(
                             &mut stdout,
                             "{}",
-                            &server_client
-                                .annotate_check(&request, _filename, color)
-                                .await?
+                            &response.annotate(text.as_str(), filename.to_str(), color)
                         )?;
                     } else {
-                        let mut resp = server_client.check(&request).await?;
-
-                        if cmd.more_context {
-                            use crate::check::CheckResponseWithContext;
-                            let text = request.get_text();
-                            resp = CheckResponseWithContext::new(text, resp).into();
-                        }
-
-                        writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&resp)?)?;
+                        writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&response)?)?;
                     }
                 }
             },

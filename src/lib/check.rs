@@ -1,9 +1,15 @@
 //! Structures for `check` requests and responses.
 
 use super::error::{Error, Result};
+#[cfg(feature = "annotate")]
+use annotate_snippets::{
+    display_list::{DisplayList, FormatOptions},
+    snippet::{Annotation, AnnotationType, Slice, Snippet, SourceAnnotation},
+};
 #[cfg(feature = "cli")]
 use clap::{Args, Parser, ValueEnum};
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "cli")]
 use std::path::PathBuf;
 
 /// Requests
@@ -520,6 +526,22 @@ impl CheckRequest {
             );
         }
     }
+
+    /// Split this request into multiple, using [`split_len`] function to split
+    /// text.
+    ///
+    /// # Panics
+    ///
+    /// If `self.text` is none.
+    #[must_use]
+    pub fn split(&self, n: usize, pat: &str) -> Vec<Self> {
+        let text = self.text.as_ref().unwrap();
+
+        split_len(text.as_str(), n, pat)
+            .iter()
+            .map(|text_fragment| self.clone().with_text(text_fragment.to_string()))
+            .collect()
+    }
 }
 
 /// Parse a string slice into a [`PathBuf`], and error if the file does not
@@ -540,19 +562,20 @@ fn parse_filename(s: &str) -> Result<PathBuf> {
 #[derive(Debug, Parser)]
 pub struct CheckCommand {
     /// If present, raw JSON output will be printed instead of annotated text.
-    #[cfg(feature = "annotate")]
+    /// This has not effect if `--data` is used, because it is never
+    /// annotated.
+    #[cfg(feature = "cli")]
     #[clap(short = 'r', long)]
     pub raw: bool,
-    /// If present, more context (i.e., line number and line offset) will be
-    /// added to response.
-    #[clap(short = 'm', long)]
-    pub more_context: bool,
     /// Sets the maximum number of characters before splitting.
     #[clap(long, default_value_t = 1500)]
-    pub maximum_length: isize,
+    pub max_length: usize,
     /// If text is too long, will split on this pattern.
     #[clap(long, default_value = "\n\n")]
     pub split_pattern: String,
+    /// Max. number of suggestions kept. If negative, all suggestions are kept.
+    #[clap(long, default_value_t = 5, allow_negative_numbers = true)]
+    pub max_suggestions: isize,
     /// Inner [`CheckRequest`].
     #[command(flatten)]
     pub request: CheckRequest,
@@ -606,7 +629,6 @@ pub struct Context {
 }
 
 /// More context, post-processed in check response.
-#[cfg(feature = "cli")]
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 pub struct MoreContext {
@@ -708,7 +730,6 @@ pub struct Match {
     /// Error message.
     pub message: String,
     /// More context to match, post-processed using original text.
-    #[cfg(feature = "cli")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub more_context: Option<MoreContext>,
     /// Char index at which the match start.
@@ -788,6 +809,71 @@ impl CheckResponse {
     pub fn iter_matches_mut(&mut self) -> std::slice::IterMut<'_, Match> {
         self.matches.iter_mut()
     }
+
+    /// Creates an annotated string from current response.
+    #[cfg(feature = "annotate")]
+    #[must_use]
+    pub fn annotate(&self, text: &str, origin: Option<&str>, color: bool) -> String {
+        if self.matches.is_empty() {
+            return "No error were found in provided text".to_string();
+        }
+        let replacements: Vec<_> = self
+            .matches
+            .iter()
+            .map(|m| {
+                m.replacements.iter().fold(String::new(), |mut acc, r| {
+                    if !acc.is_empty() {
+                        acc.push_str(", ");
+                    }
+                    acc.push_str(&r.value);
+                    acc
+                })
+            })
+            .collect();
+
+        let snippets = self.matches.iter().zip(replacements.iter()).map(|(m, r)| {
+            Snippet {
+                title: Some(Annotation {
+                    label: Some(&m.message),
+                    id: Some(&m.rule.id),
+                    annotation_type: AnnotationType::Error,
+                }),
+                footer: vec![],
+                slices: vec![Slice {
+                    source: &m.context.text,
+                    line_start: 1 + text.chars().take(m.offset).filter(|c| *c == '\n').count(),
+                    origin,
+                    fold: true,
+                    annotations: vec![
+                        SourceAnnotation {
+                            label: &m.rule.description,
+                            annotation_type: AnnotationType::Error,
+                            range: (m.context.offset, m.context.offset + m.context.length),
+                        },
+                        SourceAnnotation {
+                            label: r,
+                            annotation_type: AnnotationType::Help,
+                            range: (m.context.offset, m.context.offset + m.context.length),
+                        },
+                    ],
+                }],
+                opt: FormatOptions {
+                    color,
+                    ..Default::default()
+                },
+            }
+        });
+
+        let mut annotation = String::new();
+
+        for snippet in snippets {
+            if !annotation.is_empty() {
+                annotation.push('\n');
+            }
+            annotation.push_str(&DisplayList::from(snippet).to_string());
+        }
+        annotation
+    }
 }
 
 /// Check response with additional context.
@@ -866,7 +952,6 @@ impl CheckResponseWithContext {
     }
 }
 
-#[cfg(feature = "cli")]
 impl From<CheckResponseWithContext> for CheckResponse {
     #[allow(clippy::needless_borrow)]
     fn from(mut resp: CheckResponseWithContext) -> Self {
@@ -930,7 +1015,6 @@ impl<'source, T> MatchPositions<'source, T> {
     }
 
     fn update_line_number_and_offset(&mut self, m: &Match) {
-        // TODO: check cases where newline is actually '\r\n' (Windows platforms)
         let n = m.offset - self.offset;
         for _ in 0..n {
             match self.text_chars.next() {
