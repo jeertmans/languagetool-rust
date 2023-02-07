@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added cli requirements for `username`/`api_key` pair. [#16](https://github.com/jeertmans/languagetool-rust/pull/16), [#30](https://github.com/jeertmans/languagetool-rust/pull/30)
 - Added a `CommandNotFound` error variant for when docker is not found. [#52](https://github.com/jeertmans/languagetool-rust/pull/52)
 - Added a `split_len` function. [#18](https://github.com/jeertmans/languagetool-rust/pull/18)
-- Automatically split long text into multiple fragments. [#58](https://github.com/jeertmans/languagetool-rust/pull/58)
+- Automatically split long text into multiple fragments. [#58](https://github.com/jeertmans/languagetool-rust/pull/58), [#60](https://github.com/jeertmans/languagetool-rust/pull/60)
 - Add `try_` variants for panicking functions. [#59](https://github.com/jeertmans/languagetool-rust/pull/59)
 
 ### Changed
