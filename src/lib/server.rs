@@ -409,6 +409,7 @@ impl ServerClient {
     /// # Panics
     ///
     /// If any of the requests has `self.text` field which is none.
+    #[cfg(feature = "multi-threaded")]
     pub async fn check_multiple_and_join(
         &self,
         requests: Vec<CheckRequest>,

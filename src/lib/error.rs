@@ -58,6 +58,7 @@ pub enum Error {
     InvalidFilename(String),
 
     /// Error when joining multiple futures.
+    #[cfg(feature = "multi-threaded")]
     #[error(transparent)]
     JoinError(#[from] tokio::task::JoinError),
 }

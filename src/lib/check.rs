@@ -9,6 +9,7 @@ use annotate_snippets::{
 #[cfg(feature = "cli")]
 use clap::{Args, Parser, ValueEnum};
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "cli")]
 use std::path::PathBuf;
 
 /// Requests
@@ -628,7 +629,6 @@ pub struct Context {
 }
 
 /// More context, post-processed in check response.
-#[cfg(feature = "cli")]
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 pub struct MoreContext {
@@ -1015,7 +1015,6 @@ impl<'source, T> MatchPositions<'source, T> {
     }
 
     fn update_line_number_and_offset(&mut self, m: &Match) {
-        // TODO: check cases where newline is actually '\r\n' (Windows platforms)
         let n = m.offset - self.offset;
         for _ in 0..n {
             match self.text_chars.next() {
