@@ -730,7 +730,6 @@ pub struct Match {
     /// Error message.
     pub message: String,
     /// More context to match, post-processed using original text.
-    #[cfg(feature = "cli")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub more_context: Option<MoreContext>,
     /// Char index at which the match start.
