@@ -406,7 +406,7 @@ impl ServerClient {
 
     /// Send multiple check requests and join them into a single response.
     ///
-    /// # Panics
+    /// # Error
     ///
     /// If any of the requests has `self.text` field which is none.
     #[cfg(feature = "multithreaded")]
@@ -420,7 +420,9 @@ impl ServerClient {
             let server_client = self.clone();
             tasks.push(tokio::spawn(async move {
                 let response = server_client.check(&request).await?;
-                let text = request.text.unwrap();
+                let text = request.text.ok_or(Error::InvalidRequest(
+                    "missing text field; cannot join requests with data annotations".to_string(),
+                ))?;
                 Result::<(String, CheckResponse)>::Ok((text, response))
             }));
         }
@@ -571,7 +573,7 @@ impl ServerClient {
     }
 
     /// Create a new [`ServerClient`] instance from environ variables,
-    /// but defaults to [`ServerClient::default()`] if expected environ
+    /// but defaults to [`ServerClient::default`] if expected environ
     /// variables are not set.
     #[must_use]
     pub fn from_env_or_default() -> Self {
