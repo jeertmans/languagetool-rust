@@ -532,8 +532,9 @@ impl CheckRequest {
     /// # Panics
     ///
     /// If `self.text` is none.
+    #[must_use]
     pub fn split(&self, n: usize, pat: &str) -> Vec<Self> {
-        let text = self.text.unwrap();
+        let text = self.text.as_ref().unwrap();
 
         split_len(text.as_str(), n, pat)
             .iter()
@@ -560,6 +561,8 @@ fn parse_filename(s: &str) -> Result<PathBuf> {
 #[derive(Debug, Parser)]
 pub struct CheckCommand {
     /// If present, raw JSON output will be printed instead of annotated text.
+    /// This has not effect if `--data` is used, because it is never
+    /// annotated.
     #[cfg(feature = "cli")]
     #[clap(short = 'r', long)]
     pub raw: bool,
@@ -569,6 +572,9 @@ pub struct CheckCommand {
     /// If text is too long, will split on this pattern.
     #[clap(long, default_value = "\n\n")]
     pub split_pattern: String,
+    /// Max. number of suggestions kept. If negative, all suggestions are kept.
+    #[clap(long, default_value_t = 5, allow_negative_numbers = true)]
+    pub max_suggestions: isize,
     /// Inner [`CheckRequest`].
     #[command(flatten)]
     pub request: CheckRequest,
@@ -807,6 +813,7 @@ impl CheckResponse {
 
     /// Creates an annotated string from current response.
     #[cfg(feature = "annotate")]
+    #[must_use]
     pub fn annotate(&self, text: &str, origin: Option<&str>, color: bool) -> String {
         if self.matches.is_empty() {
             return "No error were found in provided text".to_string();

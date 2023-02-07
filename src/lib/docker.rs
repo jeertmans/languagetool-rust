@@ -163,12 +163,11 @@ pub struct DockerCommand {
 #[cfg(feature = "cli")]
 impl DockerCommand {
     /// Execute a Docker command and write output to stdout.
-    pub fn execute<W>(&self, stdout: &mut W) -> Result<()>
+    pub fn execute<W>(&self, _stdout: &mut W) -> Result<()>
     where
         W: std::io::Write,
     {
-        let result = self.docker.run_action()?;
-        writeln!(stdout, "{result:?}")?;
+        self.docker.run_action()?;
         Ok(())
     }
 }

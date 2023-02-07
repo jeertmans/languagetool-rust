@@ -4,6 +4,7 @@
 //! It contains all the content needed to create LTRS's command line interface.
 
 use crate::{
+    check::CheckResponseWithContext,
     error::Result,
     server::{ServerCli, ServerClient},
     words::WordsSubcommand,
@@ -114,13 +115,26 @@ impl Cli {
                 #[cfg(feature = "annotate")]
                 let color = stdout.supports_color();
 
-                if request.data.is_some() {}
+                let server_client = server_client.with_max_suggestions(cmd.max_suggestions);
 
                 if cmd.filenames.is_empty() {
-                    if request.text.is_none() {
+                    if request.text.is_none() && request.data.is_none() {
                         let mut text = String::new();
                         read_from_stdin(&mut stdout, &mut text)?;
                         request = request.with_text(text);
+                    }
+                    let mut response = server_client.check(&request).await?;
+
+                    if request.text.is_some() && !cmd.raw {
+                        let text = request.text.unwrap();
+                        response = CheckResponseWithContext::new(text.clone(), response).into();
+                        writeln!(
+                            &mut stdout,
+                            "{}",
+                            &response.annotate(text.as_str(), None, color)
+                        )?;
+                    } else {
+                        writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&response)?)?;
                     }
 
                     return Ok(());
@@ -128,7 +142,8 @@ impl Cli {
 
                 for filename in cmd.filenames.iter() {
                     let text = std::fs::read_to_string(filename)?;
-                    let requests = request.clone()
+                    let requests = request
+                        .clone()
                         .with_text(text.clone())
                         .split(cmd.max_length, cmd.split_pattern.as_str());
                     let response = server_client.check_multiple_and_join(requests).await?;
