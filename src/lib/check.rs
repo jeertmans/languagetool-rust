@@ -166,7 +166,7 @@ mod data_annotation_tests {
 
     #[test]
     fn test_markup() {
-        let da = DataAnnotation::new_markup("<a>Hello</a>`".to_string());
+        let da = DataAnnotation::new_markup("<a>Hello</a>".to_string());
 
         assert!(da.text.is_none());
         assert_eq!(da.markup.unwrap(), "<a>Hello</a>".to_string());
@@ -175,7 +175,7 @@ mod data_annotation_tests {
 
     #[test]
     fn test_interpreted_markup() {
-        let da = DataAnnotation::new_interpreted_markup("<a>Hello</a>`".to_string(), "Hello".to_string());
+        let da = DataAnnotation::new_interpreted_markup("<a>Hello</a>".to_string(), "Hello".to_string());
 
         assert!(da.text.is_none());
         assert_eq!(da.markup.unwrap(), "<a>Hello</a>".to_string());
