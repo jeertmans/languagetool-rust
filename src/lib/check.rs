@@ -150,6 +150,40 @@ impl DataAnnotation {
     }
 }
 
+#[cfg(test)]
+mod data_annotation_tests {
+
+    use crate::check::DataAnnotation;
+
+    #[test]
+    fn test_text() {
+        let da = DataAnnotation::new_text("Hello".to_string());
+
+        assert_eq!(da.text.unwrap(), "Hello".to_string());
+        assert!(da.markup.is_none());
+        assert!(da.interpret_as.is_none());
+    }
+
+    #[test]
+    fn test_markup() {
+        let da = DataAnnotation::new_markup("<a>Hello</a>".to_string());
+
+        assert!(da.text.is_none());
+        assert_eq!(da.markup.unwrap(), "<a>Hello</a>".to_string());
+        assert!(da.interpret_as.is_none());
+    }
+
+    #[test]
+    fn test_interpreted_markup() {
+        let da =
+            DataAnnotation::new_interpreted_markup("<a>Hello</a>".to_string(), "Hello".to_string());
+
+        assert!(da.text.is_none());
+        assert_eq!(da.markup.unwrap(), "<a>Hello</a>".to_string());
+        assert_eq!(da.interpret_as.unwrap(), "Hello".to_string());
+    }
+}
+
 /// Alternative text to be checked.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
 #[non_exhaustive]
@@ -619,7 +653,29 @@ pub struct CheckCommand {
     pub filenames: Vec<PathBuf>,
 }
 
-/// Responses
+#[cfg(test)]
+mod request_tests {
+
+    use crate::CheckRequest;
+
+    #[test]
+    fn test_with_text() {
+        let req = CheckRequest::default().with_text("hello".to_string());
+
+        assert_eq!(req.text.unwrap(), "hello".to_string());
+        assert!(req.data.is_none());
+    }
+
+    #[test]
+    fn test_with_data() {
+        let req = CheckRequest::default().with_text("hello".to_string());
+
+        assert_eq!(req.text.unwrap(), "hello".to_string());
+        assert!(req.data.is_none());
+    }
+}
+
+/// Reponses
 
 /// Detected language from check request.
 #[allow(clippy::derive_partial_eq_without_eq)]
