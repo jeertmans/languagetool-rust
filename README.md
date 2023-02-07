@@ -145,7 +145,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #### Default Features
 
-- **cli**: Adds command-line related methods for multiple structures. This feature is required to install the LTRS CLI.
+- **cli**: Adds command-line related methods for multiple structures. This feature is required to install the LTRS CLI, and enables the following features: **annotate**, **color**, **multithreaded**.
 - **native-tls**: Enables TLS functionality provided by `native-tls`.
 
 #### Optional Features
@@ -153,7 +153,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 - **annotate**: Adds method(s) to annotate results from check request.
 - **cli-complete**: Adds commands to generate completion files for various shells. This feature also activates the **cli** feature. Enter `ltrs completions --help` to get help with installing completion files.
 - **color**: Enables color outputting in the terminal. If **cli** feature is also enable, the `--color=<WHEN>` option will be available.
-- **full**: Enables all features that are mutually compatible (i.e., `annotate`, `cli`, `cli-complete`, `color`, `docker`, and `unstable`).
+- **full**: Enables all features that are mutually compatible (i.e., `cli-complete`, `docker`, and `unstable`).
 - **multithreaded**: Enables multithreaded requests.
 - **native-tls-vendored**: Enables the `vendored` feature of `native-tls`. This or `native-tls` should be activated if you are planning to use HTTPS servers.
 - **unstable**: Adds more fields to JSON responses that are not present in the [Model | Example Value](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All added fields are optional, hence the `Option` around them.
