@@ -573,7 +573,7 @@ impl ServerClient {
     }
 
     /// Create a new [`ServerClient`] instance from environ variables,
-    /// but defaults to [`ServerClient::default()`] if expected environ
+    /// but defaults to [`ServerClient::default`] if expected environ
     /// variables are not set.
     #[must_use]
     pub fn from_env_or_default() -> Self {
