@@ -15,7 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed words requests. [#64](https://github.com/jeertmans/languagetool-rust/pull/64)
 
-
 ## [2.0.0](https://github.com/jeertmans/languagetool-rust/compare/v1.3.0...v2.0.0) 2023-02-07
 
 ### Chore
