@@ -414,12 +414,18 @@ pub struct CheckRequest {
     pub language: String,
     /// Set to get Premium API access: Your username/email as used to log in at
     /// languagetool.org.
-    #[cfg_attr(feature = "cli", clap(short = 'u', long, requires = "api_key"))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(short = 'u', long, requires = "api_key", env = "LANGUAGETOOL_USERNAME")
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub username: Option<String>,
     /// Set to get Premium API access: [your API
     /// key](https://languagetool.org/editor/settings/api).
-    #[cfg_attr(feature = "cli", clap(short = 'k', long, requires = "username"))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(short = 'k', long, requires = "username", env = "LANGUAGETOOL_API_KEY")
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub api_key: Option<String>,
     /// Comma-separated list of dictionaries to include words from; uses special

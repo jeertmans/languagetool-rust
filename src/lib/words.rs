@@ -33,10 +33,16 @@ pub fn parse_word(v: &str) -> Result<String> {
 #[non_exhaustive]
 pub struct LoginArgs {
     /// Your username as used to log in at languagetool.org.
-    #[cfg_attr(feature = "cli", clap(short = 'u', long, required = true))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(short = 'u', long, required = true, env = "LANGUAGETOOL_USERNAME")
+    )]
     pub username: String,
-    /// [Your API key](https://languagetool.org/editor/settings/api)
-    #[cfg_attr(feature = "cli", clap(short = 'k', long, required = true))]
+    /// [Your API key](https://languagetool.org/editor/settings/api).
+    #[cfg_attr(
+        feature = "cli",
+        clap(short = 'k', long, required = true, env = "LANGUAGETOOL_API_KEY")
+    )]
     pub api_key: String,
 }
 
@@ -53,11 +59,12 @@ pub struct WordsRequest {
     /// Maximum number of words to return.
     #[cfg_attr(feature = "cli", clap(long, default_value = "10"))]
     pub limit: isize,
-    /// Login arguments
+    /// Login arguments.
     #[cfg_attr(feature = "cli", clap(flatten))]
-    pub login: LoginArgs,
+    #[serde(flatten)]
+    pub login: Option<LoginArgs>,
     /// Comma-separated list of dictionaries to include words from; uses special
-    /// default dictionary if this is unset
+    /// default dictionary if this is unset.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dicts: Option<Vec<String>>,
@@ -77,12 +84,13 @@ pub struct WordsAddRequest {
     /// languages.
     #[cfg_attr(feature = "cli", clap(required = true, value_parser = parse_word))]
     pub word: String,
-    /// Login arguments
+    /// Login arguments.
     #[cfg_attr(feature = "cli", clap(flatten))]
+    #[serde(flatten)]
     pub login: LoginArgs,
     /// Name of the dictionary to add the word to; non-existent dictionaries are
     /// created after calling this; if unset, adds to special default
-    /// dictionary
+    /// dictionary.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     dict: Option<String>,
@@ -100,6 +108,7 @@ pub struct WordsDeleteRequest {
     pub word: String,
     /// Login arguments.
     #[cfg_attr(feature = "cli", clap(flatten))]
+    #[serde(flatten)]
     pub login: LoginArgs,
     /// Name of the dictionary to add the word to; non-existent dictionaries are
     /// created after calling this; if unset, adds to special default
@@ -122,7 +131,8 @@ pub enum WordsSubcommand {
 /// Retrieve some user's words list.
 #[cfg(feature = "cli")]
 #[derive(Debug, Parser)]
-#[clap(subcommand_negates_reqs(true))]
+#[clap(args_conflicts_with_subcommands = true)]
+#[clap(subcommand_negates_reqs = true)]
 pub struct WordsCommand {
     /// Actual GET request.
     #[command(flatten)]
@@ -136,7 +146,7 @@ pub struct WordsCommand {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct WordsResponse {
-    /// List of words
+    /// List of words.
     words: Vec<String>,
 }
 
@@ -144,7 +154,7 @@ pub struct WordsResponse {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct WordsAddResponse {
-    /// `true` if word was correctly added
+    /// `true` if word was correctly added.
     added: bool,
 }
 
@@ -152,6 +162,6 @@ pub struct WordsAddResponse {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct WordsDeleteResponse {
-    /// `true` if word was correctly removed
+    /// `true` if word was correctly removed.
     deleted: bool,
 }
