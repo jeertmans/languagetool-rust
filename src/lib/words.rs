@@ -33,10 +33,16 @@ pub fn parse_word(v: &str) -> Result<String> {
 #[non_exhaustive]
 pub struct LoginArgs {
     /// Your username as used to log in at languagetool.org.
-    #[cfg_attr(feature = "cli", clap(short = 'u', long, required = true))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(short = 'u', long, required = true, env = "LANGUAGETOOL_USERNAME")
+    )]
     pub username: String,
-    /// [Your API key](https://languagetool.org/editor/settings/api)
-    #[cfg_attr(feature = "cli", clap(short = 'k', long, required = true))]
+    /// [Your API key](https://languagetool.org/editor/settings/api).
+    #[cfg_attr(
+        feature = "cli",
+        clap(short = 'k', long, required = true, env = "LANGUAGETOOL_API_KEY")
+    )]
     pub api_key: String,
 }
 
@@ -53,14 +59,53 @@ pub struct WordsRequest {
     /// Maximum number of words to return.
     #[cfg_attr(feature = "cli", clap(long, default_value = "10"))]
     pub limit: isize,
-    /// Login arguments
+    /// Login arguments.
     #[cfg_attr(feature = "cli", clap(flatten))]
+    #[serde(flatten)]
     pub login: LoginArgs,
     /// Comma-separated list of dictionaries to include words from; uses special
-    /// default dictionary if this is unset
+    /// default dictionary if this is unset.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dicts: Option<Vec<String>>,
+}
+
+/// Copy of [`WordsRequest`], but used to CLI only.
+///
+/// This is a temporary solution, until [#3165](https://github.com/clap-rs/clap/issues/3165) is
+/// closed.
+#[cfg(feature = "cli")]
+#[derive(Args, Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[non_exhaustive]
+pub struct WordsRequestArgs {
+    /// Offset of where to start in the list of words.
+    #[cfg_attr(feature = "cli", clap(long, default_value = "0"))]
+    offset: isize,
+    /// Maximum number of words to return.
+    #[cfg_attr(feature = "cli", clap(long, default_value = "10"))]
+    pub limit: isize,
+    /// Login arguments.
+    #[cfg_attr(feature = "cli", clap(flatten))]
+    #[serde(flatten)]
+    pub login: Option<LoginArgs>,
+    /// Comma-separated list of dictionaries to include words from; uses special
+    /// default dictionary if this is unset.
+    #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dicts: Option<Vec<String>>,
+}
+
+#[cfg(feature = "cli")]
+impl From<WordsRequestArgs> for WordsRequest {
+    #[inline]
+    fn from(args: WordsRequestArgs) -> Self {
+        Self {
+            offset: args.offset,
+            limit: args.limit,
+            login: args.login.unwrap(),
+            dicts: args.dicts,
+        }
+    }
 }
 
 /// LanguageTool POST words add request.
@@ -77,15 +122,16 @@ pub struct WordsAddRequest {
     /// languages.
     #[cfg_attr(feature = "cli", clap(required = true, value_parser = parse_word))]
     pub word: String,
-    /// Login arguments
+    /// Login arguments.
     #[cfg_attr(feature = "cli", clap(flatten))]
+    #[serde(flatten)]
     pub login: LoginArgs,
     /// Name of the dictionary to add the word to; non-existent dictionaries are
     /// created after calling this; if unset, adds to special default
-    /// dictionary
+    /// dictionary.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    dict: Option<String>,
+    pub dict: Option<String>,
 }
 
 /// LanguageTool POST words delete request.
@@ -100,6 +146,7 @@ pub struct WordsDeleteRequest {
     pub word: String,
     /// Login arguments.
     #[cfg_attr(feature = "cli", clap(flatten))]
+    #[serde(flatten)]
     pub login: LoginArgs,
     /// Name of the dictionary to add the word to; non-existent dictionaries are
     /// created after calling this; if unset, adds to special default
@@ -122,11 +169,12 @@ pub enum WordsSubcommand {
 /// Retrieve some user's words list.
 #[cfg(feature = "cli")]
 #[derive(Debug, Parser)]
-#[clap(subcommand_negates_reqs(true))]
+#[clap(args_conflicts_with_subcommands = true)]
+#[clap(subcommand_negates_reqs = true)]
 pub struct WordsCommand {
     /// Actual GET request.
     #[command(flatten)]
-    pub request: WordsRequest,
+    pub request: WordsRequestArgs,
     /// Optional subcommand.
     #[command(subcommand)]
     pub subcommand: Option<WordsSubcommand>,
@@ -136,22 +184,22 @@ pub struct WordsCommand {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct WordsResponse {
-    /// List of words
-    words: Vec<String>,
+    /// List of words.
+    pub words: Vec<String>,
 }
 
 /// LanguageTool POST word add response.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct WordsAddResponse {
-    /// `true` if word was correctly added
-    added: bool,
+    /// `true` if word was correctly added.
+    pub added: bool,
 }
 
 /// LanguageTool POST word delete response.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
 pub struct WordsDeleteResponse {
-    /// `true` if word was correctly removed
-    deleted: bool,
+    /// `true` if word was correctly removed.
+    pub deleted: bool,
 }

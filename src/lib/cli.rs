@@ -190,7 +190,7 @@ impl Cli {
                         serde_json::to_string_pretty(&words_response)?
                     },
                     None => {
-                        let words_response = server_client.words(&cmd.request).await?;
+                        let words_response = server_client.words(&cmd.request.into()).await?;
                         serde_json::to_string_pretty(&words_response)?
                     },
                 };
