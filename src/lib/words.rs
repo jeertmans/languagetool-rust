@@ -62,12 +62,50 @@ pub struct WordsRequest {
     /// Login arguments.
     #[cfg_attr(feature = "cli", clap(flatten))]
     #[serde(flatten)]
+    pub login: LoginArgs,
+    /// Comma-separated list of dictionaries to include words from; uses special
+    /// default dictionary if this is unset.
+    #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dicts: Option<Vec<String>>,
+}
+
+/// Copy of [`WordsRequest`], but used to CLI only.
+///
+/// This is a temporary solution, until [#3165](https://github.com/clap-rs/clap/issues/3165) is
+/// closed.
+#[cfg(feature = "cli")]
+#[derive(Args, Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[non_exhaustive]
+pub struct WordsRequestArgs {
+    /// Offset of where to start in the list of words.
+    #[cfg_attr(feature = "cli", clap(long, default_value = "0"))]
+    offset: isize,
+    /// Maximum number of words to return.
+    #[cfg_attr(feature = "cli", clap(long, default_value = "10"))]
+    pub limit: isize,
+    /// Login arguments.
+    #[cfg_attr(feature = "cli", clap(flatten))]
+    #[serde(flatten)]
     pub login: Option<LoginArgs>,
     /// Comma-separated list of dictionaries to include words from; uses special
     /// default dictionary if this is unset.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dicts: Option<Vec<String>>,
+}
+
+#[cfg(feature = "cli")]
+impl From<WordsRequestArgs> for WordsRequest {
+    #[inline]
+    fn from(args: WordsRequestArgs) -> Self {
+        Self {
+            offset: args.offset,
+            limit: args.limit,
+            login: args.login.unwrap(),
+            dicts: args.dicts,
+        }
+    }
 }
 
 /// LanguageTool POST words add request.
@@ -93,7 +131,7 @@ pub struct WordsAddRequest {
     /// dictionary.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    dict: Option<String>,
+    pub dict: Option<String>,
 }
 
 /// LanguageTool POST words delete request.
@@ -136,7 +174,7 @@ pub enum WordsSubcommand {
 pub struct WordsCommand {
     /// Actual GET request.
     #[command(flatten)]
-    pub request: WordsRequest,
+    pub request: WordsRequestArgs,
     /// Optional subcommand.
     #[command(subcommand)]
     pub subcommand: Option<WordsSubcommand>,
@@ -147,7 +185,7 @@ pub struct WordsCommand {
 #[non_exhaustive]
 pub struct WordsResponse {
     /// List of words.
-    words: Vec<String>,
+    pub words: Vec<String>,
 }
 
 /// LanguageTool POST word add response.
@@ -155,7 +193,7 @@ pub struct WordsResponse {
 #[non_exhaustive]
 pub struct WordsAddResponse {
     /// `true` if word was correctly added.
-    added: bool,
+    pub added: bool,
 }
 
 /// LanguageTool POST word delete response.
@@ -163,5 +201,5 @@ pub struct WordsAddResponse {
 #[non_exhaustive]
 pub struct WordsDeleteResponse {
     /// `true` if word was correctly removed.
-    deleted: bool,
+    pub deleted: bool,
 }
