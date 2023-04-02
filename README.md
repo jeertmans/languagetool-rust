@@ -23,15 +23,33 @@ LanguageTool-Rust (LTRS) is both an executable and a Rust library that aims to p
 
 *Disclaimer: the current work relies on an approximation of the LanguageTool API. We try to avoid breaking changes as much as possible, but we still highly depend on the future evolutions of LanguageTool.*
 
-## CLI Reference
+## Installation
 
-![Screenshot from CLI](https://raw.githubusercontent.com/jeertmans/languagetool-rust/main/img/screenshot.svg)
-
-The command line interface of LTRS allows to very quickly use any LanguageTool server to check for grammar and style errors. You can install the latest version with `cargo`:
+You can install the latest version with `cargo`.
 
 ```bash
 > cargo install languagetool-rust --features full
 ```
+
+And this to your `.bashrc` or `.zshrc`.
+
+```bash
+export PATH=$PATH:$HOME/.cargo/bin
+```
+
+### AUR
+
+If you're on Arch Linux simply.
+
+```bash
+paru -S languagetool-rust
+```
+
+## CLI Reference
+
+![Screenshot from CLI](https://raw.githubusercontent.com/jeertmans/languagetool-rust/main/img/screenshot.svg)
+
+The command line interface of LTRS allows to very quickly use any LanguageTool server to check for grammar and style errors.
 
 The reference for the CLI can be accessed via `ltrs --help`.
 
