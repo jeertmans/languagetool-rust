@@ -31,15 +31,9 @@ You can install the latest version with `cargo`.
 > cargo install languagetool-rust --features full
 ```
 
-And this to your `.bashrc` or `.zshrc`.
-
-```bash
-export PATH=$PATH:$HOME/.cargo/bin
-```
-
 ### AUR
 
-If you're on Arch Linux simply.
+If you are on Arch Linux, you call also install with your [AUR helper](https://wiki.archlinux.org/title/AUR_helpers):
 
 ```bash
 paru -S languagetool-rust
