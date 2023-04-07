@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrealease](https://github.com/jeertmans/languagetool-rust/compare/v2.0.0...HEAD)
 
+### Chore
+
+- Added Arch Linux installation ([@Dosx001](https://github.com/Dosx001)). [#77](https://github.com/jeertmans/languagetool-rust/pull/77)
+
 ### Added
 
 - Added environment variables for login arguments. [#64](https://github.com/jeertmans/languagetool-rust/pull/64)
