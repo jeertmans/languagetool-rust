@@ -2,6 +2,7 @@ on:
   pull_request:
     paths:
     - src/lib/**.rs
+    - .github/workflows/rustlib.yml
     - Cargo.toml
   workflow_dispatch:
 
