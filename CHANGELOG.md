@@ -5,11 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unrealease](https://github.com/jeertmans/languagetool-rust/compare/v2.0.0...HEAD)
+## [Unrealeased](https://github.com/jeertmans/languagetool-rust/compare/v2.1.1...HEAD)
+
+### Fixed
+
+- Fixed serializing of comma-separated values. [#86](https://github.com/jeertmans/languagetool-rust/pull/86)
+
+## [2.1.1](https://github.com/jeertmans/languagetool-rust/compare/v2.1.0...v2.1.1) 2023-04-07
 
 ### Chore
 
 - Added Arch Linux installation ([@Dosx001](https://github.com/Dosx001)). [#77](https://github.com/jeertmans/languagetool-rust/pull/77)
+
+## [2.1.0](https://github.com/jeertmans/languagetool-rust/compare/v2.0.0...v2.1.0) 2023-02-09
 
 ### Added
 
