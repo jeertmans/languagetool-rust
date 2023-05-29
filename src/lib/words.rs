@@ -1,7 +1,9 @@
 //! Structures for `words` requests and responses.
 
-use crate::error::{Error, Result};
-use crate::check::serialize_option_vec_string;
+use crate::{
+    check::serialize_option_vec_string,
+    error::{Error, Result},
+};
 #[cfg(feature = "cli")]
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};

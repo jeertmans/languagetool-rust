@@ -95,7 +95,7 @@ pub fn parse_language_code(v: &str) -> Result<String> {
 ///
 /// This is required by reqwest's RequestBuilder, otherwise it
 /// will not work.
-pub (crate) fn serialize_option_vec_string<S>(
+pub(crate) fn serialize_option_vec_string<S>(
     v: &Option<Vec<String>>,
     serializer: S,
 ) -> std::result::Result<S::Ok, S::Error>
@@ -103,18 +103,15 @@ where
     S: Serializer,
 {
     match v {
-        Some(v) if v.len() == 1 => {
-            serializer.serialize_str(&v[0])
-        }
+        Some(v) if v.len() == 1 => serializer.serialize_str(&v[0]),
         Some(v) if v.len() > 1 => {
             let size = v.iter().map(|s| s.len()).sum::<usize>() + v.len() - 1;
             let mut string = String::with_capacity(size);
 
-            
             string.push_str(&v[0]);
 
             for s in &v[1..] {
-                string.push_str(",");
+                string.push(',');
                 string.push_str(s);
             }
 
@@ -259,21 +256,16 @@ impl std::str::FromStr for Data {
 ///
 /// Currently, `Level::Picky` adds additional rules
 /// with respect to `Level::Default`.
-#[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Default, Deserialize, Debug, PartialEq, Eq, Serialize)]
 #[cfg_attr(feature = "cli", derive(ValueEnum))]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
 pub enum Level {
     /// Default level.
+    #[default]
     Default,
     /// Picky level.
     Picky,
-}
-
-impl Default for Level {
-    fn default() -> Self {
-        Level::Default
-    }
 }
 
 impl Level {
