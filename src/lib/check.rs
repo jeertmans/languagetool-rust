@@ -8,7 +8,7 @@ use annotate_snippets::{
 };
 #[cfg(feature = "cli")]
 use clap::{Args, Parser, ValueEnum};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 #[cfg(feature = "cli")]
 use std::path::PathBuf;
 
@@ -87,6 +87,37 @@ pub fn parse_language_code(v: &str) -> Result<String> {
              ^[a-zA-Z]{2,3}(-[a-zA-Z]{2}(-[a-zA-Z]+)*)?$"
                 .to_string(),
         ))
+    }
+}
+
+/// Utility function to serialize a optional vector a strings
+/// into a comma separated list of strings.
+///
+/// This is required by reqwest's RequestBuilder, otherwise it
+/// will not work.
+pub(crate) fn serialize_option_vec_string<S>(
+    v: &Option<Vec<String>>,
+    serializer: S,
+) -> std::result::Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    match v {
+        Some(v) if v.len() == 1 => serializer.serialize_str(&v[0]),
+        Some(v) if v.len() > 1 => {
+            let size = v.iter().map(|s| s.len()).sum::<usize>() + v.len() - 1;
+            let mut string = String::with_capacity(size);
+
+            string.push_str(&v[0]);
+
+            for s in &v[1..] {
+                string.push(',');
+                string.push_str(s);
+            }
+
+            serializer.serialize_str(string.as_ref())
+        },
+        _ => serializer.serialize_none(),
     }
 }
 
@@ -225,21 +256,16 @@ impl std::str::FromStr for Data {
 ///
 /// Currently, `Level::Picky` adds additional rules
 /// with respect to `Level::Default`.
-#[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Default, Deserialize, Debug, PartialEq, Eq, Serialize)]
 #[cfg_attr(feature = "cli", derive(ValueEnum))]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
 pub enum Level {
     /// Default level.
+    #[default]
     Default,
     /// Picky level.
     Picky,
-}
-
-impl Default for Level {
-    fn default() -> Self {
-        Level::Default
-    }
 }
 
 impl Level {
@@ -407,10 +433,6 @@ pub struct CheckRequest {
             value_parser = parse_language_code
         )
     )]
-    #[cfg_attr(
-        all(feature = "cli", not(all(feature = "cli", feature = "cli"))),
-        clap(short = 'l', long, default_value = "auto",)
-    )]
     pub language: String,
     /// Set to get Premium API access: Your username/email as used to log in at
     /// languagetool.org.
@@ -431,7 +453,7 @@ pub struct CheckRequest {
     /// Comma-separated list of dictionaries to include words from; uses special
     /// default dictionary if this is unset.
     #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "serialize_option_vec_string")]
     pub dicts: Option<Vec<String>>,
     /// A language code of the user's native language, enabling false friends
     /// checks for some language pairs.
@@ -448,23 +470,23 @@ pub struct CheckRequest {
     /// spell checking will not work for those, as no spelling dictionary can be
     /// selected for just `en` or `de`.
     #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "serialize_option_vec_string")]
     pub preferred_variants: Option<Vec<String>>,
     /// IDs of rules to be enabled, comma-separated.
     #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "serialize_option_vec_string")]
     pub enabled_rules: Option<Vec<String>>,
     /// IDs of rules to be disabled, comma-separated.
     #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "serialize_option_vec_string")]
     pub disabled_rules: Option<Vec<String>>,
     /// IDs of categories to be enabled, comma-separated.
     #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "serialize_option_vec_string")]
     pub enabled_categories: Option<Vec<String>>,
     /// IDs of categories to be disabled, comma-separated.
     #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "serialize_option_vec_string")]
     pub disabled_categories: Option<Vec<String>>,
     /// If true, only the rules and categories whose IDs are specified with
     /// `enabledRules` or `enabledCategories` are enabled.
