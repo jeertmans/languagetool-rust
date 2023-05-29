@@ -1,6 +1,7 @@
 //! Structures for `words` requests and responses.
 
 use crate::error::{Error, Result};
+use crate::check::serialize_option_vec_string;
 #[cfg(feature = "cli")]
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
@@ -66,7 +67,7 @@ pub struct WordsRequest {
     /// Comma-separated list of dictionaries to include words from; uses special
     /// default dictionary if this is unset.
     #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "serialize_option_vec_string")]
     pub dicts: Option<Vec<String>>,
 }
 
@@ -91,7 +92,7 @@ pub struct WordsRequestArgs {
     /// Comma-separated list of dictionaries to include words from; uses special
     /// default dictionary if this is unset.
     #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "serialize_option_vec_string")]
     pub dicts: Option<Vec<String>>,
 }
 
