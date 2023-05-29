@@ -407,10 +407,6 @@ pub struct CheckRequest {
             value_parser = parse_language_code
         )
     )]
-    #[cfg_attr(
-        all(feature = "cli", not(all(feature = "cli", feature = "cli"))),
-        clap(short = 'l', long, default_value = "auto",)
-    )]
     pub language: String,
     /// Set to get Premium API access: Your username/email as used to log in at
     /// languagetool.org.
