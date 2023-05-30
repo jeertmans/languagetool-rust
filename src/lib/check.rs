@@ -651,7 +651,7 @@ fn parse_filename(s: &str) -> Result<PathBuf> {
 #[derive(Debug, Parser)]
 pub struct CheckCommand {
     /// If present, raw JSON output will be printed instead of annotated text.
-    /// This has not effect if `--data` is used, because it is never
+    /// This has no effect if `--data` is used, because it is never
     /// annotated.
     #[cfg(feature = "cli")]
     #[clap(short = 'r', long)]
@@ -1182,8 +1182,7 @@ impl<'source> Iterator for MatchPositions<'source, std::slice::IterMut<'source, 
 
 #[cfg(test)]
 mod tests {
-
-    use crate::check::{Data, DataAnnotation};
+    use super::*;
 
     #[derive(Debug)]
     enum Token<'source> {
@@ -1228,5 +1227,43 @@ mod tests {
         };
 
         assert_eq!(data, expected_data);
+    }
+
+    #[test]
+    fn test_serialize_option_vec_string() {
+        use serde::Serialize;
+
+        #[derive(Serialize)]
+        struct Foo {
+            #[serde(serialize_with = "serialize_option_vec_string")]
+            values: Option<Vec<String>>,
+        }
+
+        impl Foo {
+            fn new<I, T>(values: I) -> Self
+            where
+                I: IntoIterator<Item = T>,
+                T: ToString,
+            {
+                Self {
+                    values: Some(values.into_iter().map(|v| v.to_string()).collect()),
+                }
+            }
+            fn none() -> Self {
+                Self { values: None }
+            }
+        }
+
+        let got = serde_json::to_string(&Foo::new(vec!["en-US", "de-DE"])).unwrap();
+        assert_eq!(got, r#"{"values":"en-US,de-DE"}"#);
+
+        let got = serde_json::to_string(&Foo::new(vec!["en-US"])).unwrap();
+        assert_eq!(got, r#"{"values":"en-US"}"#);
+
+        let got = serde_json::to_string(&Foo::new(Vec::<String>::new())).unwrap();
+        assert_eq!(got, r#"{"values":null}"#);
+
+        let got = serde_json::to_string(&Foo::none()).unwrap();
+        assert_eq!(got, r#"{"values":null}"#);
     }
 }

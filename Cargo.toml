@@ -21,8 +21,10 @@ thiserror = "^1.0"
 tokio = {version = "^1.0", features = ["macros", "rt-multi-thread"], optional = true}
 
 [dev-dependencies]
+assert_cmd = "2.0.11"
 criterion = "0.3"
 futures = "0.3"
+tempfile = "3.5.0"
 tokio = {version = "^1.0", features = ["macros"]}
 
 [features]
@@ -58,6 +60,11 @@ version = "2.1.2"
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+[[test]]
+name = "cli"
+path = "tests/cli.rs"
+required-features = ["cli"]
 
 [[test]]
 name = "match-positions"
