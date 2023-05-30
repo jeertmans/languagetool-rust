@@ -10,7 +10,7 @@ async fn request_until_success(req: &CheckRequest, client: &ServerClient) -> Che
     loop {
         match client.check(req).await {
             Ok(resp) => return resp,
-            Err(Error::InvalidRequest { body })
+            Err(Error::InvalidRequest(body))
                 if body == *"Error: Server overloaded, please try again later" =>
             {
                 continue;
@@ -22,14 +22,20 @@ async fn request_until_success(req: &CheckRequest, client: &ServerClient) -> Che
 
 #[tokio::main]
 async fn check_text_basic(text: &str) -> CheckResponse {
-    let client = ServerClient::from_env().unwrap();
+    let client = ServerClient::from_env().expect(
+        "Please use a local server for benchmarking, and configure the environ variables to use \
+         it.",
+    );
     let req = CheckRequest::default().with_text(text.to_string());
     request_until_success(&req, &client).await
 }
 
 #[tokio::main]
 async fn check_text_split(text: &str) -> CheckResponse {
-    let client = ServerClient::from_env().unwrap();
+    let client = ServerClient::from_env().expect(
+        "Please use a local server for benchmarking, and configure the environ variables to use \
+         it.",
+    );
     let lines = text.lines();
 
     let resps = join_all(lines.map(|line| {
