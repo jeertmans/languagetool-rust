@@ -469,7 +469,7 @@ pub struct CheckRequest {
     /// should set variants for at least German and English, as otherwise the
     /// spell checking will not work for those, as no spelling dictionary can be
     /// selected for just `en` or `de`.
-    #[cfg_attr(feature = "cli", clap(long))]
+    #[cfg_attr(feature = "cli", clap(long, conflicts_with = "language"))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub preferred_variants: Option<Vec<String>>,
     /// IDs of rules to be enabled, comma-separated.
