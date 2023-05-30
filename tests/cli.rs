@@ -169,3 +169,59 @@ fn test_check_with_unexisting_level() {
         .assert();
     assert.failure();
 }
+
+#[test]
+fn test_languages() {
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    let assert = cmd.arg("languages").assert();
+    assert.success();
+}
+
+#[test]
+fn test_words() {
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    let assert = cmd
+        .arg("words")
+        .arg("--username")
+        .arg("user")
+        .arg("--api-key")
+        .arg("key")
+        .assert();
+    assert
+        .failure()
+        .stderr(predicates::str::contains("AuthException"));
+}
+
+#[test]
+fn test_words_add() {
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    let assert = cmd
+        .arg("words")
+        .arg("add")
+        .arg("--username")
+        .arg("user")
+        .arg("--api-key")
+        .arg("key")
+        .arg("my-word")
+        .assert();
+    assert
+        .failure()
+        .stderr(predicates::str::contains("AuthException"));
+}
+
+#[test]
+fn test_words_delete() {
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    let assert = cmd
+        .arg("words")
+        .arg("delete")
+        .arg("--username")
+        .arg("user")
+        .arg("--api-key")
+        .arg("key")
+        .arg("my-word")
+        .assert();
+    assert
+        .failure()
+        .stderr(predicates::str::contains("AuthException"));
+}
