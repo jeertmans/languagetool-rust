@@ -1,10 +1,16 @@
-use criterion::{black_box, criterion_group, Criterion};
+use criterion::{criterion_group, Criterion, Throughput};
 use futures::future::join_all;
 use languagetool_rust::{
     check::{CheckRequest, CheckResponse, CheckResponseWithContext},
     error::Error,
     server::ServerClient,
 };
+
+static FILES: [(&str, &str); 3] = [
+    ("small", include_str!("../small.txt")),
+    ("medium", include_str!("../medium.txt")),
+    ("large", include_str!("../large.txt")),
+];
 
 async fn request_until_success(req: &CheckRequest, client: &ServerClient) -> CheckResponse {
     loop {
@@ -54,30 +60,22 @@ async fn check_text_split(text: &str) -> CheckResponse {
         .into()
 }
 
-#[macro_export]
-macro_rules! compare_checks_on_file {
-    ($name:ident, $filename:expr) => {
-        fn $name(c: &mut Criterion) {
-            let content = std::fs::read_to_string($filename).unwrap();
-            let text = content.as_str();
-            let name = stringify!($name);
-            c.bench_function(format!("Check basic for {}", name).as_str(), |b| {
-                b.iter(|| check_text_basic(black_box(text)))
-            });
-            c.bench_function(format!("Check split for {}", name).as_str(), |b| {
-                b.iter(|| check_text_split(black_box(text)))
-            });
-        }
-    };
+fn bench_basic(c: &mut Criterion) {
+    let mut group = c.benchmark_group("basic");
+
+    for (name, source) in FILES {
+        group.throughput(Throughput::Bytes(source.len() as u64));
+        group.bench_with_input(name, &source, |b, &s| b.iter(|| check_text_basic(s)));
+    }
 }
 
-compare_checks_on_file!(compare_checks_small_file, "./benches/small.txt");
-compare_checks_on_file!(compare_checks_medium_file, "./benches/medium.txt");
-compare_checks_on_file!(compare_checks_large_file, "./benches/large.txt");
+fn bench_split(c: &mut Criterion) {
+    let mut group = c.benchmark_group("split");
 
-criterion_group!(
-    checks,
-    compare_checks_small_file,
-    compare_checks_medium_file,
-    compare_checks_large_file
-);
+    for (name, source) in FILES {
+        group.throughput(Throughput::Bytes(source.len() as u64));
+        group.bench_with_input(name, &source, |b, &s| b.iter(|| check_text_split(s)));
+    }
+}
+
+criterion_group!(checks, bench_basic, bench_split,);

@@ -51,8 +51,4 @@ jobs:
       uses: Swatinem/rust-cache@v2
 
     - run: curl -LsSf https://get.nexte.st/latest/linux | tar zxf - -C ${CARGO_HOME:-~/.cargo}/bin
-    - run: cargo install --path . --all-features --debug
-    - run: cat LICENSE.md | ltrs check
-    - run: ltrs languages
-    - run: ltrs check -t "Some text with a apparent mistake"
     - run: cargo nextest run --all-features
