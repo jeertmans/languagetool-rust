@@ -20,8 +20,8 @@ jobs:
         ports:
         - 8010:8010
         env:
-        - Java_Xms: 512m
-        - Java_Xmx: 2g
+          Java_Xms: 512m
+          Java_Xmx: 2g
     env:
       LANGUAGETOOL_HOSTNAME: http://localhost
       LANGUAGETOOL_PORT: 8010
