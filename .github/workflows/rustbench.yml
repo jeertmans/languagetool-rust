@@ -2,14 +2,14 @@ on:
   pull_request:
     paths:
     - '**.rs'
-    - '.github/workflows/rustbench.yml'
+    - .github/workflows/rustbench.yml
     - '**/Cargo.toml'
   workflow_dispatch:
 
 name: Benchmark
 
-permissions: 
-   pull-requests: write
+permissions:
+  pull-requests: write
 
 jobs:
   benchmark:
