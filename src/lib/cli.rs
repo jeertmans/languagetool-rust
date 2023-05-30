@@ -109,6 +109,8 @@ impl Cli {
 
         let server_client: ServerClient = self.server_cli.into();
 
+        println!("Server client: {:?}", server_client);
+
         match self.command {
             Command::Check(cmd) => {
                 let mut request = cmd.request;
