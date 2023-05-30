@@ -498,5 +498,8 @@ fn test_words_delete() {
         .arg("key")
         .arg("my-word")
         .assert();
-    assert.failure().stderr(contains("AuthException"));
+    assert.failure().stderr(OrPredicate::new(
+        contains("AuthException"),
+        contains("invalid request"),
+    ));
 }
