@@ -36,7 +36,7 @@ where
             "Reading from STDIN, press [CTRL+D] when you're done."
         )?;
     }
-    let stdin = std::io::stdin();
+    let stdin = io::stdin();
 
     while stdin.read_line(buffer)? > 0 {}
     Ok(())
@@ -218,6 +218,25 @@ mod tests {
     #[test]
     fn test_cli() {
         Cli::command().debug_assert();
+    }
+
+    #[test]
+    fn test_cli_from_build_cli() {
+        build_cli().debug_assert();
+    }
+
+    #[test]
+    fn test_read_from_stdin() {
+        let handle = std::thread::spawn(|| {
+            let mut sink = io::sink();
+            let mut buffer = String::new();
+            read_from_stdin(&mut sink, &mut buffer).unwrap();
+            buffer
+        });
+
+        std::thread::sleep(std::time::Duration::from_millis(100));
+
+        assert!(!handle.is_finished());
     }
 }
 
