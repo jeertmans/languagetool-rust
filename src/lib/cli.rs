@@ -236,7 +236,11 @@ mod tests {
 
         std::thread::sleep(std::time::Duration::from_millis(100));
 
-        assert!(!handle.is_finished());
+        if std::io::stdin().is_terminal() {
+            assert!(!handle.is_finished());
+        } else {
+            assert!(handle.is_finished());
+        }
     }
 }
 
