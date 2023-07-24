@@ -28,7 +28,7 @@ LanguageTool-Rust (LTRS) is both an executable and a Rust library that aims to p
 You can install the latest version with `cargo`.
 
 ```bash
-> cargo install languagetool-rust --features full
+cargo install languagetool-rust --features full
 ```
 
 ### AUR

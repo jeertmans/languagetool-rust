@@ -388,7 +388,10 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
 #[non_exhaustive]
 pub struct CheckRequest {
     /// The text to be checked. This or 'data' is required.
-    #[cfg_attr(feature = "cli", clap(short = 't', long, conflicts_with = "data",))]
+    #[cfg_attr(
+        feature = "cli",
+        clap(short = 't', long, conflicts_with = "data", allow_hyphen_values(true))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
     /// The text to be checked, given as a JSON document that specifies what's
