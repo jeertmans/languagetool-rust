@@ -742,7 +742,7 @@ dependencies = [
 
 [[package]]
 name = "languagetool-rust"
-version = "2.1.2"
+version = "2.1.3"
 dependencies = [
  "annotate-snippets",
  "assert_cmd",
