@@ -130,7 +130,7 @@ To use LanguageTool-Rust in your Rust project, add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-languagetool_rust = "2.0"
+languagetool_rust = "^2.1"
 ```
 
 ### Example
