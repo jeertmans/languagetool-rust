@@ -123,6 +123,7 @@ where
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
+#[serde(rename_all = "camelCase")]
 /// A portion of text to be checked.
 pub struct DataAnnotation {
     /// If set, the markup will be interpreted as this.
