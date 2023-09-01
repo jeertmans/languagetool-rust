@@ -25,7 +25,7 @@ assert_cmd = "2.0.11"
 criterion = "0.5"
 futures = "0.3"
 predicates = "3.0.3"
-tempfile = "3.5.0"
+tempfile = "3.8.0"
 tokio = {version = "^1.0", features = ["macros"]}
 
 [features]
