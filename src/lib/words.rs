@@ -31,7 +31,7 @@ pub fn parse_word(v: &str) -> Result<String> {
 
 /// Login arguments required by the API.
 #[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize, Hash)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub struct LoginArgs {
@@ -53,7 +53,7 @@ pub struct LoginArgs {
 ///
 /// List words in the user's personal dictionaries.
 #[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize, Hash)]
 #[non_exhaustive]
 pub struct WordsRequest {
     /// Offset of where to start in the list of words.
@@ -117,7 +117,7 @@ impl From<WordsRequestArgs> for WordsRequest {
 /// feature is considered to be used for personal dictionaries which must not
 /// contain more than 500 words. If this is an issue for you, please contact us.
 #[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize, Hash)]
 #[non_exhaustive]
 pub struct WordsAddRequest {
     /// The word to be added. Must not be a phrase, i.e., cannot contain white
@@ -141,7 +141,7 @@ pub struct WordsAddRequest {
 ///
 /// Remove a word from one of the user's personal dictionaries.
 #[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize, Hash)]
 #[non_exhaustive]
 pub struct WordsDeleteRequest {
     /// The word to be removed.
