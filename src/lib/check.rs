@@ -121,7 +121,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize, Hash)]
 #[non_exhaustive]
 #[serde(rename_all = "camelCase")]
 /// A portion of text to be checked.
@@ -217,7 +217,7 @@ mod data_annotation_tests {
 }
 
 /// Alternative text to be checked.
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub struct Data {
     /// Vector of markup text, see [`DataAnnotation`].
@@ -257,7 +257,7 @@ impl std::str::FromStr for Data {
 ///
 /// Currently, `Level::Picky` adds additional rules
 /// with respect to `Level::Default`.
-#[derive(Clone, Default, Deserialize, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Default, Deserialize, Debug, PartialEq, Eq, Serialize, Hash)]
 #[cfg_attr(feature = "cli", derive(ValueEnum))]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
@@ -384,7 +384,7 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
 /// The structure below tries to follow as closely as possible the JSON API
 /// described [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
 #[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize, Hash)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub struct CheckRequest {
