@@ -21,7 +21,7 @@ async fn request_until_success(req: &CheckRequest, client: &ServerClient) -> Che
             {
                 continue;
             },
-            Err(e) => panic!("Some unexpected error occured: {}", e),
+            Err(e) => panic!("Some unexpected error occurred: {}", e),
         }
     }
 }

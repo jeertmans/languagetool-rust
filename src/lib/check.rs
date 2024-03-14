@@ -707,7 +707,7 @@ mod request_tests {
     }
 }
 
-/// Reponses
+/// Responses
 
 /// Detected language from check request.
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -755,7 +755,7 @@ pub struct Context {
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 pub struct MoreContext {
-    /// Line number where match occured.
+    /// Line number where match occurred.
     pub line_number: usize,
     /// Char index at which the match starts on the current line.
     pub line_offset: usize,
@@ -1035,7 +1035,7 @@ impl CheckResponseWithContext {
         self.response.iter_matches_mut()
     }
 
-    /// Return an iterator over matches and correspondig line number and line
+    /// Return an iterator over matches and corresponding line number and line
     /// offset.
     #[must_use]
     pub fn iter_match_positions(&self) -> MatchPositions<'_, std::slice::Iter<'_, Match>> {

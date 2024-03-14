@@ -1,4 +1,4 @@
-//! Structure to communite with some `LanguageTool` server through the API.
+//! Structure to communicate with some `LanguageTool` server through the API.
 
 use crate::{
     check::{CheckRequest, CheckResponse, CheckResponseWithContext},
@@ -335,7 +335,7 @@ impl From<ServerCli> for ServerClient {
 impl ServerClient {
     /// Construct a new server client using hostname and (optional) port
     ///
-    /// An empty string is accepeted as empty port.
+    /// An empty string is accepted as empty port.
     /// For port validation, please use [`parse_port`] as this constructor does
     /// not check anything.
     #[must_use]
