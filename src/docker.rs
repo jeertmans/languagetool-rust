@@ -1,10 +1,12 @@
 //! Structures and methods to easily manipulate Docker images, especially for
 //! LanguageTool applications.
 
-use crate::error::{exit_status_error, Error, Result};
+use std::process::{Command, Output, Stdio};
+
 #[cfg(feature = "cli")]
 use clap::{Args, Parser};
-use std::process::{Command, Output, Stdio};
+
+use crate::error::{exit_status_error, Error, Result};
 
 /// Commands to pull, start and stop a `LanguageTool` container using Docker.
 #[cfg_attr(feature = "cli", derive(Args))]

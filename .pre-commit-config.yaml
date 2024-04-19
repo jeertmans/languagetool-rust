@@ -1,20 +1,38 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v4.6.0
   hooks:
   - id: check-yaml
   - id: check-toml
   - id: end-of-file-fixer
   - id: trailing-whitespace
-- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.10.0
-  hooks:
-  - id: pretty-format-yaml
-    args: [--autofix]
-  - id: pretty-format-toml
-    args: [--autofix]
 - repo: https://github.com/igorshubovych/markdownlint-cli
   rev: v0.35.0
   hooks:
   - id: markdownlint-fix
     args: [--ignore, LICENSE.md]
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.13.0
+  hooks:
+  - id: pretty-format-yaml
+    args: [--autofix]
+  - id: pretty-format-toml
+    args: [--autofix, --trailing-commas]
+- repo: https://github.com/doublify/pre-commit-rust
+  rev: v1.0
+  hooks:
+  - id: cargo-check
+  - id: clippy
+- repo: local
+  hooks:
+  - id: fmt
+    name: fmt
+    description: Format files with cargo fmt
+    entry: cargo +nightly fmt --
+    language: system
+    types: [rust]
+    args: []
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.2.6
+  hooks:
+  - id: codespell

@@ -1,6 +1,8 @@
 //! Structures for `check` requests and responses.
 
-use super::error::{Error, Result};
+#[cfg(feature = "cli")]
+use std::path::PathBuf;
+
 #[cfg(feature = "annotate")]
 use annotate_snippets::{
     display_list::{DisplayList, FormatOptions},
@@ -9,8 +11,8 @@ use annotate_snippets::{
 #[cfg(feature = "cli")]
 use clap::{Args, Parser, ValueEnum};
 use serde::{Deserialize, Serialize, Serializer};
-#[cfg(feature = "cli")]
-use std::path::PathBuf;
+
+use super::error::{Error, Result};
 
 /// Requests
 
@@ -257,7 +259,7 @@ impl std::str::FromStr for Data {
 ///
 /// Currently, `Level::Picky` adds additional rules
 /// with respect to `Level::Default`.
-#[derive(Clone, Default, Deserialize, Debug, PartialEq, Eq, Serialize, Hash)]
+#[derive(Clone, Default, Debug, PartialEq, Eq, Serialize, Hash)]
 #[cfg_attr(feature = "cli", derive(ValueEnum))]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
@@ -384,7 +386,7 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
 /// The structure below tries to follow as closely as possible the JSON API
 /// described [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
 #[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Hash)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub struct CheckRequest {
@@ -650,7 +652,29 @@ fn parse_filename(s: &str) -> Result<PathBuf> {
     }
 }
 
+/// Support file types.
+#[cfg(feature = "cli")]
+#[derive(Clone, Debug, Default, ValueEnum)]
+#[non_exhaustive]
+pub enum FileType {
+    /// Auto.
+    #[default]
+    Auto,
+    /// Markdown.
+    Markdown,
+    /// Typst.
+    Typst,
+}
+
 /// Check text using LanguageTool server.
+///
+/// The input can be one of the following:
+///
+/// - raw text, if `--text TEXT` is provided;
+/// - annotated data, if `--data TEXT` is provided;
+/// - raw text, if `-- [FILE]...` are provided. Note that some file types will
+///   use a
+/// - raw text, through stdin, if nothing is provided.
 #[cfg(feature = "cli")]
 #[derive(Debug, Parser)]
 pub struct CheckCommand {
@@ -660,14 +684,6 @@ pub struct CheckCommand {
     #[cfg(feature = "cli")]
     #[clap(short = 'r', long)]
     pub raw: bool,
-    /// If present, more context (i.e., line number and line offset) will be
-    /// added to response.
-    #[clap(short = 'm', long, hide = true)]
-    #[deprecated(
-        since = "2.0.0",
-        note = "Do not use this, it is only kept for backwards compatibility with v1"
-    )]
-    pub more_context: bool,
     /// Sets the maximum number of characters before splitting.
     #[clap(long, default_value_t = 1500)]
     pub max_length: usize,
@@ -677,12 +693,17 @@ pub struct CheckCommand {
     /// Max. number of suggestions kept. If negative, all suggestions are kept.
     #[clap(long, default_value_t = 5, allow_negative_numbers = true)]
     pub max_suggestions: isize,
-    /// Inner [`CheckRequest`].
-    #[command(flatten)]
-    pub request: CheckRequest,
+    /// Specify the files type to use the correct parser.
+    ///
+    /// If set to auto, the type is guessed from the filename extension.
+    #[clap(long, default_value = "default", ignore_case = true, value_enum)]
+    pub r#type: FileType,
     /// Optional filenames from which input is read.
     #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
     pub filenames: Vec<PathBuf>,
+    /// Inner [`CheckRequest`].
+    #[command(flatten, next_help_heading = "Request options")]
+    pub request: CheckRequest,
 }
 
 #[cfg(test)]

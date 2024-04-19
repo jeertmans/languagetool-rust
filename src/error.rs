@@ -1,4 +1,5 @@
 //! Error and Result structure used all across this crate.
+
 use std::process::ExitStatus;
 
 /// Enumeration of all possible error types.
