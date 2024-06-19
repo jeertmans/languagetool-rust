@@ -5,20 +5,22 @@ path = "benches/bench_main.rs"
 
 [[bin]]
 name = "ltrs"
-path = "src/bin.rs"
+path = "src/main.rs"
 required-features = ["cli"]
 
 [dependencies]
 annotate-snippets = {version = "^0.9.1", optional = true}
-clap = {version = "^4.0", features = ["cargo", "derive", "env", "wrap_help"], optional = true}
-clap_complete = {version = "^4.0", optional = true}
+clap = {version = "^4.5.4", features = ["cargo", "derive", "env", "wrap_help"], optional = true}
+clap_complete = {version = "^4.5.2", optional = true}
 is-terminal = {version = "0.4.3", optional = true}
+pulldown-cmark = {version = "0.10.2", optional = true}
 reqwest = {version = "^0.11", default-features = false, features = ["json"]}
 serde = {version = "^1.0", features = ["derive"]}
 serde_json = "^1.0"
 termcolor = {version = "1.2.0", optional = true}
 thiserror = "^1.0"
 tokio = {version = "^1.0", features = ["macros", "rt-multi-thread"], optional = true}
+typst-syntax = {version = "^0.11.0", optional = true}
 
 [dev-dependencies]
 assert_cmd = "2.0.11"
@@ -36,14 +38,17 @@ color = ["annotate-snippets?/color", "dep:termcolor"]
 default = ["cli", "native-tls"]
 docker = []
 full = ["cli-complete", "docker", "unstable"]
+markdown = ["dep:pulldown-cmark"]
 multithreaded = ["dep:tokio"]
 native-tls = ["reqwest/native-tls"]
 native-tls-vendored = ["reqwest/native-tls-vendored"]
+pulldown-cmark = ["dep:pulldown-cmark"]
+typst = ["dep:typst-syntax"]
 unstable = []
 
 [lib]
 name = "languagetool_rust"
-path = "src/lib/lib.rs"
+path = "src/lib.rs"
 
 [package]
 authors = ["Jérome Eertmans <jeertmans@icloud.com>"]
@@ -70,5 +75,3 @@ required-features = ["cli"]
 [[test]]
 name = "match-positions"
 path = "tests/match_positions.rs"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

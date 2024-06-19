@@ -2,6 +2,13 @@
 //!
 //! This module is specifically designed to be used by LTRS's binary target.
 //! It contains all the content needed to create LTRS's command line interface.
+use std::io::{self, Write};
+
+use clap::{CommandFactory, Parser, Subcommand};
+use is_terminal::IsTerminal;
+#[cfg(feature = "annotate")]
+use termcolor::WriteColor;
+use termcolor::{ColorChoice, StandardStream};
 
 use crate::{
     check::CheckResponseWithContext,
@@ -9,12 +16,6 @@ use crate::{
     server::{ServerCli, ServerClient},
     words::WordsSubcommand,
 };
-use clap::{CommandFactory, Parser, Subcommand};
-use is_terminal::IsTerminal;
-use std::io::{self, Write};
-#[cfg(feature = "annotate")]
-use termcolor::WriteColor;
-use termcolor::{ColorChoice, StandardStream};
 
 /// Read lines from standard input and write to buffer string.
 ///
@@ -57,7 +58,7 @@ pub struct Cli {
     #[arg(short, long, value_name = "WHEN", default_value = "auto", default_missing_value = "always", num_args(0..=1), require_equals(true))]
     pub color: clap::ColorChoice,
     /// [`ServerCli`] arguments.
-    #[command(flatten)]
+    #[command(flatten, next_help_heading = "Server options")]
     pub server_cli: ServerCli,
     /// Subcommand.
     #[command(subcommand)]

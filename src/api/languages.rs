@@ -2,6 +2,9 @@
 
 use serde::{Deserialize, Serialize};
 
+/// LanguageTool GET languages request.
+pub struct Request;
+
 #[derive(Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
@@ -18,4 +21,4 @@ pub struct Language {
 /// LanguageTool GET languages response.
 ///
 /// List of all supported languages.
-pub type LanguagesResponse = Vec<Language>;
+pub type Response = Vec<Language>;
