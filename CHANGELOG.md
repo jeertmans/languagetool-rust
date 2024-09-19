@@ -13,9 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Chore
 
 - **Breaking** Stopped (de)serializing structs that did not need.
-  [#116](https://github.com/jeertmans/languagetool-rust/pull/116)
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
 - **Breaking** Completly reorganized the crate.
-  [#116](https://github.com/jeertmans/languagetool-rust/pull/116)
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
 
 ## [2.1.4](https://github.com/jeertmans/languagetool-rust/compare/v2.1.3...v2.1.4)
 
