@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added support for Mardown and Typst files.
-  [#116](https://github.com/jeertmans/languagetool-rust/pull/116)
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
 
 ### Chore
 
