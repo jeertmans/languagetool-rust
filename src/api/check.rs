@@ -389,7 +389,7 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Hash)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-pub struct CheckRequest {
+pub struct Request {
     /// The text to be checked. This or 'data' is required.
     #[cfg_attr(
         feature = "cli",
@@ -509,10 +509,10 @@ pub struct CheckRequest {
     pub level: Level,
 }
 
-impl Default for CheckRequest {
+impl Default for Request {
     #[inline]
-    fn default() -> CheckRequest {
-        CheckRequest {
+    fn default() -> Request {
+        Request {
             text: Default::default(),
             data: Default::default(),
             language: "auto".to_string(),
@@ -536,7 +536,7 @@ fn is_false(b: &bool) -> bool {
     !(*b)
 }
 
-impl CheckRequest {
+impl Request {
     /// Set the text to be checked and remove potential data field.
     #[must_use]
     pub fn with_text(mut self, text: String) -> Self {
@@ -597,7 +597,7 @@ impl CheckRequest {
     }
 
     /// Return a copy of the text within the request.
-    /// Call [`CheckRequest::try_get_text`] but panic on error.
+    /// Call [`check::request::try_get_text`] but panic on error.
     ///
     /// # Panics
     ///
@@ -628,7 +628,7 @@ impl CheckRequest {
 
     /// Split this request into multiple, using [`split_len`] function to split
     /// text.
-    /// Call [`CheckRequest::try_split`] but panic on error.
+    /// Call [`check::request::try_split`] but panic on error.
     ///
     /// # Panics
     ///
@@ -701,19 +701,19 @@ pub struct CheckCommand {
     /// Optional filenames from which input is read.
     #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
     pub filenames: Vec<PathBuf>,
-    /// Inner [`CheckRequest`].
+    /// Inner [`check::request`].
     #[command(flatten, next_help_heading = "Request options")]
-    pub request: CheckRequest,
+    pub request: Request,
 }
 
 #[cfg(test)]
 mod request_tests {
 
-    use super::CheckRequest;
+    use super::Request;
 
     #[test]
     fn test_with_text() {
-        let req = CheckRequest::default().with_text("hello".to_string());
+        let req = Request::default().with_text("hello".to_string());
 
         assert_eq!(req.text.unwrap(), "hello".to_string());
         assert!(req.data.is_none());
@@ -721,7 +721,7 @@ mod request_tests {
 
     #[test]
     fn test_with_data() {
-        let req = CheckRequest::default().with_text("hello".to_string());
+        let req = Request::default().with_text("hello".to_string());
 
         assert_eq!(req.text.unwrap(), "hello".to_string());
         assert!(req.data.is_none());
@@ -928,7 +928,7 @@ pub struct Warnings {
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-pub struct CheckResponse {
+pub struct Response {
     /// Language information.
     pub language: LanguageResponse,
     /// List of error matches.
@@ -943,7 +943,7 @@ pub struct CheckResponse {
     pub warnings: Option<Warnings>,
 }
 
-impl CheckResponse {
+impl Response {
     /// Return an iterator over matches.
     pub fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
         self.matches.iter()
@@ -1027,19 +1027,19 @@ impl CheckResponse {
 /// This structure exists to keep a link between a check response
 /// and the original text that was checked.
 #[derive(Debug, Clone, PartialEq)]
-pub struct CheckResponseWithContext {
+pub struct ResponseWithContext {
     /// Original text that was checked by LT.
     pub text: String,
     /// Check response.
-    pub response: CheckResponse,
+    pub response: Response,
     /// Text's length.
     pub text_length: usize,
 }
 
-impl CheckResponseWithContext {
+impl ResponseWithContext {
     /// Bind a check response with its original text.
     #[must_use]
-    pub fn new(text: String, response: CheckResponse) -> Self {
+    pub fn new(text: String, response: Response) -> Self {
         let text_length = text.chars().count();
         Self {
             text,
@@ -1098,9 +1098,9 @@ impl CheckResponseWithContext {
     }
 }
 
-impl From<CheckResponseWithContext> for CheckResponse {
+impl From<ResponseWithContext> for Response {
     #[allow(clippy::needless_borrow)]
-    fn from(mut resp: CheckResponseWithContext) -> Self {
+    fn from(mut resp: ResponseWithContext) -> Self {
         let iter: MatchPositions<'_, std::slice::IterMut<'_, Match>> = (&mut resp).into();
 
         for (line_number, line_offset, m) in iter {
@@ -1123,10 +1123,10 @@ pub struct MatchPositions<'source, T> {
     offset: usize,
 }
 
-impl<'source> From<&'source CheckResponseWithContext>
+impl<'source> From<&'source ResponseWithContext>
     for MatchPositions<'source, std::slice::Iter<'source, Match>>
 {
-    fn from(response: &'source CheckResponseWithContext) -> Self {
+    fn from(response: &'source ResponseWithContext) -> Self {
         MatchPositions {
             text_chars: response.text.chars(),
             matches: response.iter_matches(),
@@ -1137,10 +1137,10 @@ impl<'source> From<&'source CheckResponseWithContext>
     }
 }
 
-impl<'source> From<&'source mut CheckResponseWithContext>
+impl<'source> From<&'source mut ResponseWithContext>
     for MatchPositions<'source, std::slice::IterMut<'source, Match>>
 {
-    fn from(response: &'source mut CheckResponseWithContext) -> Self {
+    fn from(response: &'source mut ResponseWithContext) -> Self {
         MatchPositions {
             text_chars: response.text.chars(),
             matches: response.response.iter_matches_mut(),

@@ -12,7 +12,7 @@ use termcolor::{ColorChoice, StandardStream};
 
 use crate::{
     api::{
-        check::CheckResponseWithContext,
+        check,
         server::{ServerCli, ServerClient},
         words::WordsSubcommand,
     },
@@ -136,7 +136,7 @@ impl Cli {
 
                     if request.text.is_some() && !cmd.raw {
                         let text = request.text.unwrap();
-                        response = CheckResponseWithContext::new(text.clone(), response).into();
+                        response = check::ResponseWithContext::new(text.clone(), response).into();
                         writeln!(
                             &mut stdout,
                             "{}",

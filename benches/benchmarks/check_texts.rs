@@ -2,7 +2,7 @@ use criterion::{criterion_group, Criterion, Throughput};
 use futures::future::join_all;
 use languagetool_rust::{
     api::{
-        check::{CheckRequest, CheckResponse, CheckResponseWithContext},
+        check::{self, Request, Response},
         server::ServerClient,
     },
     error::Error,
@@ -14,7 +14,7 @@ static FILES: [(&str, &str); 3] = [
     ("large", include_str!("../large.txt")),
 ];
 
-async fn request_until_success(req: &CheckRequest, client: &ServerClient) -> CheckResponse {
+async fn request_until_success(req: &Request, client: &ServerClient) -> Response {
     loop {
         match client.check(req).await {
             Ok(resp) => return resp,
@@ -29,17 +29,17 @@ async fn request_until_success(req: &CheckRequest, client: &ServerClient) -> Che
 }
 
 #[tokio::main]
-async fn check_text_basic(text: &str) -> CheckResponse {
+async fn check_text_basic(text: &str) -> Response {
     let client = ServerClient::from_env().expect(
         "Please use a local server for benchmarking, and configure the environ variables to use \
          it.",
     );
-    let req = CheckRequest::default().with_text(text.to_string());
+    let req = Request::default().with_text(text.to_string());
     request_until_success(&req, &client).await
 }
 
 #[tokio::main]
-async fn check_text_split(text: &str) -> CheckResponse {
+async fn check_text_split(text: &str) -> Response {
     let client = ServerClient::from_env().expect(
         "Please use a local server for benchmarking, and configure the environ variables to use \
          it.",
@@ -47,9 +47,9 @@ async fn check_text_split(text: &str) -> CheckResponse {
     let lines = text.lines();
 
     let resps = join_all(lines.map(|line| async {
-        let req = CheckRequest::default().with_text(line.to_string());
+        let req = Request::default().with_text(line.to_string());
         let resp = request_until_success(&req, &client).await;
-        CheckResponseWithContext::new(req.get_text(), resp)
+        check::ResponseWithContext::new(req.get_text(), resp)
     }))
     .await;
 

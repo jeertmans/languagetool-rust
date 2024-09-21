@@ -1,7 +1,4 @@
-use languagetool_rust::api::{
-    check::{CheckRequest, CheckResponseWithContext},
-    server::ServerClient,
-};
+use languagetool_rust::api::{check, server::ServerClient};
 
 #[macro_export]
 macro_rules! test_match_positions {
@@ -10,9 +7,9 @@ macro_rules! test_match_positions {
         async fn $name()  -> Result<(), Box<dyn std::error::Error>> {
 
             let client = ServerClient::from_env_or_default();
-            let req = CheckRequest::default().with_text($text.to_string());
+            let req = check::Request::default().with_text($text.to_string());
             let resp = client.check(&req).await.unwrap();
-            let resp = CheckResponseWithContext::new(req.get_text(), resp);
+            let resp = check::ResponseWithContext::new(req.get_text(), resp);
 
             let expected = vec![$(($x, $y)),*];
             let got = resp.iter_match_positions();

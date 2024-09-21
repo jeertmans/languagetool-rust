@@ -1,9 +1,10 @@
 //! Structure to communicate with some `LanguageTool` server through the API.
 
 use crate::{
-    api::check::{CheckRequest, CheckResponse, CheckResponseWithContext},
-    api::languages,
-    api::words,
+    api::{
+        check::{self, Request, Response},
+        languages, words,
+    },
     error::{Error, Result},
 };
 #[cfg(feature = "cli")]
@@ -363,7 +364,7 @@ impl ServerClient {
     }
 
     /// Send a check request to the server and await for the response.
-    pub async fn check(&self, request: &CheckRequest) -> Result<CheckResponse> {
+    pub async fn check(&self, request: &Request) -> Result<Response> {
         match self
             .client
             .post(format!("{0}/check", self.api))
@@ -373,7 +374,7 @@ impl ServerClient {
         {
             Ok(resp) => match resp.error_for_status_ref() {
                 Ok(_) => resp
-                    .json::<CheckResponse>()
+                    .json::<Response>()
                     .await
                     .map_err(Error::ResponseDecode)
                     .map(|mut resp| {
@@ -402,10 +403,7 @@ impl ServerClient {
     ///
     /// If any of the requests has `self.text` field which is none.
     #[cfg(feature = "multithreaded")]
-    pub async fn check_multiple_and_join(
-        &self,
-        requests: Vec<CheckRequest>,
-    ) -> Result<CheckResponse> {
+    pub async fn check_multiple_and_join(&self, requests: Vec<Request>) -> Result<Response> {
         let mut tasks = Vec::with_capacity(requests.len());
 
         for request in requests.into_iter() {
@@ -415,20 +413,22 @@ impl ServerClient {
                 let text = request.text.ok_or(Error::InvalidRequest(
                     "missing text field; cannot join requests with data annotations".to_string(),
                 ))?;
-                Result::<(String, CheckResponse)>::Ok((text, response))
+                Result::<(String, Response)>::Ok((text, response))
             }));
         }
 
-        let mut response_with_context: Option<CheckResponseWithContext> = None;
+        let mut response_with_context: Option<check::ResponseWithContext> = None;
 
         for task in tasks {
             let (text, response) = task.await.unwrap()?;
             match response_with_context {
                 Some(resp) => {
                     response_with_context =
-                        Some(resp.append(CheckResponseWithContext::new(text, response)))
+                        Some(resp.append(check::ResponseWithContext::new(text, response)))
                 },
-                None => response_with_context = Some(CheckResponseWithContext::new(text, response)),
+                None => {
+                    response_with_context = Some(check::ResponseWithContext::new(text, response))
+                },
             }
         }
 
@@ -440,7 +440,7 @@ impl ServerClient {
     #[cfg(feature = "annotate")]
     pub async fn annotate_check(
         &self,
-        request: &CheckRequest,
+        request: &Request,
         origin: Option<&str>,
         color: bool,
     ) -> Result<String> {
@@ -567,7 +567,7 @@ impl ServerClient {
 #[cfg(test)]
 mod tests {
     use super::ServerClient;
-    use crate::api::check::CheckRequest;
+    use crate::api::check::Request;
 
     #[tokio::test]
     async fn test_server_ping() {
@@ -578,14 +578,14 @@ mod tests {
     #[tokio::test]
     async fn test_server_check_text() {
         let client = ServerClient::from_env_or_default();
-        let req = CheckRequest::default().with_text("je suis une poupee".to_string());
+        let req = Request::default().with_text("je suis une poupee".to_string());
         assert!(client.check(&req).await.is_ok());
     }
 
     #[tokio::test]
     async fn test_server_check_data() {
         let client = ServerClient::from_env_or_default();
-        let req = CheckRequest::default()
+        let req = Request::default()
             .with_data_str("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
             .unwrap();
         assert!(client.check(&req).await.is_ok());

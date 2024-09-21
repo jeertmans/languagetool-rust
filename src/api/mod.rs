@@ -46,20 +46,18 @@ impl Client {
     }
 
     /// Send a check request to the server and await for the response.
-    pub async fn check(
-        &self,
-        request: &check::CheckRequest,
-    ) -> reqwest::Result<check::CheckResponse> {
+    pub async fn check(&self, request: &check::Request) -> reqwest::Result<check::Response> {
         self.client
             .post(self.url("/check"))
             .query(request)
             .send()
             .await?
-            .json::<check::CheckResponse>()
+            .json::<check::Response>()
             .await
     }
 
-    /// Send a request for the list of supported languages to the server and await for the response.
+    /// Send a request for the list of supported languages to the server and
+    /// await for the response.
     pub async fn languages(&self) -> reqwest::Result<languages::Response> {
         self.client
             .get(self.url("/languages"))
