@@ -7,11 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0](https://github.com/jeertmans/languagetool-rust/compare/v2.1.4...v2.1.5)
 
-- Added support for Markdown and Typst files.
-  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
-
-### Breaking
-
 - **Breaking** Stopped (de)serializing structs that did not need it.
   [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
 - **Breaking** Completely reorganized the crate.
