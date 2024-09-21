@@ -160,7 +160,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = ServerClient::from_env_or_default();
 
     let req = CheckRequest::default()
-        .with_text("Some phrase with a smal mistake".to_string());  //# codespell:ignore smal
+        .with_text("Some phrase with a smal mistake".to_string());  // # codespell:ignore smal
 
     println!(
         "{}",
