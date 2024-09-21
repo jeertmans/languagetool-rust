@@ -597,7 +597,7 @@ impl Request {
     }
 
     /// Return a copy of the text within the request.
-    /// Call [`check::request::try_get_text`] but panic on error.
+    /// Call [`Request::try_get_text`] but panic on error.
     ///
     /// # Panics
     ///
@@ -628,7 +628,7 @@ impl Request {
 
     /// Split this request into multiple, using [`split_len`] function to split
     /// text.
-    /// Call [`check::request::try_split`] but panic on error.
+    /// Call [`Request::try_split`] but panic on error.
     ///
     /// # Panics
     ///
@@ -701,7 +701,7 @@ pub struct CheckCommand {
     /// Optional filenames from which input is read.
     #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
     pub filenames: Vec<PathBuf>,
-    /// Inner [`check::request`].
+    /// Inner [`Request`].
     #[command(flatten, next_help_heading = "Request options")]
     pub request: Request,
 }

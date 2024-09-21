@@ -19,7 +19,7 @@ pub enum Error {
     ExitStatus(String),
 
     /// Error specifying an invalid
-    /// [`DataAnnotation`](`crate::check::DataAnnotation`).
+    /// [`DataAnnotation`](`crate::api::check::DataAnnotation`).
     #[error("invalid request: {0}")]
     InvalidDataAnnotation(String),
 
