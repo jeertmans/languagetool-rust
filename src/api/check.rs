@@ -975,11 +975,8 @@ impl Response {
             })
             .collect();
 
-        let snippets = self
-            .matches
-            .iter()
-            .zip(replacements.iter())
-            .map(|(m, r)| Snippet {
+        let snippets = self.matches.iter().zip(replacements.iter()).map(|(m, r)| {
+            Snippet {
                 title: Some(Annotation {
                     label: Some(&m.message),
                     id: Some(&m.rule.id),
@@ -1008,7 +1005,8 @@ impl Response {
                     color,
                     ..Default::default()
                 },
-            });
+            }
+        });
 
         let mut annotation = String::new();
 

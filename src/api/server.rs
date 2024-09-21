@@ -141,15 +141,17 @@ impl ConfigFile {
                 Value::Bool(b) => writeln!(w, "{key}={b}")?,
                 Value::Number(n) => writeln!(w, "{key}={n}")?,
                 Value::String(s) => writeln!(w, "{key}=\"{s}\"")?,
-                Value::Array(a) => writeln!(
-                    w,
-                    "{}=\"{}\"",
-                    key,
-                    a.iter()
-                        .map(std::string::ToString::to_string)
-                        .collect::<Vec<String>>()
-                        .join(",")
-                )?,
+                Value::Array(a) => {
+                    writeln!(
+                        w,
+                        "{}=\"{}\"",
+                        key,
+                        a.iter()
+                            .map(std::string::ToString::to_string)
+                            .collect::<Vec<String>>()
+                            .join(",")
+                    )?
+                },
                 Value::Object(o) => {
                     for (key, value) in o.iter() {
                         writeln!(w, "{key}=\"{value}\"")?
@@ -372,26 +374,29 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => match resp.error_for_status_ref() {
-                Ok(_) => resp
-                    .json::<Response>()
-                    .await
-                    .map_err(Error::ResponseDecode)
-                    .map(|mut resp| {
-                        if self.max_suggestions > 0 {
-                            let max = self.max_suggestions as usize;
-                            resp.matches.iter_mut().for_each(|m| {
-                                let len = m.replacements.len();
-                                if max < len {
-                                    m.replacements[max] =
-                                        format!("... ({} not shown)", len - max).into();
-                                    m.replacements.truncate(max + 1);
+            Ok(resp) => {
+                match resp.error_for_status_ref() {
+                    Ok(_) => {
+                        resp.json::<Response>()
+                            .await
+                            .map_err(Error::ResponseDecode)
+                            .map(|mut resp| {
+                                if self.max_suggestions > 0 {
+                                    let max = self.max_suggestions as usize;
+                                    resp.matches.iter_mut().for_each(|m| {
+                                        let len = m.replacements.len();
+                                        if max < len {
+                                            m.replacements[max] =
+                                                format!("... ({} not shown)", len - max).into();
+                                            m.replacements.truncate(max + 1);
+                                        }
+                                    });
                                 }
-                            });
-                        }
-                        resp
-                    }),
-                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                                resp
+                            })
+                    },
+                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                }
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
@@ -458,12 +463,15 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => match resp.error_for_status_ref() {
-                Ok(_) => resp
-                    .json::<languages::Response>()
-                    .await
-                    .map_err(Error::ResponseDecode),
-                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+            Ok(resp) => {
+                match resp.error_for_status_ref() {
+                    Ok(_) => {
+                        resp.json::<languages::Response>()
+                            .await
+                            .map_err(Error::ResponseDecode)
+                    },
+                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                }
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
@@ -478,12 +486,15 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => match resp.error_for_status_ref() {
-                Ok(_) => resp
-                    .json::<words::Response>()
-                    .await
-                    .map_err(Error::ResponseDecode),
-                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+            Ok(resp) => {
+                match resp.error_for_status_ref() {
+                    Ok(_) => {
+                        resp.json::<words::Response>()
+                            .await
+                            .map_err(Error::ResponseDecode)
+                    },
+                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                }
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
@@ -498,12 +509,15 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => match resp.error_for_status_ref() {
-                Ok(_) => resp
-                    .json::<words::add::Response>()
-                    .await
-                    .map_err(Error::ResponseDecode),
-                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+            Ok(resp) => {
+                match resp.error_for_status_ref() {
+                    Ok(_) => {
+                        resp.json::<words::add::Response>()
+                            .await
+                            .map_err(Error::ResponseDecode)
+                    },
+                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                }
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
@@ -521,12 +535,15 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => match resp.error_for_status_ref() {
-                Ok(_) => resp
-                    .json::<words::delete::Response>()
-                    .await
-                    .map_err(Error::ResponseDecode),
-                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+            Ok(resp) => {
+                match resp.error_for_status_ref() {
+                    Ok(_) => {
+                        resp.json::<words::delete::Response>()
+                            .await
+                            .map_err(Error::ResponseDecode)
+                    },
+                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
+                }
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }

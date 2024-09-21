@@ -46,10 +46,12 @@ async fn check_text_split(text: &str) -> Response {
     );
     let lines = text.lines();
 
-    let resps = join_all(lines.map(|line| async {
-        let req = Request::default().with_text(line.to_string());
-        let resp = request_until_success(&req, &client).await;
-        check::ResponseWithContext::new(req.get_text(), resp)
+    let resps = join_all(lines.map(|line| {
+        async {
+            let req = Request::default().with_text(line.to_string());
+            let resp = request_until_success(&req, &client).await;
+            check::ResponseWithContext::new(req.get_text(), resp)
+        }
     }))
     .await;
 
