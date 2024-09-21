@@ -12,7 +12,7 @@ use annotate_snippets::{
 use clap::{Args, Parser, ValueEnum};
 use serde::{Deserialize, Serialize, Serializer};
 
-use super::error::{Error, Result};
+use crate::error::{Error, Result};
 
 /// Requests
 
@@ -23,7 +23,7 @@ use super::error::{Error, Result};
 /// - a five character string matching pattern `[a-z]{2}-[A-Z]{2}
 /// - or some more complex ascii string (see below)
 ///
-/// Language code is case insensitive.
+/// Language code is case-insensitive.
 ///
 /// Therefore, a valid language code must match the following:
 ///
@@ -38,7 +38,7 @@ use super::error::{Error, Result};
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::check::parse_language_code;
+/// # use languagetool_rust::api::check::parse_language_code;
 /// assert!(parse_language_code("en").is_ok());
 ///
 /// assert!(parse_language_code("en-US").is_ok());
@@ -187,7 +187,7 @@ impl DataAnnotation {
 #[cfg(test)]
 mod data_annotation_tests {
 
-    use crate::check::DataAnnotation;
+    use super::DataAnnotation;
 
     #[test]
     fn test_text() {
@@ -277,7 +277,7 @@ impl Level {
     /// # Examples
     ///
     /// ```
-    /// # use languagetool_rust::check::Level;
+    /// # use languagetool_rust::api::check::Level;
     ///
     /// let level: Level = Default::default();
     ///
@@ -296,7 +296,7 @@ impl Level {
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::check::split_len;
+/// # use languagetool_rust::api::check::split_len;
 /// let s = "I have so many friends.
 /// They are very funny.
 /// I think I am very lucky to have them.
@@ -696,7 +696,7 @@ pub struct CheckCommand {
     /// Specify the files type to use the correct parser.
     ///
     /// If set to auto, the type is guessed from the filename extension.
-    #[clap(long, default_value = "default", ignore_case = true, value_enum)]
+    #[clap(long, value_enum, default_value_t = FileType::default(), ignore_case = true)]
     pub r#type: FileType,
     /// Optional filenames from which input is read.
     #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
@@ -709,7 +709,7 @@ pub struct CheckCommand {
 #[cfg(test)]
 mod request_tests {
 
-    use crate::CheckRequest;
+    use super::CheckRequest;
 
     #[test]
     fn test_with_text() {
@@ -845,7 +845,7 @@ pub struct Rule {
     pub urls: Option<Vec<Url>>,
 }
 
-/// Type of a given match.
+/// Type of given match.
 #[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
@@ -876,7 +876,7 @@ pub struct Match {
     /// More context to match, post-processed using original text.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub more_context: Option<MoreContext>,
-    /// Char index at which the match start.
+    /// Char index at which the match starts.
     pub offset: usize,
     /// List of possible replacements (if applies).
     pub replacements: Vec<Replacement>,
@@ -959,7 +959,7 @@ impl CheckResponse {
     #[must_use]
     pub fn annotate(&self, text: &str, origin: Option<&str>, color: bool) -> String {
         if self.matches.is_empty() {
-            return "No error were found in provided text".to_string();
+            return "No errors were found in provided text".to_string();
         }
         let replacements: Vec<_> = self
             .matches
@@ -975,8 +975,11 @@ impl CheckResponse {
             })
             .collect();
 
-        let snippets = self.matches.iter().zip(replacements.iter()).map(|(m, r)| {
-            Snippet {
+        let snippets = self
+            .matches
+            .iter()
+            .zip(replacements.iter())
+            .map(|(m, r)| Snippet {
                 title: Some(Annotation {
                     label: Some(&m.message),
                     id: Some(&m.rule.id),
@@ -1005,8 +1008,7 @@ impl CheckResponse {
                     color,
                     ..Default::default()
                 },
-            }
-        });
+            });
 
         let mut annotation = String::new();
 

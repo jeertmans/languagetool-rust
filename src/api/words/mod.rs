@@ -1,11 +1,14 @@
 //! Structures for `words` requests and responses.
 
-use crate::{Error, Result};
+use crate::error::{Error, Result};
 
 use super::check::serialize_option_vec_string;
 #[cfg(feature = "cli")]
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
+
+pub mod add;
+pub mod delete;
 
 /// Parse `v` if valid word.
 ///
@@ -14,7 +17,7 @@ use serde::{Deserialize, Serialize};
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::words::parse_word;
+/// # use languagetool_rust::api::words::parse_word;
 /// assert!(parse_word("word").is_ok());
 ///
 /// assert!(parse_word("some words").is_err());
@@ -109,8 +112,8 @@ impl From<RequestArgs> for Request {
     #[inline]
     fn from(args: RequestArgs) -> Self {
         Self {
-            offset: args.offset,
-            limit: args.limit,
+            offset: Some(args.offset),
+            limit: Some(args.limit),
             login: args.login.unwrap(),
             dicts: args.dicts,
         }
@@ -122,9 +125,9 @@ impl From<RequestArgs> for Request {
 #[derive(Clone, Debug, Subcommand)]
 pub enum WordsSubcommand {
     /// Add a word to some user's list.
-    Add(WordsAddRequest),
+    Add(add::Request),
     /// Remove a word from some user's list.
-    Delete(WordsDeleteRequest),
+    Delete(delete::Request),
 }
 
 /// Retrieve some user's words list.
@@ -147,77 +150,4 @@ pub struct WordsCommand {
 pub struct Response {
     /// List of words.
     pub words: Vec<String>,
-}
-
-pub mod add {
-    use super::*;
-
-    /// LanguageTool POST words add request.
-    ///
-    /// Add a word to one of the user's personal dictionaries. Please note that
-    /// this feature is considered to be used for personal dictionaries
-    /// which must not contain more than 500 words. If this is an issue for
-    /// you, please contact us.
-    #[cfg_attr(feature = "cli", derive(Args))]
-    #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize, Hash)]
-    #[non_exhaustive]
-    pub struct Request {
-        /// The word to be added. Must not be a phrase, i.e., cannot contain
-        /// white space. The word is added to a global dictionary that
-        /// applies to all languages.
-        #[cfg_attr(feature = "cli", clap(required = true, value_parser = parse_word))]
-        pub word: String,
-        /// Login arguments.
-        #[cfg_attr(feature = "cli", clap(flatten))]
-        #[serde(flatten)]
-        pub login: LoginArgs,
-        /// Name of the dictionary to add the word to; non-existent dictionaries
-        /// are created after calling this; if unset, adds to special
-        /// default dictionary.
-        #[cfg_attr(feature = "cli", clap(long))]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pub dict: Option<String>,
-    }
-
-    /// LanguageTool POST word add response.
-    #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
-    #[non_exhaustive]
-    pub struct Response {
-        /// `true` if word was correctly added.
-        pub added: bool,
-    }
-}
-
-pub mod delete {
-    use super::*;
-
-    /// LanguageTool POST words delete request.
-    ///
-    /// Remove a word from one of the user's personal dictionaries.
-    #[cfg_attr(feature = "cli", derive(Args))]
-    #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize, Hash)]
-    #[non_exhaustive]
-    pub struct Request {
-        /// The word to be removed.
-        #[cfg_attr(feature = "cli", clap(required = true, value_parser = parse_word))]
-        pub word: String,
-        /// Login arguments.
-        #[cfg_attr(feature = "cli", clap(flatten))]
-        #[serde(flatten)]
-        pub login: LoginArgs,
-        /// Name of the dictionary to add the word to; non-existent dictionaries
-        /// are created after calling this; if unset, adds to special
-        /// default dictionary.
-        #[cfg_attr(feature = "cli", clap(long))]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pub dict: Option<String>,
-    }
-
-    /// LanguageTool POST word delete response.
-    #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
-    #[non_exhaustive]
-    pub struct Response {
-        /// `true` if word was correctly removed.
-        pub deleted: bool,
-    }
 }

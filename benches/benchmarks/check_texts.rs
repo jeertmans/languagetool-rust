@@ -1,9 +1,11 @@
 use criterion::{criterion_group, Criterion, Throughput};
 use futures::future::join_all;
 use languagetool_rust::{
-    check::{CheckRequest, CheckResponse, CheckResponseWithContext},
+    api::{
+        check::{CheckRequest, CheckResponse, CheckResponseWithContext},
+        server::ServerClient,
+    },
     error::Error,
-    server::ServerClient,
 };
 
 static FILES: [(&str, &str); 3] = [
@@ -44,12 +46,10 @@ async fn check_text_split(text: &str) -> CheckResponse {
     );
     let lines = text.lines();
 
-    let resps = join_all(lines.map(|line| {
-        async {
-            let req = CheckRequest::default().with_text(line.to_string());
-            let resp = request_until_success(&req, &client).await;
-            CheckResponseWithContext::new(req.get_text(), resp)
-        }
+    let resps = join_all(lines.map(|line| async {
+        let req = CheckRequest::default().with_text(line.to_string());
+        let resp = request_until_success(&req, &client).await;
+        CheckResponseWithContext::new(req.get_text(), resp)
     }))
     .await;
 

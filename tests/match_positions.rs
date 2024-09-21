@@ -1,4 +1,4 @@
-use languagetool_rust::{
+use languagetool_rust::api::{
     check::{CheckRequest, CheckResponseWithContext},
     server::ServerClient,
 };

@@ -1,23 +1,24 @@
-/// Raw bindings to the LanguageTool API v1.1.2.
-///
-/// The current bindings were generated using the
-/// [HTTP API documentation](https://languagetool.org/http-api/).
-///
-/// Unfortunately, the LanguageTool API is not as documented as we could
-/// hope, and resquests might return undocumented fields. Those are deserialized
-/// to the `undocumented` field.
+//! Raw bindings to the LanguageTool API v1.1.2.
+//!
+//! The current bindings were generated using the
+//! [HTTP API documentation](https://languagetool.org/http-api/).
+//!
+//! Unfortunately, the LanguageTool API is not as documented as we could
+//! hope, and requests might return undocumented fields. Those are de-serialized
+//! to the `undocumented` field.
 pub mod check;
 pub mod languages;
 pub mod server;
 pub mod words;
 
-/// A HTTP client for making requests to some LanguageTool server.
+/// A HTTP client for making requests to a LanguageTool server.
+#[derive(Debug)]
 pub struct Client {
     /// Server's hostname.
     hostname: String,
     /// Server's port.
     port: Option<String>,
-    /// Inner client to perform HTTP requets.
+    /// Inner client to perform HTTP requests.
     client: reqwest::Client,
 }
 
@@ -25,40 +26,46 @@ impl Default for Client {
     fn default() -> Self {
         Self {
             hostname: "https://api.languagetoolplus.com".to_string(),
-            ..Default::default()
+            port: None,
+            client: Default::default(),
         }
     }
 }
 
 impl Client {
-    /// Construct a HTTP url base on the current hostname, optional port,
+    /// Construct an HTTP URL base on the current hostname, optional port,
     /// and provided endpoint.
     #[inline]
+    #[must_use]
     pub fn url(&self, endpoint: &str) -> String {
-        let hostname = self.hostname;
-        match self.port {
+        let hostname = &self.hostname;
+        match &self.port {
             Some(p) => format!("{hostname}:{p}/v2{endpoint}"),
             None => format!("{hostname}/v2{endpoint}"),
         }
     }
 
     /// Send a check request to the server and await for the response.
-    pub async fn check(&self, request: &check::Request) -> Result<check::Response> {
+    pub async fn check(
+        &self,
+        request: &check::CheckRequest,
+    ) -> reqwest::Result<check::CheckResponse> {
         self.client
             .post(self.url("/check"))
             .query(request)
             .send()
             .await?
-            .json::<check::Response>()
+            .json::<check::CheckResponse>()
+            .await
     }
 
-    /// Send a words request to the server and await for the response.
-    pub async fn languages(&self, request: &languages::Request) -> Result<languages::Response> {
+    /// Send a request for the list of supported languages to the server and await for the response.
+    pub async fn languages(&self) -> reqwest::Result<languages::Response> {
         self.client
             .get(self.url("/languages"))
-            .query(request)
             .send()
             .await?
-            .json::<check::Response>()
+            .json::<languages::Response>()
+            .await
     }
 }

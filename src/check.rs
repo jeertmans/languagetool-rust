@@ -25,7 +25,7 @@ use super::error::{Error, Result};
 /// - a five character string matching pattern `[a-z]{2}-[A-Z]{2}
 /// - or some more complex ascii string (see below)
 ///
-/// Language code is case insensitive.
+/// Language code is case-insensitive.
 ///
 /// Therefore, a valid language code must match the following:
 ///
@@ -40,7 +40,7 @@ use super::error::{Error, Result};
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::check::parse_language_code;
+/// # use languagetool_rust::api::check::parse_language_code;
 /// assert!(parse_language_code("en").is_ok());
 ///
 /// assert!(parse_language_code("en-US").is_ok());
@@ -279,7 +279,7 @@ impl Level {
     /// # Examples
     ///
     /// ```
-    /// # use languagetool_rust::check::Level;
+    /// # use languagetool_rust::api::check::Level;
     ///
     /// let level: Level = Default::default();
     ///
@@ -298,7 +298,7 @@ impl Level {
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::check::split_len;
+/// # use languagetool_rust::api::check::split_len;
 /// let s = "I have so many friends.
 /// They are very funny.
 /// I think I am very lucky to have them.
@@ -815,7 +815,7 @@ impl From<&str> for Replacement {
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 pub struct Category {
-    /// Category id.
+    /// Category ID.
     pub id: String,
     /// Category name.
     pub name: String,
@@ -838,14 +838,14 @@ pub struct Rule {
     pub category: Category,
     /// Rule description.
     pub description: String,
-    /// Rule id.
+    /// Rule ID.
     pub id: String,
     /// Issue type.
     pub issue_type: String,
     /// Rule source file.
-    /// Rule sub id.
+    /// Rule sub ID.
     pub sub_id: Option<String>,
-    /// Rule list of urls.
+    /// Rule list of URLs.
     pub urls: Option<Vec<Url>>,
     /// Undocumented fields.
     ///
@@ -858,7 +858,7 @@ pub struct Rule {
     pub undocumented: HashMap<String, Value>,
 }
 
-/// Type of a given match.
+/// Type of given match.
 #[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
@@ -970,7 +970,7 @@ impl Response {
     #[must_use]
     pub fn annotate(&self, text: &str, origin: Option<&str>, color: bool) -> String {
         if self.matches.is_empty() {
-            return "No error were found in provided text".to_string();
+            return "No errors were found in provided text".to_string();
         }
         let replacements: Vec<_> = self
             .matches
@@ -986,8 +986,11 @@ impl Response {
             })
             .collect();
 
-        let snippets = self.matches.iter().zip(replacements.iter()).map(|(m, r)| {
-            Snippet {
+        let snippets = self
+            .matches
+            .iter()
+            .zip(replacements.iter())
+            .map(|(m, r)| Snippet {
                 title: Some(Annotation {
                     label: Some(&m.message),
                     id: Some(&m.rule.id),
@@ -1016,8 +1019,7 @@ impl Response {
                     color,
                     ..Default::default()
                 },
-            }
-        });
+            });
 
         let mut annotation = String::new();
 

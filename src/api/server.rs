@@ -1,13 +1,10 @@
 //! Structure to communicate with some `LanguageTool` server through the API.
 
 use crate::{
-    check::{CheckRequest, CheckResponse, CheckResponseWithContext},
+    api::check::{CheckRequest, CheckResponse, CheckResponseWithContext},
+    api::languages,
+    api::words,
     error::{Error, Result},
-    languages::LanguagesResponse,
-    words::{
-        WordsAddRequest, WordsAddResponse, WordsDeleteRequest, WordsDeleteResponse, WordsRequest,
-        WordsResponse,
-    },
 };
 #[cfg(feature = "cli")]
 use clap::Args;
@@ -25,7 +22,7 @@ use std::{io, path::PathBuf, time::Instant};
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::server::parse_port;
+/// # use languagetool_rust::api::server::parse_port;
 /// assert!(parse_port("8081").is_ok());
 ///
 /// assert!(parse_port("").is_ok()); // No port specified, which is accepted
@@ -143,17 +140,15 @@ impl ConfigFile {
                 Value::Bool(b) => writeln!(w, "{key}={b}")?,
                 Value::Number(n) => writeln!(w, "{key}={n}")?,
                 Value::String(s) => writeln!(w, "{key}=\"{s}\"")?,
-                Value::Array(a) => {
-                    writeln!(
-                        w,
-                        "{}=\"{}\"",
-                        key,
-                        a.iter()
-                            .map(std::string::ToString::to_string)
-                            .collect::<Vec<String>>()
-                            .join(",")
-                    )?
-                },
+                Value::Array(a) => writeln!(
+                    w,
+                    "{}=\"{}\"",
+                    key,
+                    a.iter()
+                        .map(std::string::ToString::to_string)
+                        .collect::<Vec<String>>()
+                        .join(",")
+                )?,
                 Value::Object(o) => {
                     for (key, value) in o.iter() {
                         writeln!(w, "{key}=\"{value}\"")?
@@ -376,29 +371,26 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<CheckResponse>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                            .map(|mut resp| {
-                                if self.max_suggestions > 0 {
-                                    let max = self.max_suggestions as usize;
-                                    resp.matches.iter_mut().for_each(|m| {
-                                        let len = m.replacements.len();
-                                        if max < len {
-                                            m.replacements[max] =
-                                                format!("... ({} not shown)", len - max).into();
-                                            m.replacements.truncate(max + 1);
-                                        }
-                                    });
+            Ok(resp) => match resp.error_for_status_ref() {
+                Ok(_) => resp
+                    .json::<CheckResponse>()
+                    .await
+                    .map_err(Error::ResponseDecode)
+                    .map(|mut resp| {
+                        if self.max_suggestions > 0 {
+                            let max = self.max_suggestions as usize;
+                            resp.matches.iter_mut().for_each(|m| {
+                                let len = m.replacements.len();
+                                if max < len {
+                                    m.replacements[max] =
+                                        format!("... ({} not shown)", len - max).into();
+                                    m.replacements.truncate(max + 1);
                                 }
-                                resp
-                            })
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
+                            });
+                        }
+                        resp
+                    }),
+                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
@@ -459,29 +451,26 @@ impl ServerClient {
     }
 
     /// Send a languages request to the server and await for the response.
-    pub async fn languages(&self) -> Result<LanguagesResponse> {
+    pub async fn languages(&self) -> Result<languages::Response> {
         match self
             .client
             .get(format!("{}/languages", self.api))
             .send()
             .await
         {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<LanguagesResponse>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
+            Ok(resp) => match resp.error_for_status_ref() {
+                Ok(_) => resp
+                    .json::<languages::Response>()
+                    .await
+                    .map_err(Error::ResponseDecode),
+                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
     }
 
     /// Send a words request to the server and await for the response.
-    pub async fn words(&self, request: &WordsRequest) -> Result<WordsResponse> {
+    pub async fn words(&self, request: &words::Request) -> Result<words::Response> {
         match self
             .client
             .get(format!("{}/words", self.api))
@@ -489,22 +478,19 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<WordsResponse>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
+            Ok(resp) => match resp.error_for_status_ref() {
+                Ok(_) => resp
+                    .json::<words::Response>()
+                    .await
+                    .map_err(Error::ResponseDecode),
+                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
     }
 
     /// Send a words/add request to the server and await for the response.
-    pub async fn words_add(&self, request: &WordsAddRequest) -> Result<WordsAddResponse> {
+    pub async fn words_add(&self, request: &words::add::Request) -> Result<words::add::Response> {
         match self
             .client
             .post(format!("{}/words/add", self.api))
@@ -512,22 +498,22 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<WordsAddResponse>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
+            Ok(resp) => match resp.error_for_status_ref() {
+                Ok(_) => resp
+                    .json::<words::add::Response>()
+                    .await
+                    .map_err(Error::ResponseDecode),
+                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
     }
 
     /// Send a words/delete request to the server and await for the response.
-    pub async fn words_delete(&self, request: &WordsDeleteRequest) -> Result<WordsDeleteResponse> {
+    pub async fn words_delete(
+        &self,
+        request: &words::delete::Request,
+    ) -> Result<words::delete::Response> {
         match self
             .client
             .post(format!("{}/words/delete", self.api))
@@ -535,15 +521,12 @@ impl ServerClient {
             .send()
             .await
         {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<WordsDeleteResponse>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
+            Ok(resp) => match resp.error_for_status_ref() {
+                Ok(_) => resp
+                    .json::<words::delete::Response>()
+                    .await
+                    .map_err(Error::ResponseDecode),
+                Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
             },
             Err(e) => Err(Error::RequestEncode(e)),
         }
@@ -583,7 +566,8 @@ impl ServerClient {
 
 #[cfg(test)]
 mod tests {
-    use crate::{check::CheckRequest, ServerClient};
+    use super::ServerClient;
+    use crate::api::check::CheckRequest;
 
     #[tokio::test]
     async fn test_server_ping() {
