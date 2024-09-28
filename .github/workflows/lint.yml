@@ -20,11 +20,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
     - name: Install pre-commit
       run: pip install pre-commit
 
@@ -44,20 +39,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install PDM
-      uses: pdm-project/setup-pdm@v4
-      with:
-        python-version: '3.11'
-        cache: true
-
     - name: Install Rust nightly
       uses: dtolnay/rust-toolchain@nightly
       with:
         components: clippy,rustfmt
-
-    - name: Install dependencies
-      run: |
-        pdm install -G test,github-action
 
     - name: Run pre-commit hooks
       uses: pre-commit/action@v3.0.1
