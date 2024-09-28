@@ -12,7 +12,7 @@ use annotate_snippets::{
 use clap::{Args, Parser, ValueEnum};
 use serde::{Deserialize, Serialize, Serializer};
 
-use super::error::{Error, Result};
+use crate::error::{Error, Result};
 
 /// Requests
 
@@ -23,7 +23,7 @@ use super::error::{Error, Result};
 /// - a five character string matching pattern `[a-z]{2}-[A-Z]{2}
 /// - or some more complex ascii string (see below)
 ///
-/// Language code is case insensitive.
+/// Language code is case-insensitive.
 ///
 /// Therefore, a valid language code must match the following:
 ///
@@ -38,7 +38,7 @@ use super::error::{Error, Result};
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::check::parse_language_code;
+/// # use languagetool_rust::api::check::parse_language_code;
 /// assert!(parse_language_code("en").is_ok());
 ///
 /// assert!(parse_language_code("en-US").is_ok());
@@ -187,7 +187,7 @@ impl DataAnnotation {
 #[cfg(test)]
 mod data_annotation_tests {
 
-    use crate::check::DataAnnotation;
+    use super::DataAnnotation;
 
     #[test]
     fn test_text() {
@@ -277,7 +277,7 @@ impl Level {
     /// # Examples
     ///
     /// ```
-    /// # use languagetool_rust::check::Level;
+    /// # use languagetool_rust::api::check::Level;
     ///
     /// let level: Level = Default::default();
     ///
@@ -296,7 +296,7 @@ impl Level {
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::check::split_len;
+/// # use languagetool_rust::api::check::split_len;
 /// let s = "I have so many friends.
 /// They are very funny.
 /// I think I am very lucky to have them.
@@ -389,7 +389,7 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Hash)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-pub struct CheckRequest {
+pub struct Request {
     /// The text to be checked. This or 'data' is required.
     #[cfg_attr(
         feature = "cli",
@@ -509,10 +509,10 @@ pub struct CheckRequest {
     pub level: Level,
 }
 
-impl Default for CheckRequest {
+impl Default for Request {
     #[inline]
-    fn default() -> CheckRequest {
-        CheckRequest {
+    fn default() -> Request {
+        Request {
             text: Default::default(),
             data: Default::default(),
             language: "auto".to_string(),
@@ -536,7 +536,7 @@ fn is_false(b: &bool) -> bool {
     !(*b)
 }
 
-impl CheckRequest {
+impl Request {
     /// Set the text to be checked and remove potential data field.
     #[must_use]
     pub fn with_text(mut self, text: String) -> Self {
@@ -597,7 +597,7 @@ impl CheckRequest {
     }
 
     /// Return a copy of the text within the request.
-    /// Call [`CheckRequest::try_get_text`] but panic on error.
+    /// Call [`Request::try_get_text`] but panic on error.
     ///
     /// # Panics
     ///
@@ -628,7 +628,7 @@ impl CheckRequest {
 
     /// Split this request into multiple, using [`split_len`] function to split
     /// text.
-    /// Call [`CheckRequest::try_split`] but panic on error.
+    /// Call [`Request::try_split`] but panic on error.
     ///
     /// # Panics
     ///
@@ -696,24 +696,24 @@ pub struct CheckCommand {
     /// Specify the files type to use the correct parser.
     ///
     /// If set to auto, the type is guessed from the filename extension.
-    #[clap(long, default_value = "default", ignore_case = true, value_enum)]
+    #[clap(long, value_enum, default_value_t = FileType::default(), ignore_case = true)]
     pub r#type: FileType,
     /// Optional filenames from which input is read.
     #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
     pub filenames: Vec<PathBuf>,
-    /// Inner [`CheckRequest`].
+    /// Inner [`Request`].
     #[command(flatten, next_help_heading = "Request options")]
-    pub request: CheckRequest,
+    pub request: Request,
 }
 
 #[cfg(test)]
 mod request_tests {
 
-    use crate::CheckRequest;
+    use super::Request;
 
     #[test]
     fn test_with_text() {
-        let req = CheckRequest::default().with_text("hello".to_string());
+        let req = Request::default().with_text("hello".to_string());
 
         assert_eq!(req.text.unwrap(), "hello".to_string());
         assert!(req.data.is_none());
@@ -721,7 +721,7 @@ mod request_tests {
 
     #[test]
     fn test_with_data() {
-        let req = CheckRequest::default().with_text("hello".to_string());
+        let req = Request::default().with_text("hello".to_string());
 
         assert_eq!(req.text.unwrap(), "hello".to_string());
         assert!(req.data.is_none());
@@ -845,7 +845,7 @@ pub struct Rule {
     pub urls: Option<Vec<Url>>,
 }
 
-/// Type of a given match.
+/// Type of given match.
 #[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
@@ -876,7 +876,7 @@ pub struct Match {
     /// More context to match, post-processed using original text.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub more_context: Option<MoreContext>,
-    /// Char index at which the match start.
+    /// Char index at which the match starts.
     pub offset: usize,
     /// List of possible replacements (if applies).
     pub replacements: Vec<Replacement>,
@@ -928,7 +928,7 @@ pub struct Warnings {
 #[derive(Clone, PartialEq, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-pub struct CheckResponse {
+pub struct Response {
     /// Language information.
     pub language: LanguageResponse,
     /// List of error matches.
@@ -943,7 +943,7 @@ pub struct CheckResponse {
     pub warnings: Option<Warnings>,
 }
 
-impl CheckResponse {
+impl Response {
     /// Return an iterator over matches.
     pub fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
         self.matches.iter()
@@ -959,7 +959,7 @@ impl CheckResponse {
     #[must_use]
     pub fn annotate(&self, text: &str, origin: Option<&str>, color: bool) -> String {
         if self.matches.is_empty() {
-            return "No error were found in provided text".to_string();
+            return "No errors were found in provided text".to_string();
         }
         let replacements: Vec<_> = self
             .matches
@@ -1025,19 +1025,19 @@ impl CheckResponse {
 /// This structure exists to keep a link between a check response
 /// and the original text that was checked.
 #[derive(Debug, Clone, PartialEq)]
-pub struct CheckResponseWithContext {
+pub struct ResponseWithContext {
     /// Original text that was checked by LT.
     pub text: String,
     /// Check response.
-    pub response: CheckResponse,
+    pub response: Response,
     /// Text's length.
     pub text_length: usize,
 }
 
-impl CheckResponseWithContext {
+impl ResponseWithContext {
     /// Bind a check response with its original text.
     #[must_use]
-    pub fn new(text: String, response: CheckResponse) -> Self {
+    pub fn new(text: String, response: Response) -> Self {
         let text_length = text.chars().count();
         Self {
             text,
@@ -1096,9 +1096,9 @@ impl CheckResponseWithContext {
     }
 }
 
-impl From<CheckResponseWithContext> for CheckResponse {
+impl From<ResponseWithContext> for Response {
     #[allow(clippy::needless_borrow)]
-    fn from(mut resp: CheckResponseWithContext) -> Self {
+    fn from(mut resp: ResponseWithContext) -> Self {
         let iter: MatchPositions<'_, std::slice::IterMut<'_, Match>> = (&mut resp).into();
 
         for (line_number, line_offset, m) in iter {
@@ -1121,10 +1121,10 @@ pub struct MatchPositions<'source, T> {
     offset: usize,
 }
 
-impl<'source> From<&'source CheckResponseWithContext>
+impl<'source> From<&'source ResponseWithContext>
     for MatchPositions<'source, std::slice::Iter<'source, Match>>
 {
-    fn from(response: &'source CheckResponseWithContext) -> Self {
+    fn from(response: &'source ResponseWithContext) -> Self {
         MatchPositions {
             text_chars: response.text.chars(),
             matches: response.iter_matches(),
@@ -1135,10 +1135,10 @@ impl<'source> From<&'source CheckResponseWithContext>
     }
 }
 
-impl<'source> From<&'source mut CheckResponseWithContext>
+impl<'source> From<&'source mut ResponseWithContext>
     for MatchPositions<'source, std::slice::IterMut<'source, Match>>
 {
-    fn from(response: &'source mut CheckResponseWithContext) -> Self {
+    fn from(response: &'source mut ResponseWithContext) -> Self {
         MatchPositions {
             text_chars: response.text.chars(),
             matches: response.response.iter_matches_mut(),

@@ -11,10 +11,12 @@ use termcolor::WriteColor;
 use termcolor::{ColorChoice, StandardStream};
 
 use crate::{
-    check::CheckResponseWithContext,
+    api::{
+        check,
+        server::{ServerCli, ServerClient},
+        words::WordsSubcommand,
+    },
     error::Result,
-    server::{ServerCli, ServerClient},
-    words::WordsSubcommand,
 };
 
 /// Read lines from standard input and write to buffer string.
@@ -71,7 +73,7 @@ pub struct Cli {
 #[allow(missing_docs)]
 pub enum Command {
     /// Check text using LanguageTool server.
-    Check(crate::check::CheckCommand),
+    Check(crate::api::check::CheckCommand),
     /// Commands to easily run a LanguageTool server with Docker.
     #[cfg(feature = "docker")]
     Docker(crate::docker::DockerCommand),
@@ -81,7 +83,7 @@ pub enum Command {
     /// Ping the LanguageTool server and return time elapsed in ms if success.
     Ping,
     /// Retrieve some user's words list, or add / delete word from it.
-    Words(crate::words::WordsCommand),
+    Words(crate::api::words::WordsCommand),
     /// Generate tab-completion scripts for supported shells
     #[cfg(feature = "cli-complete")]
     Completions(complete::CompleteCommand),
@@ -134,7 +136,7 @@ impl Cli {
 
                     if request.text.is_some() && !cmd.raw {
                         let text = request.text.unwrap();
-                        response = CheckResponseWithContext::new(text.clone(), response).into();
+                        response = check::ResponseWithContext::new(text.clone(), response).into();
                         writeln!(
                             &mut stdout,
                             "{}",

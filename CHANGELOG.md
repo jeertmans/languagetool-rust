@@ -24,8 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [#121](https://github.com/jeertmans/languagetool-rust/pull/121)
 - **Breaking** Stopped (de)serializing structs that did not need.
   [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
-- **Breaking** Completly reorganized the crate.
-  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
 
 ## [2.1.4](https://github.com/jeertmans/languagetool-rust/compare/v2.1.3...v2.1.4) - 2023-08-10
 
@@ -193,7 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [#6](https://github.com/jeertmans/languagetool-rust/pull/6)
 - Add compare links to release tags in CHANGELOG.
   [#9](https://github.com/jeertmans/languagetool-rust/pull/9)
-- Add action to check if can publish.
+- Add action to check if crate is publishable.
   [#11](https://github.com/jeertmans/languagetool-rust/pull/11)
 
 ### Added
