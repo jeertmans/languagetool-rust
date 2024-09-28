@@ -11,6 +11,8 @@ pub mod languages;
 pub mod server;
 pub mod words;
 
+use crate::error::{Error, Result};
+
 /// A HTTP client for making requests to a LanguageTool server.
 #[derive(Debug)]
 pub struct Client {
@@ -46,14 +48,16 @@ impl Client {
     }
 
     /// Send a check request to the server and await for the response.
-    pub async fn check(&self, request: &check::Request) -> reqwest::Result<check::Response> {
+    pub async fn check(&self, request: &check::Request) -> Result<check::Response> {
         self.client
             .post(self.url("/check"))
             .query(request)
             .send()
-            .await?
+            .await
+            .map_err(Error::RequestEncode)?
             .json::<check::Response>()
             .await
+            .map_err(Error::ResponseDecode)
     }
 
     /// Send a request for the list of supported languages to the server and
