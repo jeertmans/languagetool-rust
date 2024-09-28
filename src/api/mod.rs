@@ -62,12 +62,14 @@ impl Client {
 
     /// Send a request for the list of supported languages to the server and
     /// await for the response.
-    pub async fn languages(&self) -> reqwest::Result<languages::Response> {
+    pub async fn languages(&self) -> Result<languages::Response> {
         self.client
             .get(self.url("/languages"))
             .send()
-            .await?
+            .await
+            .map_err(Error::RequestEncode)?
             .json::<languages::Response>()
             .await
+            .map_err(Error::ResponseDecode)
     }
 }
