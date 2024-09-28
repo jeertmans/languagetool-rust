@@ -53,11 +53,9 @@ impl Client {
             .post(self.url("/check"))
             .query(request)
             .send()
-            .await
-            .map_err(Error::RequestEncode)?
+            .await?
             .json::<check::Response>()
             .await
-            .map_err(Error::ResponseDecode)
     }
 
     /// Send a request for the list of supported languages to the server and
