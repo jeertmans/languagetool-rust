@@ -56,6 +56,7 @@ impl Client {
             .await?
             .json::<check::Response>()
             .await
+            .map_err(Into::into)
     }
 
     /// Send a request for the list of supported languages to the server and
@@ -67,5 +68,6 @@ impl Client {
             .await?
             .json::<languages::Response>()
             .await
+            .map_err(Into::into)
     }
 }
