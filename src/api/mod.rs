@@ -64,10 +64,8 @@ impl Client {
         self.client
             .get(self.url("/languages"))
             .send()
-            .await
-            .map_err(Error::RequestEncode)?
+            .await?
             .json::<languages::Response>()
             .await
-            .map_err(Error::ResponseDecode)
     }
 }
