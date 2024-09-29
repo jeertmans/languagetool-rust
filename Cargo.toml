@@ -63,7 +63,6 @@ readme = "README.md"
 repository = "https://github.com/jeertmans/languagetool-rust"
 rust-version = "1.74.0"
 version = "2.1.4"
-rust-version = "1.74.0"
 
 [package.metadata.docs.rs]
 all-features = true
