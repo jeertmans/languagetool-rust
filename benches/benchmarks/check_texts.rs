@@ -1,4 +1,4 @@
-use criterion::{criterion_group, Criterion, Throughput};
+use codspeed_criterion_compat::{criterion_group, Criterion, Throughput};
 use futures::future::join_all;
 use languagetool_rust::{
     check::{CheckRequest, CheckResponse, CheckResponseWithContext},
