@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v2.1.4...HEAD)
+
+### Chore
+
+- Fixed dependency declaration in README.md. [#118](https://github.com/jeertmans/languagetool-rust/pull/118)
+- Fixed some types. [#115](https://github.com/jeertmans/languagetool-rust/pull/115)
+- Derive `Hash` on requests types. [#114](https://github.com/jeertmans/languagetool-rust/pull/114)
+- Use Codspeed and `check-changelog` actions. [#121](https://github.com/jeertmans/languagetool-rust/pull/121)
+
 ## [2.1.4](https://github.com/jeertmans/languagetool-rust/compare/v2.1.3...v2.1.4)
 
 ### Fixed
