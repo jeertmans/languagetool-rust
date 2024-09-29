@@ -4,6 +4,8 @@ on:
     - '**.rs'
     - .github/workflows/rustbench.yml
     - '**/Cargo.toml'
+  push:
+    branches: [main]
   workflow_dispatch:
 
 name: Benchmark
