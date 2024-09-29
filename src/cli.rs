@@ -2,19 +2,22 @@
 //!
 //! This module is specifically designed to be used by LTRS's binary target.
 //! It contains all the content needed to create LTRS's command line interface.
+use std::io::{self, Write};
 
-use crate::{
-    check::CheckResponseWithContext,
-    error::Result,
-    server::{ServerCli, ServerClient},
-    words::WordsSubcommand,
-};
 use clap::{CommandFactory, Parser, Subcommand};
 use is_terminal::IsTerminal;
-use std::io::{self, Write};
 #[cfg(feature = "annotate")]
 use termcolor::WriteColor;
 use termcolor::{ColorChoice, StandardStream};
+
+use crate::{
+    api::{
+        check,
+        server::{ServerCli, ServerClient},
+        words::WordsSubcommand,
+    },
+    error::Result,
+};
 
 /// Read lines from standard input and write to buffer string.
 ///
@@ -57,7 +60,7 @@ pub struct Cli {
     #[arg(short, long, value_name = "WHEN", default_value = "auto", default_missing_value = "always", num_args(0..=1), require_equals(true))]
     pub color: clap::ColorChoice,
     /// [`ServerCli`] arguments.
-    #[command(flatten)]
+    #[command(flatten, next_help_heading = "Server options")]
     pub server_cli: ServerCli,
     /// Subcommand.
     #[command(subcommand)]
@@ -70,7 +73,7 @@ pub struct Cli {
 #[allow(missing_docs)]
 pub enum Command {
     /// Check text using LanguageTool server.
-    Check(crate::check::CheckCommand),
+    Check(crate::api::check::CheckCommand),
     /// Commands to easily run a LanguageTool server with Docker.
     #[cfg(feature = "docker")]
     Docker(crate::docker::DockerCommand),
@@ -80,7 +83,7 @@ pub enum Command {
     /// Ping the LanguageTool server and return time elapsed in ms if success.
     Ping,
     /// Retrieve some user's words list, or add / delete word from it.
-    Words(crate::words::WordsCommand),
+    Words(crate::api::words::WordsCommand),
     /// Generate tab-completion scripts for supported shells
     #[cfg(feature = "cli-complete")]
     Completions(complete::CompleteCommand),
@@ -133,7 +136,7 @@ impl Cli {
 
                     if request.text.is_some() && !cmd.raw {
                         let text = request.text.unwrap();
-                        response = CheckResponseWithContext::new(text.clone(), response).into();
+                        response = check::ResponseWithContext::new(text.clone(), response).into();
                         writeln!(
                             &mut stdout,
                             "{}",

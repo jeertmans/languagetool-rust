@@ -1,4 +1,5 @@
 //! Error and Result structure used all across this crate.
+
 use std::process::ExitStatus;
 
 /// Enumeration of all possible error types.
@@ -18,7 +19,7 @@ pub enum Error {
     ExitStatus(String),
 
     /// Error specifying an invalid
-    /// [`DataAnnotation`](`crate::check::DataAnnotation`).
+    /// [`DataAnnotation`](`crate::api::check::DataAnnotation`).
     #[error("invalid request: {0}")]
     InvalidDataAnnotation(String),
 

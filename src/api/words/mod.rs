@@ -1,12 +1,14 @@
 //! Structures for `words` requests and responses.
 
-use crate::{
-    check::serialize_option_vec_string,
-    error::{Error, Result},
-};
+use crate::error::{Error, Result};
+
+use super::check::serialize_option_vec_string;
 #[cfg(feature = "cli")]
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
+
+pub mod add;
+pub mod delete;
 
 /// Parse `v` if valid word.
 ///
@@ -15,7 +17,7 @@ use serde::{Deserialize, Serialize};
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::words::parse_word;
+/// # use languagetool_rust::api::words::parse_word;
 /// assert!(parse_word("word").is_ok());
 ///
 /// assert!(parse_word("some words").is_err());
@@ -55,13 +57,19 @@ pub struct LoginArgs {
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize, Hash)]
 #[non_exhaustive]
-pub struct WordsRequest {
+pub struct Request {
     /// Offset of where to start in the list of words.
-    #[cfg_attr(feature = "cli", clap(long, default_value = "0"))]
-    offset: isize,
+    ///
+    /// Defaults to 0.
+    #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub offset: Option<isize>,
     /// Maximum number of words to return.
-    #[cfg_attr(feature = "cli", clap(long, default_value = "10"))]
-    pub limit: isize,
+    ///
+    /// Defaults to 10.
+    #[cfg_attr(feature = "cli", clap(long))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub limit: Option<isize>,
     /// Login arguments.
     #[cfg_attr(feature = "cli", clap(flatten))]
     #[serde(flatten)]
@@ -70,20 +78,21 @@ pub struct WordsRequest {
     /// default dictionary if this is unset.
     #[cfg_attr(feature = "cli", clap(long))]
     #[serde(serialize_with = "serialize_option_vec_string")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dicts: Option<Vec<String>>,
 }
 
-/// Copy of [`WordsRequest`], but used to CLI only.
+/// Copy of [`Request`], but used to CLI only.
 ///
 /// This is a temporary solution, until [#3165](https://github.com/clap-rs/clap/issues/3165) is
 /// closed.
 #[cfg(feature = "cli")]
 #[derive(Args, Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
-pub struct WordsRequestArgs {
+pub struct RequestArgs {
     /// Offset of where to start in the list of words.
     #[cfg_attr(feature = "cli", clap(long, default_value = "0"))]
-    offset: isize,
+    pub offset: isize,
     /// Maximum number of words to return.
     #[cfg_attr(feature = "cli", clap(long, default_value = "10"))]
     pub limit: isize,
@@ -99,64 +108,16 @@ pub struct WordsRequestArgs {
 }
 
 #[cfg(feature = "cli")]
-impl From<WordsRequestArgs> for WordsRequest {
+impl From<RequestArgs> for Request {
     #[inline]
-    fn from(args: WordsRequestArgs) -> Self {
+    fn from(args: RequestArgs) -> Self {
         Self {
-            offset: args.offset,
-            limit: args.limit,
+            offset: Some(args.offset),
+            limit: Some(args.limit),
             login: args.login.unwrap(),
             dicts: args.dicts,
         }
     }
-}
-
-/// LanguageTool POST words add request.
-///
-/// Add a word to one of the user's personal dictionaries. Please note that this
-/// feature is considered to be used for personal dictionaries which must not
-/// contain more than 500 words. If this is an issue for you, please contact us.
-#[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize, Hash)]
-#[non_exhaustive]
-pub struct WordsAddRequest {
-    /// The word to be added. Must not be a phrase, i.e., cannot contain white
-    /// space. The word is added to a global dictionary that applies to all
-    /// languages.
-    #[cfg_attr(feature = "cli", clap(required = true, value_parser = parse_word))]
-    pub word: String,
-    /// Login arguments.
-    #[cfg_attr(feature = "cli", clap(flatten))]
-    #[serde(flatten)]
-    pub login: LoginArgs,
-    /// Name of the dictionary to add the word to; non-existent dictionaries are
-    /// created after calling this; if unset, adds to special default
-    /// dictionary.
-    #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub dict: Option<String>,
-}
-
-/// LanguageTool POST words delete request.
-///
-/// Remove a word from one of the user's personal dictionaries.
-#[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize, Hash)]
-#[non_exhaustive]
-pub struct WordsDeleteRequest {
-    /// The word to be removed.
-    #[cfg_attr(feature = "cli", clap(required = true, value_parser = parse_word))]
-    pub word: String,
-    /// Login arguments.
-    #[cfg_attr(feature = "cli", clap(flatten))]
-    #[serde(flatten)]
-    pub login: LoginArgs,
-    /// Name of the dictionary to add the word to; non-existent dictionaries are
-    /// created after calling this; if unset, adds to special default
-    /// dictionary.
-    #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub dict: Option<String>,
 }
 
 /// Words' optional subcommand.
@@ -164,9 +125,9 @@ pub struct WordsDeleteRequest {
 #[derive(Clone, Debug, Subcommand)]
 pub enum WordsSubcommand {
     /// Add a word to some user's list.
-    Add(WordsAddRequest),
+    Add(add::Request),
     /// Remove a word from some user's list.
-    Delete(WordsDeleteRequest),
+    Delete(delete::Request),
 }
 
 /// Retrieve some user's words list.
@@ -177,7 +138,7 @@ pub enum WordsSubcommand {
 pub struct WordsCommand {
     /// Actual GET request.
     #[command(flatten)]
-    pub request: WordsRequestArgs,
+    pub request: RequestArgs,
     /// Optional subcommand.
     #[command(subcommand)]
     pub subcommand: Option<WordsSubcommand>,
@@ -186,23 +147,7 @@ pub struct WordsCommand {
 /// LanguageTool GET words response.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[non_exhaustive]
-pub struct WordsResponse {
+pub struct Response {
     /// List of words.
     pub words: Vec<String>,
-}
-
-/// LanguageTool POST word add response.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
-#[non_exhaustive]
-pub struct WordsAddResponse {
-    /// `true` if word was correctly added.
-    pub added: bool,
-}
-
-/// LanguageTool POST word delete response.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
-#[non_exhaustive]
-pub struct WordsDeleteResponse {
-    /// `true` if word was correctly removed.
-    pub deleted: bool,
 }
