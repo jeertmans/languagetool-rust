@@ -43,7 +43,7 @@ pub struct LoginArgs {
         clap(short = 'u', long, required = true, env = "LANGUAGETOOL_USERNAME")
     )]
     pub username: String,
-    /// Your API key (see https://languagetool.org/editor/settings/api).
+    /// Your API key (see <https://languagetool.org/editor/settings/api>).
     #[cfg_attr(
         feature = "cli",
         clap(short = 'k', long, required = true, env = "LANGUAGETOOL_API_KEY")

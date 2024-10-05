@@ -262,6 +262,7 @@ impl Default for ServerParameters {
 /// To use your local server instead of online api, set:
 /// * `hostname` to "http://localhost"
 /// * `port` to "8081"
+///
 /// if you used the default configuration to start the server.
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
