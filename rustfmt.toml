@@ -1,4 +1,5 @@
 condense_wildcard_suffixes = true
+edition = "2021"
 # error_on_line_overflow = true
 # error_on_unformatted = true
 force_multiline_blocks = true
@@ -9,5 +10,4 @@ imports_granularity = "Crate"
 match_block_trailing_comma = true
 normalize_doc_attributes = true
 unstable_features = true
-edition = "2021"
 wrap_comments = true

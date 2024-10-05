@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::error::{Error, Result};
 
-/// Requests
+// REQUESTS
 
 /// Parse `v` is valid language code.
 ///
@@ -652,7 +652,7 @@ mod request_tests {
     }
 }
 
-/// Responses
+// RESPONSES
 
 /// Detected language from check request.
 #[allow(clippy::derive_partial_eq_without_eq)]
