@@ -12,7 +12,7 @@ mod languages;
 mod ping;
 mod words;
 
-use std::{io, ops::Deref};
+use std::io;
 
 use clap::{CommandFactory, Parser, Subcommand};
 use is_terminal::IsTerminal;
