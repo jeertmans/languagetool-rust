@@ -1,15 +1,12 @@
 //! Structures for `check` requests and responses.
 
-#[cfg(feature = "cli")]
-use std::path::PathBuf;
-
 #[cfg(feature = "annotate")]
 use annotate_snippets::{
     display_list::{DisplayList, FormatOptions},
     snippet::{Annotation, AnnotationType, Slice, Snippet, SourceAnnotation},
 };
 #[cfg(feature = "cli")]
-use clap::{Args, Parser, ValueEnum};
+use clap::{Args, ValueEnum};
 use serde::{Deserialize, Serialize, Serializer};
 
 use crate::error::{Error, Result};
@@ -431,7 +428,7 @@ pub struct Request {
     /// will only be activated when you specify the variant, e.g. `en-GB`
     /// instead of just `en`.
     #[cfg_attr(
-        all(feature = "cli", feature = "cli", feature = "cli"),
+        feature = "cli",
         clap(
             short = 'l',
             long,
@@ -632,73 +629,6 @@ impl Request {
     pub fn split(&self, n: usize, pat: &str) -> Vec<Self> {
         self.try_split(n, pat).unwrap()
     }
-}
-
-/// Parse a string slice into a [`PathBuf`], and error if the file does not
-/// exist.
-#[cfg(feature = "cli")]
-fn parse_filename(s: &str) -> Result<PathBuf> {
-    let path_buf: PathBuf = s.parse().unwrap();
-
-    if path_buf.is_file() {
-        Ok(path_buf)
-    } else {
-        Err(Error::InvalidFilename(s.to_string()))
-    }
-}
-
-/// Support file types.
-#[cfg(feature = "cli")]
-#[derive(Clone, Debug, Default, ValueEnum)]
-#[non_exhaustive]
-pub enum FileType {
-    /// Auto.
-    #[default]
-    Auto,
-    /// Markdown.
-    Markdown,
-    /// Typst.
-    Typst,
-}
-
-/// Check text using LanguageTool server.
-///
-/// The input can be one of the following:
-///
-/// - raw text, if `--text TEXT` is provided;
-/// - annotated data, if `--data TEXT` is provided;
-/// - raw text, if `-- [FILE]...` are provided. Note that some file types will
-///   use a
-/// - raw text, through stdin, if nothing is provided.
-#[cfg(feature = "cli")]
-#[derive(Debug, Parser)]
-pub struct CheckCommand {
-    /// If present, raw JSON output will be printed instead of annotated text.
-    /// This has no effect if `--data` is used, because it is never
-    /// annotated.
-    #[cfg(feature = "cli")]
-    #[clap(short = 'r', long)]
-    pub raw: bool,
-    /// Sets the maximum number of characters before splitting.
-    #[clap(long, default_value_t = 1500)]
-    pub max_length: usize,
-    /// If text is too long, will split on this pattern.
-    #[clap(long, default_value = "\n\n")]
-    pub split_pattern: String,
-    /// Max. number of suggestions kept. If negative, all suggestions are kept.
-    #[clap(long, default_value_t = 5, allow_negative_numbers = true)]
-    pub max_suggestions: isize,
-    /// Specify the files type to use the correct parser.
-    ///
-    /// If set to auto, the type is guessed from the filename extension.
-    #[clap(long, value_enum, default_value_t = FileType::default(), ignore_case = true)]
-    pub r#type: FileType,
-    /// Optional filenames from which input is read.
-    #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
-    pub filenames: Vec<PathBuf>,
-    /// Inner [`Request`].
-    #[command(flatten, next_help_heading = "Request options")]
-    pub request: Request,
 }
 
 #[cfg(test)]
@@ -970,8 +900,11 @@ impl Response {
             })
             .collect();
 
-        let snippets = self.matches.iter().zip(replacements.iter()).map(|(m, r)| {
-            Snippet {
+        let snippets = self
+            .matches
+            .iter()
+            .zip(replacements.iter())
+            .map(|(m, r)| Snippet {
                 title: Some(Annotation {
                     label: Some(&m.message),
                     id: Some(&m.rule.id),
@@ -1000,8 +933,7 @@ impl Response {
                     color,
                     ..Default::default()
                 },
-            }
-        });
+            });
 
         let mut annotation = String::new();
 

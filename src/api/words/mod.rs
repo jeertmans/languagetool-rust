@@ -4,7 +4,7 @@ use crate::error::{Error, Result};
 
 use super::check::serialize_option_vec_string;
 #[cfg(feature = "cli")]
-use clap::{Args, Parser, Subcommand};
+use clap::Args;
 use serde::{Deserialize, Serialize};
 
 pub mod add;
@@ -43,7 +43,7 @@ pub struct LoginArgs {
         clap(short = 'u', long, required = true, env = "LANGUAGETOOL_USERNAME")
     )]
     pub username: String,
-    /// [Your API key](https://languagetool.org/editor/settings/api).
+    /// Your API key (see https://languagetool.org/editor/settings/api).
     #[cfg_attr(
         feature = "cli",
         clap(short = 'k', long, required = true, env = "LANGUAGETOOL_API_KEY")
@@ -84,7 +84,7 @@ pub struct Request {
 
 /// Copy of [`Request`], but used to CLI only.
 ///
-/// This is a temporary solution, until [#3165](https://github.com/clap-rs/clap/issues/3165) is
+/// This is a temporary solution, until [#4697](https://github.com/clap-rs/clap/issues/4697) is
 /// closed.
 #[cfg(feature = "cli")]
 #[derive(Args, Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
@@ -118,30 +118,6 @@ impl From<RequestArgs> for Request {
             dicts: args.dicts,
         }
     }
-}
-
-/// Words' optional subcommand.
-#[cfg(feature = "cli")]
-#[derive(Clone, Debug, Subcommand)]
-pub enum WordsSubcommand {
-    /// Add a word to some user's list.
-    Add(add::Request),
-    /// Remove a word from some user's list.
-    Delete(delete::Request),
-}
-
-/// Retrieve some user's words list.
-#[cfg(feature = "cli")]
-#[derive(Debug, Parser)]
-#[clap(args_conflicts_with_subcommands = true)]
-#[clap(subcommand_negates_reqs = true)]
-pub struct WordsCommand {
-    /// Actual GET request.
-    #[command(flatten)]
-    pub request: RequestArgs,
-    /// Optional subcommand.
-    #[command(subcommand)]
-    pub subcommand: Option<WordsSubcommand>,
 }
 
 /// LanguageTool GET words response.
