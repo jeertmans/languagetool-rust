@@ -304,27 +304,21 @@ impl Level {
 /// let split = split_len(&s, 40, "\n");
 ///
 /// assert_eq!(split.join(""), s);
-/// assert_eq!(
-///     split,
-///     vec![
-///         "I have so many friends.\n",
-///         "They are very funny.\n",
-///         "I think I am very lucky to have them.\n",
-///         "One day, I will write them a poem.\n",
-///         "But, in the meantime, I write code.\n"
-///     ]
-/// );
+/// assert_eq!(split, vec![
+///     "I have so many friends.\n",
+///     "They are very funny.\n",
+///     "I think I am very lucky to have them.\n",
+///     "One day, I will write them a poem.\n",
+///     "But, in the meantime, I write code.\n"
+/// ]);
 ///
 /// let split = split_len(&s, 80, "\n");
 ///
-/// assert_eq!(
-///     split,
-///     vec![
-///         "I have so many friends.\nThey are very funny.\n",
-///         "I think I am very lucky to have them.\nOne day, I will write them a poem.\n",
-///         "But, in the meantime, I write code.\n"
-///     ]
-/// );
+/// assert_eq!(split, vec![
+///     "I have so many friends.\nThey are very funny.\n",
+///     "I think I am very lucky to have them.\nOne day, I will write them a poem.\n",
+///     "But, in the meantime, I write code.\n"
+/// ]);
 ///
 /// let s = "I have so many friends.
 /// They are very funny.
@@ -338,14 +332,10 @@ impl Level {
 ///
 /// println!("{:?}", split);
 ///
-/// assert_eq!(
-///     split,
-///     vec![
-///         "I have so many friends.\nThey are very funny.\nI think I am very lucky to have \
-///          them.\n\n",
-///         "One day, I will write them a poem.\nBut, in the meantime, I write code.\n"
-///     ]
-/// );
+/// assert_eq!(split, vec![
+///     "I have so many friends.\nThey are very funny.\nI think I am very lucky to have them.\n\n",
+///     "One day, I will write them a poem.\nBut, in the meantime, I write code.\n"
+/// ]);
 /// ```
 #[must_use]
 pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source str> {
@@ -900,11 +890,8 @@ impl Response {
             })
             .collect();
 
-        let snippets = self
-            .matches
-            .iter()
-            .zip(replacements.iter())
-            .map(|(m, r)| Snippet {
+        let snippets = self.matches.iter().zip(replacements.iter()).map(|(m, r)| {
+            Snippet {
                 title: Some(Annotation {
                     label: Some(&m.message),
                     id: Some(&m.rule.id),
@@ -933,7 +920,8 @@ impl Response {
                     color,
                     ..Default::default()
                 },
-            });
+            }
+        });
 
         let mut annotation = String::new();
 

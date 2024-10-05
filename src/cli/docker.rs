@@ -8,7 +8,7 @@ use termcolor::StandardStream;
 
 use crate::{
     api::server::ServerClient,
-    error::{exit_status_error, Error, Result},
+    error::{Error, Result, exit_status_error},
 };
 
 use super::ExecuteSubcommand;

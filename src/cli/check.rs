@@ -6,8 +6,7 @@
 //! - annotated data, if `--data TEXT` is provided;
 //! - text from file(s), if `[FILE(S)]...` are provided.
 //! - raw text through `stdin`, if nothing else is provided.
-use std::io::Write;
-use std::path::PathBuf;
+use std::{io::Write, path::PathBuf};
 
 use clap::{Parser, ValueEnum};
 use termcolor::{StandardStream, WriteColor};
