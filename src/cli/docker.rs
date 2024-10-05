@@ -1,7 +1,7 @@
 //! Structures and methods to easily manipulate Docker images, especially for
 //! LanguageTool applications.
 
-use std::process::{Command as ProcessCommand, Output, Stdio};
+use std::process::{self, Output, Stdio};
 
 use clap::{Args, Parser};
 use termcolor::StandardStream;
@@ -67,7 +67,7 @@ enum Action {
 impl Docker {
     /// Pull a Docker image from the given repository/file/...
     pub fn pull(&self) -> Result<Output> {
-        let output = ProcessCommand::new(&self.bin)
+        let output = process::Command::new(&self.bin)
             .args(["pull", &self.name])
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
@@ -81,7 +81,7 @@ impl Docker {
 
     /// Start a Docker container with given specifications.
     pub fn start(&self) -> Result<Output> {
-        let output = ProcessCommand::new(&self.bin)
+        let output = process::Command::new(&self.bin)
             .args([
                 "run",
                 "--rm",
@@ -104,7 +104,7 @@ impl Docker {
 
     /// Stop the latest Docker container with the given name.
     pub fn stop(&self) -> Result<Output> {
-        let output = ProcessCommand::new(&self.bin)
+        let output = process::Command::new(&self.bin)
             .args([
                 "ps",
                 "-l",
@@ -123,7 +123,7 @@ impl Docker {
             .filter(|c| c.is_alphanumeric()) // This avoids newlines
             .collect();
 
-        let output = ProcessCommand::new(&self.bin)
+        let output = process::Command::new(&self.bin)
             .args(["kill", &docker_id])
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
