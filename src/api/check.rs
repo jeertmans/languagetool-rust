@@ -445,8 +445,7 @@ pub struct Request {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub username: Option<String>,
-    /// Set to get Premium API access: [your API
-    /// key](https://languagetool.org/editor/settings/api).
+    /// Set to get Premium API access: your API key (see <https://languagetool.org/editor/settings/api>).
     #[cfg_attr(
         feature = "cli",
         clap(short = 'k', long, requires = "username", env = "LANGUAGETOOL_API_KEY")
