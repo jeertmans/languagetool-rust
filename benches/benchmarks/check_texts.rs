@@ -1,4 +1,4 @@
-use codspeed_criterion_compat::{Criterion, Throughput, criterion_group};
+use codspeed_criterion_compat::{criterion_group, Criterion, Throughput};
 use futures::future::join_all;
 use languagetool_rust::{
     api::{
