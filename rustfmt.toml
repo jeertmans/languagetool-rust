@@ -9,5 +9,5 @@ imports_granularity = "Crate"
 match_block_trailing_comma = true
 normalize_doc_attributes = true
 unstable_features = true
-version = "Two"
+edition = "2021"
 wrap_comments = true
