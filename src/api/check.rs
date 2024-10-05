@@ -497,7 +497,7 @@ pub struct Request {
     /// If true, only the rules and categories whose IDs are specified with
     /// `enabledRules` or `enabledCategories` are enabled.
     #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "is_false")]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub enabled_only: bool,
     /// If set to `picky`, additional rules will be activated, i.e. rules that
     /// you might only find useful when checking formal text.
@@ -529,11 +529,6 @@ impl Default for Request {
             level: Default::default(),
         }
     }
-}
-
-#[inline]
-fn is_false(b: &bool) -> bool {
-    !(*b)
 }
 
 impl Request {
