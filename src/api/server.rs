@@ -409,7 +409,10 @@ impl ServerClient {
     ///
     /// If any of the requests has `self.text` field which is none.
     #[cfg(feature = "multithreaded")]
-    pub async fn check_multiple_and_join(&self, requests: Vec<Request>) -> Result<Response> {
+    pub async fn check_multiple_and_join(
+        &self,
+        requests: Vec<Request>,
+    ) -> Result<check::ResponseWithContext> {
         let mut tasks = Vec::with_capacity(requests.len());
 
         for request in requests.into_iter() {
@@ -438,7 +441,7 @@ impl ServerClient {
             }
         }
 
-        Ok(response_with_context.unwrap().into())
+        Ok(response_with_context.unwrap())
     }
 
     /// Send a check request to the server, await for the response and annotate

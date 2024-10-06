@@ -1,5 +1,7 @@
 //! Structures for `check` requests and responses.
 
+use std::ops::Deref;
+
 #[cfg(feature = "annotate")]
 use annotate_snippets::{
     display_list::{DisplayList, FormatOptions},
@@ -956,6 +958,13 @@ pub struct ResponseWithContext {
     pub response: Response,
     /// Text's length.
     pub text_length: usize,
+}
+
+impl Deref for ResponseWithContext {
+    type Target = Response;
+    fn deref(&self) -> &Self::Target {
+        &self.response
+    }
 }
 
 impl ResponseWithContext {
