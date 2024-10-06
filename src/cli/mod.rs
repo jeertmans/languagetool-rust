@@ -15,6 +15,8 @@ mod words;
 use std::io;
 
 use clap::{CommandFactory, Parser, Subcommand};
+#[cfg(feature = "cli")]
+use enum_dispatch::enum_dispatch;
 use is_terminal::IsTerminal;
 #[cfg(feature = "annotate")]
 use termcolor::{ColorChoice, StandardStream};
@@ -78,6 +80,7 @@ pub struct Cli {
 
 /// All possible subcommands.
 #[derive(Subcommand, Debug)]
+#[enum_dispatch]
 #[allow(missing_docs)]
 pub enum Command {
     /// Check text using LanguageTool server.
@@ -98,6 +101,7 @@ pub enum Command {
 }
 
 /// Provides a common interface for executing the subcommands.
+#[enum_dispatch(Command)]
 trait ExecuteSubcommand {
     /// Executes the subcommand.
     async fn execute(self, stdout: StandardStream, server_client: ServerClient) -> Result<()>;
@@ -125,16 +129,7 @@ impl Cli {
         let stdout = self.stdout();
         let server_client: ServerClient = self.server_cli.into();
 
-        match self.command {
-            Command::Check(cmd) => cmd.execute(stdout, server_client).await,
-            Command::Languages(cmd) => cmd.execute(stdout, server_client).await,
-            Command::Ping(cmd) => cmd.execute(stdout, server_client).await,
-            Command::Words(cmd) => cmd.execute(stdout, server_client).await,
-            #[cfg(feature = "docker")]
-            Command::Docker(cmd) => cmd.execute(stdout, server_client).await,
-            #[cfg(feature = "cli-complete")]
-            Command::Completions(cmd) => cmd.execute(stdout, server_client).await,
-        }
+        self.command.execute(stdout, server_client).await
     }
 }
 
