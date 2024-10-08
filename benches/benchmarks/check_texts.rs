@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use codspeed_criterion_compat::{criterion_group, Criterion, Throughput};
 use futures::future::join_all;
 use languagetool_rust::{
@@ -29,12 +31,12 @@ async fn request_until_success(req: &Request, client: &ServerClient) -> Response
 }
 
 #[tokio::main]
-async fn check_text_basic(text: &str) -> Response {
+async fn check_text_basic(text: &'static str) -> Response {
     let client = ServerClient::from_env().expect(
         "Please use a local server for benchmarking, and configure the environ variables to use \
          it.",
     );
-    let req = Request::default().with_text(text.to_string());
+    let req = Request::default().with_text(Cow::Borrowed(text));
     request_until_success(&req, &client).await
 }
 
@@ -48,7 +50,7 @@ async fn check_text_split(text: &str) -> Response {
 
     let resps = join_all(lines.map(|line| {
         async {
-            let req = Request::default().with_text(line.to_string());
+            let req = Request::default().with_text(Cow::Owned(line.to_string()));
             let resp = request_until_success(&req, &client).await;
             check::ResponseWithContext::new(req.get_text(), resp)
         }

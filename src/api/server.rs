@@ -1,5 +1,7 @@
 //! Structure to communicate with some `LanguageTool` server through the API.
 
+use std::borrow::Cow;
+
 use crate::{
     api::{
         check::{self, Request, Response},
@@ -422,7 +424,7 @@ impl ServerClient {
                 let text = request.text.ok_or(Error::InvalidRequest(
                     "missing text field; cannot join requests with data annotations".to_string(),
                 ))?;
-                Result::<(String, Response)>::Ok((text, response))
+                Result::<(Cow<'static, str>, Response)>::Ok((text, response))
             }));
         }
 
@@ -456,7 +458,7 @@ impl ServerClient {
         let text = request.get_text();
         let resp = self.check(request).await?;
 
-        Ok(resp.annotate(text.as_str(), origin, color))
+        Ok(resp.annotate(text.as_ref(), origin, color))
     }
 
     /// Send a languages request to the server and await for the response.
@@ -587,6 +589,8 @@ impl ServerClient {
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::Cow;
+
     use super::ServerClient;
     use crate::api::check::Request;
 
@@ -599,7 +603,7 @@ mod tests {
     #[tokio::test]
     async fn test_server_check_text() {
         let client = ServerClient::from_env_or_default();
-        let req = Request::default().with_text("je suis une poupee".to_string());
+        let req = Request::default().with_text(Cow::Borrowed("je suis une poupee"));
         assert!(client.check(&req).await.is_ok());
     }
 

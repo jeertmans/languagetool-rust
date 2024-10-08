@@ -1,6 +1,6 @@
 //! Structures for `check` requests and responses.
 
-use std::ops::Deref;
+use std::{borrow::Cow, mem, ops::Deref};
 
 #[cfg(feature = "annotate")]
 use annotate_snippets::{
@@ -395,7 +395,7 @@ pub struct Request {
         clap(short = 't', long, conflicts_with = "data", allow_hyphen_values(true))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub text: Option<String>,
+    pub text: Option<Cow<'static, str>>,
     /// The text to be checked, given as a JSON document that specifies what's
     /// text and what's markup. This or 'text' is required.
     ///
@@ -532,7 +532,7 @@ impl Default for Request {
 impl Request {
     /// Set the text to be checked and remove potential data field.
     #[must_use]
-    pub fn with_text(mut self, text: String) -> Self {
+    pub fn with_text(mut self, text: Cow<'static, str>) -> Self {
         self.text = Some(text);
         self.data = None;
         self
@@ -565,7 +565,7 @@ impl Request {
     ///
     /// If both `self.text` and `self.data` are [`None`].
     /// If any data annotation does not contain text or markup.
-    pub fn try_get_text(&self) -> Result<String> {
+    pub fn try_get_text(&self) -> Result<Cow<'static, str>> {
         if let Some(ref text) = self.text {
             Ok(text.clone())
         } else if let Some(ref data) = self.data {
@@ -581,7 +581,7 @@ impl Request {
                     ));
                 }
             }
-            Ok(text)
+            Ok(Cow::Owned(text))
         } else {
             Err(Error::InvalidRequest(
                 "missing either text or data field".to_string(),
@@ -597,7 +597,7 @@ impl Request {
     /// If both `self.text` and `self.data` are [`None`].
     /// If any data annotation does not contain text or markup.
     #[must_use]
-    pub fn get_text(&self) -> String {
+    pub fn get_text(&self) -> Cow<'static, str> {
         self.try_get_text().unwrap()
     }
 
@@ -607,15 +607,20 @@ impl Request {
     /// # Errors
     ///
     /// If `self.text` is none.
-    pub fn try_split(&self, n: usize, pat: &str) -> Result<Vec<Self>> {
-        let text = self
-            .text
-            .as_ref()
-            .ok_or(Error::InvalidRequest("missing text field".to_string()))?;
+    pub fn try_split(mut self, n: usize, pat: &str) -> Result<Vec<Self>> {
+        let text = mem::take(&mut self.text)
+            .ok_or_else(|| Error::InvalidRequest("missing text field".to_string()))?;
+        let string: &str = match &text {
+            Cow::Owned(s) => s.as_str(),
+            Cow::Borrowed(s) => s,
+        };
 
-        Ok(split_len(text.as_str(), n, pat)
+        Ok(split_len(string, n, pat)
             .iter()
-            .map(|text_fragment| self.clone().with_text(text_fragment.to_string()))
+            .map(|text_fragment| {
+                self.clone()
+                    .with_text(Cow::Owned(text_fragment.to_string()))
+            })
             .collect())
     }
 
@@ -627,7 +632,7 @@ impl Request {
     ///
     /// If `self.text` is none.
     #[must_use]
-    pub fn split(&self, n: usize, pat: &str) -> Vec<Self> {
+    pub fn split(self, n: usize, pat: &str) -> Vec<Self> {
         self.try_split(n, pat).unwrap()
     }
 }
@@ -639,7 +644,7 @@ mod request_tests {
 
     #[test]
     fn test_with_text() {
-        let req = Request::default().with_text("hello".to_string());
+        let req = Request::default().with_text(std::borrow::Cow::Borrowed("hello"));
 
         assert_eq!(req.text.unwrap(), "hello".to_string());
         assert!(req.data.is_none());
@@ -647,7 +652,7 @@ mod request_tests {
 
     #[test]
     fn test_with_data() {
-        let req = Request::default().with_text("hello".to_string());
+        let req = Request::default().with_text(std::borrow::Cow::Borrowed("hello"));
 
         assert_eq!(req.text.unwrap(), "hello".to_string());
         assert!(req.data.is_none());
@@ -953,7 +958,7 @@ impl Response {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ResponseWithContext {
     /// Original text that was checked by LT.
-    pub text: String,
+    pub text: Cow<'static, str>,
     /// Check response.
     pub response: Response,
     /// Text's length.
@@ -970,7 +975,7 @@ impl Deref for ResponseWithContext {
 impl ResponseWithContext {
     /// Bind a check response with its original text.
     #[must_use]
-    pub fn new(text: String, response: Response) -> Self {
+    pub fn new(text: Cow<'static, str>, response: Response) -> Self {
         let text_length = text.chars().count();
         Self {
             text,
@@ -1023,8 +1028,12 @@ impl ResponseWithContext {
         }
 
         self.response.matches.append(&mut other.response.matches);
-        self.text.push_str(other.text.as_str());
+
+        let mut string = self.text.into_owned();
+        string.push_str(other.text.as_ref());
+        self.text = Cow::Owned(string);
         self.text_length += other.text_length;
+
         self
     }
 }

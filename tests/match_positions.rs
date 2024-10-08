@@ -1,4 +1,5 @@
 use languagetool_rust::api::{check, server::ServerClient};
+use std::borrow::Cow;
 
 #[macro_export]
 macro_rules! test_match_positions {
@@ -7,7 +8,7 @@ macro_rules! test_match_positions {
         async fn $name()  -> Result<(), Box<dyn std::error::Error>> {
 
             let client = ServerClient::from_env_or_default();
-            let req = check::Request::default().with_text($text.to_string());
+            let req = check::Request::default().with_text(Cow::Borrowed($text));
             let resp = client.check(&req).await.unwrap();
             let resp = check::ResponseWithContext::new(req.get_text(), resp);
 

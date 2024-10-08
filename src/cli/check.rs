@@ -6,7 +6,7 @@
 //! - annotated data, if `--data TEXT` is provided;
 //! - text from file(s), if `[FILE(S)]...` are provided.
 //! - raw text through `stdin`, if nothing else is provided.
-use std::{io::Write, path::PathBuf};
+use std::{borrow::Cow, io::Write, path::PathBuf};
 
 use clap::{Parser, ValueEnum};
 use termcolor::{StandardStream, WriteColor};
@@ -87,7 +87,7 @@ impl ExecuteSubcommand for Command {
             if request.text.is_none() && request.data.is_none() {
                 let mut text = String::new();
                 super::read_from_stdin(&mut stdout, &mut text)?;
-                request = request.with_text(text);
+                request = request.with_text(Cow::Owned(text));
             }
 
             if request.text.is_none() {
@@ -103,7 +103,7 @@ impl ExecuteSubcommand for Command {
             writeln!(
                 &mut stdout,
                 "{}",
-                &response.annotate(response.text.as_str(), None, color)
+                &response.annotate(response.text.as_ref(), None, color)
             )?;
 
             return Ok(());
@@ -114,7 +114,7 @@ impl ExecuteSubcommand for Command {
             let text = std::fs::read_to_string(filename)?;
             let requests = request
                 .clone()
-                .with_text(text)
+                .with_text(Cow::Owned(text))
                 .split(self.max_length, self.split_pattern.as_str());
             let response = server_client.check_multiple_and_join(requests).await?;
 
@@ -122,7 +122,7 @@ impl ExecuteSubcommand for Command {
                 writeln!(
                     &mut stdout,
                     "{}",
-                    &response.annotate(response.text.as_str(), filename.to_str(), color)
+                    &response.annotate(response.text.as_ref(), filename.to_str(), color)
                 )?;
             } else {
                 writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&*response)?)?;
