@@ -20,9 +20,4 @@
 pub mod api;
 #[cfg(feature = "cli")]
 pub mod cli;
-#[cfg(feature = "docker")]
-pub mod docker;
 pub mod error;
-
-#[cfg(feature = "docker")]
-pub use crate::docker::Docker;

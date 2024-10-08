@@ -11,7 +11,7 @@ pub mod languages;
 pub mod server;
 pub mod words;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 
 /// A HTTP client for making requests to a LanguageTool server.
 #[derive(Debug)]

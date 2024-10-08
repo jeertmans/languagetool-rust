@@ -1,7 +1,6 @@
 //! Structures for `check` requests and responses.
 
-#[cfg(feature = "cli")]
-use std::path::PathBuf;
+use std::{borrow::Cow, mem, ops::Deref};
 
 #[cfg(feature = "annotate")]
 use annotate_snippets::{
@@ -9,12 +8,12 @@ use annotate_snippets::{
     snippet::{Annotation, AnnotationType, Slice, Snippet, SourceAnnotation},
 };
 #[cfg(feature = "cli")]
-use clap::{Args, Parser, ValueEnum};
+use clap::{Args, ValueEnum};
 use serde::{Deserialize, Serialize, Serializer};
 
 use crate::error::{Error, Result};
 
-/// Requests
+// REQUESTS
 
 /// Parse `v` is valid language code.
 ///
@@ -396,7 +395,7 @@ pub struct Request {
         clap(short = 't', long, conflicts_with = "data", allow_hyphen_values(true))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub text: Option<String>,
+    pub text: Option<Cow<'static, str>>,
     /// The text to be checked, given as a JSON document that specifies what's
     /// text and what's markup. This or 'text' is required.
     ///
@@ -431,7 +430,7 @@ pub struct Request {
     /// will only be activated when you specify the variant, e.g. `en-GB`
     /// instead of just `en`.
     #[cfg_attr(
-        all(feature = "cli", feature = "cli", feature = "cli"),
+        feature = "cli",
         clap(
             short = 'l',
             long,
@@ -448,8 +447,7 @@ pub struct Request {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub username: Option<String>,
-    /// Set to get Premium API access: [your API
-    /// key](https://languagetool.org/editor/settings/api).
+    /// Set to get Premium API access: your API key (see <https://languagetool.org/editor/settings/api>).
     #[cfg_attr(
         feature = "cli",
         clap(short = 'k', long, requires = "username", env = "LANGUAGETOOL_API_KEY")
@@ -497,7 +495,7 @@ pub struct Request {
     /// If true, only the rules and categories whose IDs are specified with
     /// `enabledRules` or `enabledCategories` are enabled.
     #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "is_false")]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub enabled_only: bool,
     /// If set to `picky`, additional rules will be activated, i.e. rules that
     /// you might only find useful when checking formal text.
@@ -531,15 +529,10 @@ impl Default for Request {
     }
 }
 
-#[inline]
-fn is_false(b: &bool) -> bool {
-    !(*b)
-}
-
 impl Request {
     /// Set the text to be checked and remove potential data field.
     #[must_use]
-    pub fn with_text(mut self, text: String) -> Self {
+    pub fn with_text(mut self, text: Cow<'static, str>) -> Self {
         self.text = Some(text);
         self.data = None;
         self
@@ -572,7 +565,7 @@ impl Request {
     ///
     /// If both `self.text` and `self.data` are [`None`].
     /// If any data annotation does not contain text or markup.
-    pub fn try_get_text(&self) -> Result<String> {
+    pub fn try_get_text(&self) -> Result<Cow<'static, str>> {
         if let Some(ref text) = self.text {
             Ok(text.clone())
         } else if let Some(ref data) = self.data {
@@ -588,7 +581,7 @@ impl Request {
                     ));
                 }
             }
-            Ok(text)
+            Ok(Cow::Owned(text))
         } else {
             Err(Error::InvalidRequest(
                 "missing either text or data field".to_string(),
@@ -604,7 +597,7 @@ impl Request {
     /// If both `self.text` and `self.data` are [`None`].
     /// If any data annotation does not contain text or markup.
     #[must_use]
-    pub fn get_text(&self) -> String {
+    pub fn get_text(&self) -> Cow<'static, str> {
         self.try_get_text().unwrap()
     }
 
@@ -614,15 +607,20 @@ impl Request {
     /// # Errors
     ///
     /// If `self.text` is none.
-    pub fn try_split(&self, n: usize, pat: &str) -> Result<Vec<Self>> {
-        let text = self
-            .text
-            .as_ref()
-            .ok_or(Error::InvalidRequest("missing text field".to_string()))?;
+    pub fn try_split(mut self, n: usize, pat: &str) -> Result<Vec<Self>> {
+        let text = mem::take(&mut self.text)
+            .ok_or_else(|| Error::InvalidRequest("missing text field".to_string()))?;
+        let string: &str = match &text {
+            Cow::Owned(s) => s.as_str(),
+            Cow::Borrowed(s) => s,
+        };
 
-        Ok(split_len(text.as_str(), n, pat)
+        Ok(split_len(string, n, pat)
             .iter()
-            .map(|text_fragment| self.clone().with_text(text_fragment.to_string()))
+            .map(|text_fragment| {
+                self.clone()
+                    .with_text(Cow::Owned(text_fragment.to_string()))
+            })
             .collect())
     }
 
@@ -634,76 +632,9 @@ impl Request {
     ///
     /// If `self.text` is none.
     #[must_use]
-    pub fn split(&self, n: usize, pat: &str) -> Vec<Self> {
+    pub fn split(self, n: usize, pat: &str) -> Vec<Self> {
         self.try_split(n, pat).unwrap()
     }
-}
-
-/// Parse a string slice into a [`PathBuf`], and error if the file does not
-/// exist.
-#[cfg(feature = "cli")]
-fn parse_filename(s: &str) -> Result<PathBuf> {
-    let path_buf: PathBuf = s.parse().unwrap();
-
-    if path_buf.is_file() {
-        Ok(path_buf)
-    } else {
-        Err(Error::InvalidFilename(s.to_string()))
-    }
-}
-
-/// Support file types.
-#[cfg(feature = "cli")]
-#[derive(Clone, Debug, Default, ValueEnum)]
-#[non_exhaustive]
-pub enum FileType {
-    /// Auto.
-    #[default]
-    Auto,
-    /// Markdown.
-    Markdown,
-    /// Typst.
-    Typst,
-}
-
-/// Check text using LanguageTool server.
-///
-/// The input can be one of the following:
-///
-/// - raw text, if `--text TEXT` is provided;
-/// - annotated data, if `--data TEXT` is provided;
-/// - raw text, if `-- [FILE]...` are provided. Note that some file types will
-///   use a
-/// - raw text, through stdin, if nothing is provided.
-#[cfg(feature = "cli")]
-#[derive(Debug, Parser)]
-pub struct CheckCommand {
-    /// If present, raw JSON output will be printed instead of annotated text.
-    /// This has no effect if `--data` is used, because it is never
-    /// annotated.
-    #[cfg(feature = "cli")]
-    #[clap(short = 'r', long)]
-    pub raw: bool,
-    /// Sets the maximum number of characters before splitting.
-    #[clap(long, default_value_t = 1500)]
-    pub max_length: usize,
-    /// If text is too long, will split on this pattern.
-    #[clap(long, default_value = "\n\n")]
-    pub split_pattern: String,
-    /// Max. number of suggestions kept. If negative, all suggestions are kept.
-    #[clap(long, default_value_t = 5, allow_negative_numbers = true)]
-    pub max_suggestions: isize,
-    /// Specify the files type to use the correct parser.
-    ///
-    /// If set to auto, the type is guessed from the filename extension.
-    #[clap(long, value_enum, default_value_t = FileType::default(), ignore_case = true)]
-    pub r#type: FileType,
-    /// Optional filenames from which input is read.
-    #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
-    pub filenames: Vec<PathBuf>,
-    /// Inner [`Request`].
-    #[command(flatten, next_help_heading = "Request options")]
-    pub request: Request,
 }
 
 #[cfg(test)]
@@ -713,7 +644,7 @@ mod request_tests {
 
     #[test]
     fn test_with_text() {
-        let req = Request::default().with_text("hello".to_string());
+        let req = Request::default().with_text(std::borrow::Cow::Borrowed("hello"));
 
         assert_eq!(req.text.unwrap(), "hello".to_string());
         assert!(req.data.is_none());
@@ -721,14 +652,14 @@ mod request_tests {
 
     #[test]
     fn test_with_data() {
-        let req = Request::default().with_text("hello".to_string());
+        let req = Request::default().with_text(std::borrow::Cow::Borrowed("hello"));
 
         assert_eq!(req.text.unwrap(), "hello".to_string());
         assert!(req.data.is_none());
     }
 }
 
-/// Responses
+// RESPONSES
 
 /// Detected language from check request.
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -1027,17 +958,24 @@ impl Response {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ResponseWithContext {
     /// Original text that was checked by LT.
-    pub text: String,
+    pub text: Cow<'static, str>,
     /// Check response.
     pub response: Response,
     /// Text's length.
     pub text_length: usize,
 }
 
+impl Deref for ResponseWithContext {
+    type Target = Response;
+    fn deref(&self) -> &Self::Target {
+        &self.response
+    }
+}
+
 impl ResponseWithContext {
     /// Bind a check response with its original text.
     #[must_use]
-    pub fn new(text: String, response: Response) -> Self {
+    pub fn new(text: Cow<'static, str>, response: Response) -> Self {
         let text_length = text.chars().count();
         Self {
             text,
@@ -1090,8 +1028,12 @@ impl ResponseWithContext {
         }
 
         self.response.matches.append(&mut other.response.matches);
-        self.text.push_str(other.text.as_str());
+
+        let mut string = self.text.into_owned();
+        string.push_str(other.text.as_ref());
+        self.text = Cow::Owned(string);
         self.text_length += other.text_length;
+
         self
     }
 }

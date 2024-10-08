@@ -1,5 +1,7 @@
 //! Structure to communicate with some `LanguageTool` server through the API.
 
+use std::borrow::Cow;
+
 use crate::{
     api::{
         check::{self, Request, Response},
@@ -262,6 +264,7 @@ impl Default for ServerParameters {
 /// To use your local server instead of online api, set:
 /// * `hostname` to "http://localhost"
 /// * `port` to "8081"
+///
 /// if you used the default configuration to start the server.
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
@@ -408,7 +411,10 @@ impl ServerClient {
     ///
     /// If any of the requests has `self.text` field which is none.
     #[cfg(feature = "multithreaded")]
-    pub async fn check_multiple_and_join(&self, requests: Vec<Request>) -> Result<Response> {
+    pub async fn check_multiple_and_join(
+        &self,
+        requests: Vec<Request>,
+    ) -> Result<check::ResponseWithContext> {
         let mut tasks = Vec::with_capacity(requests.len());
 
         for request in requests.into_iter() {
@@ -418,7 +424,7 @@ impl ServerClient {
                 let text = request.text.ok_or(Error::InvalidRequest(
                     "missing text field; cannot join requests with data annotations".to_string(),
                 ))?;
-                Result::<(String, Response)>::Ok((text, response))
+                Result::<(Cow<'static, str>, Response)>::Ok((text, response))
             }));
         }
 
@@ -437,7 +443,7 @@ impl ServerClient {
             }
         }
 
-        Ok(response_with_context.unwrap().into())
+        Ok(response_with_context.unwrap())
     }
 
     /// Send a check request to the server, await for the response and annotate
@@ -452,7 +458,7 @@ impl ServerClient {
         let text = request.get_text();
         let resp = self.check(request).await?;
 
-        Ok(resp.annotate(text.as_str(), origin, color))
+        Ok(resp.annotate(text.as_ref(), origin, color))
     }
 
     /// Send a languages request to the server and await for the response.
@@ -583,6 +589,8 @@ impl ServerClient {
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::Cow;
+
     use super::ServerClient;
     use crate::api::check::Request;
 
@@ -595,7 +603,7 @@ mod tests {
     #[tokio::test]
     async fn test_server_check_text() {
         let client = ServerClient::from_env_or_default();
-        let req = Request::default().with_text("je suis une poupee".to_string());
+        let req = Request::default().with_text(Cow::Borrowed("je suis une poupee"));
         assert!(client.check(&req).await.is_ok());
     }
 
