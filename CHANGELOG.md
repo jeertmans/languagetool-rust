@@ -5,7 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unrealeased](https://github.com/jeertmans/languagetool-rust/compare/v2.1.2...HEAD)
+## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v2.1.4...HEAD)
+
+### Chore
+
+- Fixed dependency declaration in README.md. [#118](https://github.com/jeertmans/languagetool-rust/pull/118)
+- Fixed some types. [#115](https://github.com/jeertmans/languagetool-rust/pull/115)
+- Derive `Hash` on requests types. [#114](https://github.com/jeertmans/languagetool-rust/pull/114)
+- Use Codspeed and `check-changelog` actions. [#121](https://github.com/jeertmans/languagetool-rust/pull/121)
+
+## [2.1.4](https://github.com/jeertmans/languagetool-rust/compare/v2.1.3...v2.1.4)
+
+### Fixed
+
+- Fixed serializing of `interpretAs` in `data`. [#103](https://github.com/jeertmans/languagetool-rust/pull/103)
+
+## [2.1.3](https://github.com/jeertmans/languagetool-rust/compare/v2.1.2...v2.1.3)
 
 ### Chore
 
@@ -44,9 +59,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Chore
 
 - Created founding link. [#19](https://github.com/jeertmans/languagetool-rust/pull/19)
-- Added two related projets. [#21](https://github.com/jeertmans/languagetool-rust/pull/21)
+- Added two related projects. [#21](https://github.com/jeertmans/languagetool-rust/pull/21)
 - Added release dates. [#31](https://github.com/jeertmans/languagetool-rust/pull/31)
-- Added `#[must_use]` flag to most structures, to please clippy pendantic. [#29](https://github.com/jeertmans/languagetool-rust/pull/29)
+- Added `#[must_use]` flag to most structures, to please clippy pedantic. [#29](https://github.com/jeertmans/languagetool-rust/pull/29)
 - Changed conditional compilation flags to directly point to dependency, e.g., `"clap"` instead of `"cli"`. [#28](https://github.com/jeertmans/languagetool-rust/pull/28)
 - Use `cargo-nextest` instead of `cargo test` for faster CI testing. [#32](https://github.com/jeertmans/languagetool-rust/pull/32)
 - Improve CI testing. [#41](https://github.com/jeertmans/languagetool-rust/pull/41)

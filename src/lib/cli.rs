@@ -103,7 +103,7 @@ impl Cli {
         StandardStream::stdout(choice)
     }
 
-    /// Execute command, possibily returning an error.
+    /// Execute command, possibly returning an error.
     pub async fn execute(self) -> Result<()> {
         let mut stdout = self.stdout();
 

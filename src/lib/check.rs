@@ -121,8 +121,9 @@ where
     }
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize, Hash)]
 #[non_exhaustive]
+#[serde(rename_all = "camelCase")]
 /// A portion of text to be checked.
 pub struct DataAnnotation {
     /// If set, the markup will be interpreted as this.
@@ -216,7 +217,7 @@ mod data_annotation_tests {
 }
 
 /// Alternative text to be checked.
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub struct Data {
     /// Vector of markup text, see [`DataAnnotation`].
@@ -256,7 +257,7 @@ impl std::str::FromStr for Data {
 ///
 /// Currently, `Level::Picky` adds additional rules
 /// with respect to `Level::Default`.
-#[derive(Clone, Default, Deserialize, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Default, Deserialize, Debug, PartialEq, Eq, Serialize, Hash)]
 #[cfg_attr(feature = "cli", derive(ValueEnum))]
 #[serde(rename_all = "lowercase")]
 #[non_exhaustive]
@@ -383,7 +384,7 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
 /// The structure below tries to follow as closely as possible the JSON API
 /// described [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
 #[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Deserialize, Debug, PartialEq, Eq, Serialize, Hash)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
 pub struct CheckRequest {
@@ -706,7 +707,7 @@ mod request_tests {
     }
 }
 
-/// Reponses
+/// Responses
 
 /// Detected language from check request.
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -754,7 +755,7 @@ pub struct Context {
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 #[non_exhaustive]
 pub struct MoreContext {
-    /// Line number where match occured.
+    /// Line number where match occurred.
     pub line_number: usize,
     /// Char index at which the match starts on the current line.
     pub line_offset: usize,
@@ -1034,7 +1035,7 @@ impl CheckResponseWithContext {
         self.response.iter_matches_mut()
     }
 
-    /// Return an iterator over matches and correspondig line number and line
+    /// Return an iterator over matches and corresponding line number and line
     /// offset.
     #[must_use]
     pub fn iter_match_positions(&self) -> MatchPositions<'_, std::slice::Iter<'_, Match>> {
