@@ -48,7 +48,7 @@ impl Client {
     }
 
     /// Send a check request to the server and await for the response.
-    pub async fn check(&self, request: &check::Request) -> Result<check::Response> {
+    pub async fn check(&self, request: &check::Request<'_>) -> Result<check::Response> {
         self.client
             .post(self.url("/check"))
             .query(request)

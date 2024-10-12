@@ -369,7 +369,7 @@ impl ServerClient {
     }
 
     /// Send a check request to the server and await for the response.
-    pub async fn check(&self, request: &Request) -> Result<Response> {
+    pub async fn check(&self, request: &Request<'_>) -> Result<Response> {
         match self
             .client
             .post(format!("{0}/check", self.api))
@@ -413,7 +413,7 @@ impl ServerClient {
     #[cfg(feature = "multithreaded")]
     pub async fn check_multiple_and_join(
         &self,
-        requests: Vec<Request>,
+        requests: Vec<Request<'_>>,
     ) -> Result<check::ResponseWithContext> {
         let mut tasks = Vec::with_capacity(requests.len());
 

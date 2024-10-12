@@ -122,63 +122,72 @@ where
     }
 }
 
+/// A portion of text to be checked.
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize, Hash)]
 #[non_exhaustive]
 #[serde(rename_all = "camelCase")]
-/// A portion of text to be checked.
-pub struct DataAnnotation {
+pub struct DataAnnotation<'source> {
+    /// Text that should be treated as normal text.
+    /// 
+    /// This or `markup` is required.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<Cow<'source, str>>,
+    /// Text that should be treated as markup.
+    /// 
+    /// This or `text` is required.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub markup: Option<Cow<'source, str>>,
     /// If set, the markup will be interpreted as this.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub interpret_as: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    /// Text that should be treated as markup.
-    pub markup: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    /// Text that should be treated as normal text.
-    pub text: Option<String>,
+    pub interpret_as: Option<Cow<'source, str>>,
 }
 
-impl Default for DataAnnotation {
-    fn default() -> Self {
-        Self {
-            interpret_as: None,
-            markup: None,
-            text: Some(String::new()),
-        }
-    }
-}
-
-impl DataAnnotation {
+impl<'source> DataAnnotation<'source> {
     /// Instantiate a new `DataAnnotation` with text only.
     #[inline]
     #[must_use]
-    pub fn new_text(text: String) -> Self {
+    pub fn new_text<T: Into<Cow<'source, str>>>(text: T) -> Self {
         Self {
-            interpret_as: None,
+            text: Some(text.into()),
             markup: None,
-            text: Some(text),
+            interpret_as: None,
         }
     }
 
     /// Instantiate a new `DataAnnotation` with markup only.
     #[inline]
     #[must_use]
-    pub fn new_markup(markup: String) -> Self {
+    pub fn new_markup<M: Into<Cow<'source, str>>>(markup: M) -> Self {
         Self {
-            interpret_as: None,
-            markup: Some(markup),
             text: None,
+            markup: Some(markup.into()),
+            interpret_as: None,
         }
     }
 
     /// Instantiate a new `DataAnnotation` with markup and its interpretation.
     #[inline]
     #[must_use]
-    pub fn new_interpreted_markup(markup: String, interpret_as: String) -> Self {
+    pub fn new_interpreted_markup<M: Into<Cow<'source, str>>, I: Into<Cow<'source, str>>>(markup: M, interpret_as: I) -> Self {
         Self {
-            interpret_as: Some(interpret_as),
-            markup: Some(markup),
+            interpret_as: Some(interpret_as.into()),
+            markup: Some(markup.into()),
             text: None,
+        }
+    }
+
+    /// Return the text or markup within the data annotation.
+    ///
+    /// # Errors
+    ///
+    /// If this data annotation does not contain text or markup.
+    pub fn try_get_text(&self) -> Result<Cow<'source, str>> {
+        if let Some(ref text) = self.text {
+            Ok(text.clone())
+        } else if let Some(ref markup) = self.markup {
+            Ok(markup.clone())
+        } else{
+            Err(Error::InvalidDataAnnotation(format!("missing either text or markup field in {self:?}")))
         }
     }
 }
@@ -190,49 +199,49 @@ mod data_annotation_tests {
 
     #[test]
     fn test_text() {
-        let da = DataAnnotation::new_text("Hello".to_string());
+        let da = DataAnnotation::new_text("Hello");
 
-        assert_eq!(da.text.unwrap(), "Hello".to_string());
+        assert_eq!(da.text.unwrap(), "Hello");
         assert!(da.markup.is_none());
         assert!(da.interpret_as.is_none());
     }
 
     #[test]
     fn test_markup() {
-        let da = DataAnnotation::new_markup("<a>Hello</a>".to_string());
+        let da = DataAnnotation::new_markup("<a>Hello</a>");
 
         assert!(da.text.is_none());
-        assert_eq!(da.markup.unwrap(), "<a>Hello</a>".to_string());
+        assert_eq!(da.markup.unwrap(), "<a>Hello</a>");
         assert!(da.interpret_as.is_none());
     }
 
     #[test]
     fn test_interpreted_markup() {
         let da =
-            DataAnnotation::new_interpreted_markup("<a>Hello</a>".to_string(), "Hello".to_string());
+            DataAnnotation::new_interpreted_markup("<a>Hello</a>", "Hello");
 
         assert!(da.text.is_none());
-        assert_eq!(da.markup.unwrap(), "<a>Hello</a>".to_string());
-        assert_eq!(da.interpret_as.unwrap(), "Hello".to_string());
+        assert_eq!(da.markup.unwrap(), "<a>Hello</a>");
+        assert_eq!(da.interpret_as.unwrap(), "Hello");
     }
 }
 
 /// Alternative text to be checked.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq, Hash)]
 #[non_exhaustive]
-pub struct Data {
+pub struct Data<'source> {
     /// Vector of markup text, see [`DataAnnotation`].
-    pub annotation: Vec<DataAnnotation>,
+    pub annotation: Vec<DataAnnotation<'source>>,
 }
 
-impl<T: Into<DataAnnotation>> FromIterator<T> for Data {
+impl<'source, T: Into<DataAnnotation<'source>>> FromIterator<T> for Data<'source> {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let annotation = iter.into_iter().map(std::convert::Into::into).collect();
         Data { annotation }
     }
 }
 
-impl Serialize for Data {
+impl Serialize for Data<'_> {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -245,7 +254,7 @@ impl Serialize for Data {
 }
 
 #[cfg(feature = "cli")]
-impl std::str::FromStr for Data {
+impl std::str::FromStr for Data<'_> {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self> {
@@ -377,6 +386,10 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
     vec
 }
 
+
+macro_rules! declare_request {
+    ($name:ident, $lt:lifetime) => {
+
 /// LanguageTool POST check request.
 ///
 /// The main feature - check a text with LanguageTool for possible style and
@@ -384,18 +397,18 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
 ///
 /// The structure below tries to follow as closely as possible the JSON API
 /// described [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
-#[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Hash)]
+#[cfg_attr(all(feature = "cli", $lt == 'static), derive(Args))]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Hash)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-pub struct Request {
+pub struct $name<$lt> {
     /// The text to be checked. This or 'data' is required.
     #[cfg_attr(
         feature = "cli",
         clap(short = 't', long, conflicts_with = "data", allow_hyphen_values(true))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub text: Option<Cow<'static, str>>,
+    pub text: Option<Cow<$lt, str>>,
     /// The text to be checked, given as a JSON document that specifies what's
     /// text and what's markup. This or 'text' is required.
     ///
@@ -422,7 +435,7 @@ pub struct Request {
     /// kind of markup. Entities will need to be expanded in this input.
     #[cfg_attr(feature = "cli", clap(short = 'd', long, conflicts_with = "text"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub data: Option<Data>,
+    pub data: Option<Data<$lt>>,
     /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the
     /// language automatically (see `preferredVariants` below).
     ///
@@ -507,40 +520,32 @@ pub struct Request {
     pub level: Level,
 }
 
-impl Default for Request {
-    #[inline]
-    fn default() -> Request {
-        Request {
-            text: Default::default(),
-            data: Default::default(),
-            language: "auto".to_string(),
-            username: Default::default(),
-            api_key: Default::default(),
-            dicts: Default::default(),
-            mother_tongue: Default::default(),
-            preferred_variants: Default::default(),
-            enabled_rules: Default::default(),
-            disabled_rules: Default::default(),
-            enabled_categories: Default::default(),
-            disabled_categories: Default::default(),
-            enabled_only: Default::default(),
-            level: Default::default(),
-        }
-    }
+    };
 }
 
-impl Request {
+declare_request!(Request, 'source);
+
+impl<'source> Request<'source> {
+    /// Create a new empty request with language set to `"auto"`.
+    #[must_use]
+    pub fn new() -> Self {
+        Self {
+            language: "auto".to_string(),
+            ..Default::default()
+        }
+    }
+
     /// Set the text to be checked and remove potential data field.
     #[must_use]
-    pub fn with_text(mut self, text: Cow<'static, str>) -> Self {
-        self.text = Some(text);
+    pub fn with_text<T: Into<Cow<'source, str>>>(mut self, text: T) -> Self {
+        self.text = Some(text.into());
         self.data = None;
         self
     }
 
     /// Set the data to be checked and remove potential text field.
     #[must_use]
-    pub fn with_data(mut self, data: Data) -> Self {
+    pub fn with_data(mut self, data: Data<'source>) -> Self {
         self.data = Some(data);
         self.text = None;
         self
@@ -549,7 +554,7 @@ impl Request {
     /// Set the data (obtained from string) to be checked and remove potential
     /// text field
     pub fn with_data_str(self, data: &str) -> serde_json::Result<Self> {
-        Ok(self.with_data(serde_json::from_str(data)?))
+        serde_json::from_str(data).map(|data| self.with_data(data))
     }
 
     /// Set the language of the text / data.
@@ -559,29 +564,29 @@ impl Request {
         self
     }
 
-    /// Return a copy of the text within the request.
+    /// Return the text within the request.
     ///
     /// # Errors
     ///
     /// If both `self.text` and `self.data` are [`None`].
     /// If any data annotation does not contain text or markup.
-    pub fn try_get_text(&self) -> Result<Cow<'static, str>> {
+    pub fn try_get_text(&self) -> Result<Cow<'source, str>> {
         if let Some(ref text) = self.text {
             Ok(text.clone())
         } else if let Some(ref data) = self.data {
-            let mut text = String::new();
-            for da in data.annotation.iter() {
-                if let Some(ref t) = da.text {
-                    text.push_str(t.as_str());
-                } else if let Some(ref t) = da.markup {
-                    text.push_str(t.as_str());
-                } else {
-                    return Err(Error::InvalidDataAnnotation(
-                        "missing either text or markup field in {da:?}".to_string(),
-                    ));
+            match data.annotation.len() {
+                0 => Ok(Default::default()),
+                1 => data.annotation[0].try_get_text(),
+                _ => {
+                    let mut text = String::new();
+                    
+                    for da in data.annotation.iter() {
+                        text.push_str(da.try_get_text()?.deref());
+                    }
+
+                    Ok(Cow::Owned(text))
                 }
             }
-            Ok(Cow::Owned(text))
         } else {
             Err(Error::InvalidRequest(
                 "missing either text or data field".to_string(),
@@ -597,7 +602,7 @@ impl Request {
     /// If both `self.text` and `self.data` are [`None`].
     /// If any data annotation does not contain text or markup.
     #[must_use]
-    pub fn get_text(&self) -> Cow<'static, str> {
+    pub fn get_text(&self) -> Cow<'source, str> {
         self.try_get_text().unwrap()
     }
 
@@ -644,17 +649,17 @@ mod request_tests {
 
     #[test]
     fn test_with_text() {
-        let req = Request::default().with_text(std::borrow::Cow::Borrowed("hello"));
+        let req = Request::default().with_text("hello");
 
-        assert_eq!(req.text.unwrap(), "hello".to_string());
+        assert_eq!(req.text.unwrap(), "hello");
         assert!(req.data.is_none());
     }
 
     #[test]
     fn test_with_data() {
-        let req = Request::default().with_text(std::borrow::Cow::Borrowed("hello"));
+        let req = Request::default().with_text("hello");
 
-        assert_eq!(req.text.unwrap(), "hello".to_string());
+        assert_eq!(req.text.unwrap(), "hello");
         assert!(req.data.is_none());
     }
 }
@@ -1170,11 +1175,11 @@ mod tests {
         }
     }
 
-    impl<'source> From<Token<'source>> for DataAnnotation {
+    impl<'source> From<Token<'source>> for DataAnnotation<'source> {
         fn from(token: Token<'source>) -> Self {
             match token {
-                Token::Text(s) => DataAnnotation::new_text(s.to_string()),
-                Token::Skip(s) => DataAnnotation::new_markup(s.to_string()),
+                Token::Text(s) => DataAnnotation::new_text(s),
+                Token::Skip(s) => DataAnnotation::new_markup(s),
             }
         }
     }
@@ -1186,10 +1191,10 @@ mod tests {
 
         let expected_data = Data {
             annotation: vec![
-                DataAnnotation::new_text("My".to_string()),
-                DataAnnotation::new_text("name".to_string()),
-                DataAnnotation::new_text("is".to_string()),
-                DataAnnotation::new_markup("Q34XY".to_string()),
+                DataAnnotation::new_text("My"),
+                DataAnnotation::new_text("name"),
+                DataAnnotation::new_text("is"),
+                DataAnnotation::new_markup("Q34XY"),
             ],
         };
 
