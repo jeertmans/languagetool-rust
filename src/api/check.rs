@@ -8,7 +8,8 @@ use annotate_snippets::{
     snippet::{Annotation, AnnotationType, Slice, Snippet, SourceAnnotation},
 };
 #[cfg(feature = "cli")]
-use clap::{Args, ValueEnum};
+use clap::ValueEnum;
+use lifetime::IntoStatic;
 use serde::{Deserialize, Serialize, Serializer};
 
 use crate::error::{Error, Result};
@@ -123,17 +124,17 @@ where
 }
 
 /// A portion of text to be checked.
-#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize, Hash)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize, Hash, IntoStatic)]
 #[non_exhaustive]
 #[serde(rename_all = "camelCase")]
 pub struct DataAnnotation<'source> {
     /// Text that should be treated as normal text.
-    /// 
+    ///
     /// This or `markup` is required.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<Cow<'source, str>>,
     /// Text that should be treated as markup.
-    /// 
+    ///
     /// This or `text` is required.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub markup: Option<Cow<'source, str>>,
@@ -168,7 +169,10 @@ impl<'source> DataAnnotation<'source> {
     /// Instantiate a new `DataAnnotation` with markup and its interpretation.
     #[inline]
     #[must_use]
-    pub fn new_interpreted_markup<M: Into<Cow<'source, str>>, I: Into<Cow<'source, str>>>(markup: M, interpret_as: I) -> Self {
+    pub fn new_interpreted_markup<M: Into<Cow<'source, str>>, I: Into<Cow<'source, str>>>(
+        markup: M,
+        interpret_as: I,
+    ) -> Self {
         Self {
             interpret_as: Some(interpret_as.into()),
             markup: Some(markup.into()),
@@ -186,8 +190,10 @@ impl<'source> DataAnnotation<'source> {
             Ok(text.clone())
         } else if let Some(ref markup) = self.markup {
             Ok(markup.clone())
-        } else{
-            Err(Error::InvalidDataAnnotation(format!("missing either text or markup field in {self:?}")))
+        } else {
+            Err(Error::InvalidDataAnnotation(format!(
+                "missing either text or markup field in {self:?}"
+            )))
         }
     }
 }
@@ -217,8 +223,7 @@ mod data_annotation_tests {
 
     #[test]
     fn test_interpreted_markup() {
-        let da =
-            DataAnnotation::new_interpreted_markup("<a>Hello</a>", "Hello");
+        let da = DataAnnotation::new_interpreted_markup("<a>Hello</a>", "Hello");
 
         assert!(da.text.is_none());
         assert_eq!(da.markup.unwrap(), "<a>Hello</a>");
@@ -232,6 +237,19 @@ mod data_annotation_tests {
 pub struct Data<'source> {
     /// Vector of markup text, see [`DataAnnotation`].
     pub annotation: Vec<DataAnnotation<'source>>,
+}
+
+impl<'source> IntoStatic for Data<'source> {
+    type Static = Data<'static>;
+    fn into_static(self) -> Self::Static {
+        Data {
+            annotation: self
+                .annotation
+                .into_iter()
+                .map(IntoStatic::into_static)
+                .collect(),
+        }
+    }
 }
 
 impl<'source, T: Into<DataAnnotation<'source>>> FromIterator<T> for Data<'source> {
@@ -386,9 +404,20 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
     vec
 }
 
+/// Default value for [`Request::language`].
+pub const DEFAULT_LANGUAGE: &str = "auto";
 
-macro_rules! declare_request {
-    ($name:ident, $lt:lifetime) => {
+/// Custom serialization for [`Request::language`].
+fn serialize_language<S>(lang: &str, s: S) -> std::result::Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    s.serialize_str(if lang.is_empty() {
+        DEFAULT_LANGUAGE
+    } else {
+        lang
+    })
+}
 
 /// LanguageTool POST check request.
 ///
@@ -397,18 +426,13 @@ macro_rules! declare_request {
 ///
 /// The structure below tries to follow as closely as possible the JSON API
 /// described [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
-#[cfg_attr(all(feature = "cli", $lt == 'static), derive(Args))]
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Hash)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Hash, IntoStatic)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-pub struct $name<$lt> {
+pub struct Request<'source> {
     /// The text to be checked. This or 'data' is required.
-    #[cfg_attr(
-        feature = "cli",
-        clap(short = 't', long, conflicts_with = "data", allow_hyphen_values(true))
-    )]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub text: Option<Cow<$lt, str>>,
+    pub text: Option<Cow<'source, str>>,
     /// The text to be checked, given as a JSON document that specifies what's
     /// text and what's markup. This or 'text' is required.
     ///
@@ -433,48 +457,29 @@ pub struct $name<$lt> {
     /// ```
     /// The 'data' feature is not limited to HTML or XML, it can be used for any
     /// kind of markup. Entities will need to be expanded in this input.
-    #[cfg_attr(feature = "cli", clap(short = 'd', long, conflicts_with = "text"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub data: Option<Data<$lt>>,
+    pub data: Option<Data<'source>>,
     /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the
     /// language automatically (see `preferredVariants` below).
     ///
     /// For languages with variants (English, German, Portuguese) spell checking
     /// will only be activated when you specify the variant, e.g. `en-GB`
     /// instead of just `en`.
-    #[cfg_attr(
-        feature = "cli",
-        clap(
-            short = 'l',
-            long,
-            default_value = "auto",
-            value_parser = parse_language_code
-        )
-    )]
+    #[serde(serialize_with = "serialize_language")]
     pub language: String,
     /// Set to get Premium API access: Your username/email as used to log in at
     /// languagetool.org.
-    #[cfg_attr(
-        feature = "cli",
-        clap(short = 'u', long, requires = "api_key", env = "LANGUAGETOOL_USERNAME")
-    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub username: Option<String>,
     /// Set to get Premium API access: your API key (see <https://languagetool.org/editor/settings/api>).
-    #[cfg_attr(
-        feature = "cli",
-        clap(short = 'k', long, requires = "username", env = "LANGUAGETOOL_API_KEY")
-    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub api_key: Option<String>,
     /// Comma-separated list of dictionaries to include words from; uses special
     /// default dictionary if this is unset.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub dicts: Option<Vec<String>>,
     /// A language code of the user's native language, enabling false friends
     /// checks for some language pairs.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mother_tongue: Option<String>,
     /// Comma-separated list of preferred language variants.
@@ -486,44 +491,29 @@ pub struct $name<$lt> {
     /// should set variants for at least German and English, as otherwise the
     /// spell checking will not work for those, as no spelling dictionary can be
     /// selected for just `en` or `de`.
-    #[cfg_attr(feature = "cli", clap(long, conflicts_with = "language"))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub preferred_variants: Option<Vec<String>>,
     /// IDs of rules to be enabled, comma-separated.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub enabled_rules: Option<Vec<String>>,
     /// IDs of rules to be disabled, comma-separated.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub disabled_rules: Option<Vec<String>>,
     /// IDs of categories to be enabled, comma-separated.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub enabled_categories: Option<Vec<String>>,
     /// IDs of categories to be disabled, comma-separated.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub disabled_categories: Option<Vec<String>>,
     /// If true, only the rules and categories whose IDs are specified with
     /// `enabledRules` or `enabledCategories` are enabled.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub enabled_only: bool,
     /// If set to `picky`, additional rules will be activated, i.e. rules that
     /// you might only find useful when checking formal text.
-    #[cfg_attr(
-        feature = "cli",
-        clap(long, default_value = "default", ignore_case = true, value_enum)
-    )]
     #[serde(skip_serializing_if = "Level::is_default")]
     pub level: Level,
 }
-
-    };
-}
-
-declare_request!(Request, 'source);
 
 impl<'source> Request<'source> {
     /// Create a new empty request with language set to `"auto"`.
@@ -537,7 +527,7 @@ impl<'source> Request<'source> {
 
     /// Set the text to be checked and remove potential data field.
     #[must_use]
-    pub fn with_text<T: Into<Cow<'source, str>>>(mut self, text: T) -> Self {
+    pub fn with_text<T: Into<Cow<'static, str>>>(mut self, text: T) -> Self {
         self.text = Some(text.into());
         self.data = None;
         self
@@ -545,7 +535,7 @@ impl<'source> Request<'source> {
 
     /// Set the data to be checked and remove potential text field.
     #[must_use]
-    pub fn with_data(mut self, data: Data<'source>) -> Self {
+    pub fn with_data(mut self, data: Data<'static>) -> Self {
         self.data = Some(data);
         self.text = None;
         self
@@ -579,13 +569,13 @@ impl<'source> Request<'source> {
                 1 => data.annotation[0].try_get_text(),
                 _ => {
                     let mut text = String::new();
-                    
+
                     for da in data.annotation.iter() {
                         text.push_str(da.try_get_text()?.deref());
                     }
 
                     Ok(Cow::Owned(text))
-                }
+                },
             }
         } else {
             Err(Error::InvalidRequest(
@@ -963,7 +953,7 @@ impl Response {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ResponseWithContext {
     /// Original text that was checked by LT.
-    pub text: Cow<'static, str>,
+    pub text: String,
     /// Check response.
     pub response: Response,
     /// Text's length.
@@ -980,7 +970,7 @@ impl Deref for ResponseWithContext {
 impl ResponseWithContext {
     /// Bind a check response with its original text.
     #[must_use]
-    pub fn new(text: Cow<'static, str>, response: Response) -> Self {
+    pub fn new(text: String, response: Response) -> Self {
         let text_length = text.chars().count();
         Self {
             text,
@@ -1034,9 +1024,7 @@ impl ResponseWithContext {
 
         self.response.matches.append(&mut other.response.matches);
 
-        let mut string = self.text.into_owned();
-        string.push_str(other.text.as_ref());
-        self.text = Cow::Owned(string);
+        self.text.push_str(other.text.as_str());
         self.text_length += other.text_length;
 
         self

@@ -14,6 +14,7 @@ clap = {version = "^4.5.18", features = ["cargo", "derive", "env", "wrap_help"],
 clap_complete = {version = "^4.5.2", optional = true}
 enum_dispatch = {version = "0.3.13", optional = true}
 is-terminal = {version = "0.4.3", optional = true}
+lifetime = { version = "0.1.0", features = ["macros"] }
 pulldown-cmark = {version = "0.10.2", optional = true}
 reqwest = {version = "^0.11", default-features = false, features = ["json"]}
 serde = {version = "^1.0", features = ["derive"]}

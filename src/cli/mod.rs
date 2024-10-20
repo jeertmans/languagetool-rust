@@ -3,7 +3,7 @@
 //! This module is specifically designed to be used by LTRS's binary target.
 //! It contains all the content needed to create LTRS's command line interface.
 
-mod check;
+pub mod check;
 #[cfg(feature = "cli-complete")]
 mod completions;
 #[cfg(feature = "docker")]

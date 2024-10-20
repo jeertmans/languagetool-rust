@@ -1,7 +1,5 @@
 //! Structure to communicate with some `LanguageTool` server through the API.
 
-use std::borrow::Cow;
-
 use crate::{
     api::{
         check::{self, Request, Response},
@@ -11,6 +9,7 @@ use crate::{
 };
 #[cfg(feature = "cli")]
 use clap::Args;
+use lifetime::IntoStatic;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -411,36 +410,42 @@ impl ServerClient {
     ///
     /// If any of the requests has `self.text` field which is none.
     #[cfg(feature = "multithreaded")]
-    pub async fn check_multiple_and_join(
+    pub async fn check_multiple_and_join<'source>(
         &self,
-        requests: Vec<Request<'_>>,
+        requests: Vec<Request<'source>>,
     ) -> Result<check::ResponseWithContext> {
         let mut tasks = Vec::with_capacity(requests.len());
 
-        for request in requests.into_iter() {
-            let server_client = self.clone();
-            tasks.push(tokio::spawn(async move {
-                let response = server_client.check(&request).await?;
-                let text = request.text.ok_or(Error::InvalidRequest(
-                    "missing text field; cannot join requests with data annotations".to_string(),
-                ))?;
-                Result::<(Cow<'static, str>, Response)>::Ok((text, response))
-            }));
-        }
+        requests
+            .into_iter()
+            .map(|r| r.into_static())
+            .for_each(|request| {
+                let server_client = self.clone();
+
+                tasks.push(tokio::spawn(async move {
+                    let response = server_client.check(&request).await?;
+                    let text = request
+                        .text
+                        .ok_or_else(|| {
+                            Error::InvalidRequest(
+                                "missing text field; cannot join requests with data annotations"
+                                    .to_string(),
+                            )
+                        })?
+                        .into_owned();
+                    Result::<(String, Response)>::Ok((text, response))
+                }));
+            });
 
         let mut response_with_context: Option<check::ResponseWithContext> = None;
 
         for task in tasks {
             let (text, response) = task.await.unwrap()?;
-            match response_with_context {
-                Some(resp) => {
-                    response_with_context =
-                        Some(resp.append(check::ResponseWithContext::new(text, response)))
-                },
-                None => {
-                    response_with_context = Some(check::ResponseWithContext::new(text, response))
-                },
-            }
+
+            response_with_context = Some(match response_with_context {
+                Some(resp) => resp.append(check::ResponseWithContext::new(text, response)),
+                None => check::ResponseWithContext::new(text, response),
+            })
         }
 
         Ok(response_with_context.unwrap())
@@ -449,9 +454,9 @@ impl ServerClient {
     /// Send a check request to the server, await for the response and annotate
     /// it.
     #[cfg(feature = "annotate")]
-    pub async fn annotate_check(
+    pub async fn annotate_check<'source>(
         &self,
-        request: &Request,
+        request: &Request<'source>,
         origin: Option<&str>,
         color: bool,
     ) -> Result<String> {
