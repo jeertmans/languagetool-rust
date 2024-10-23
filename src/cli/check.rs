@@ -120,11 +120,10 @@ impl ExecuteSubcommand for Command {
         // FILES
         for filename in self.filenames.iter() {
             let text = std::fs::read_to_string(filename)?;
-            let split_pattern = self.split_pattern.clone();
             let requests = request
                 .clone()
                 .with_text(text)
-                .split(self.max_length, split_pattern.as_str());
+                .split(self.max_length, self.split_pattern.as_str());
             let response = server_client.check_multiple_and_join(requests).await?;
 
             if !self.raw {
