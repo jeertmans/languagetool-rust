@@ -52,7 +52,7 @@ async fn check_text_split(text: &str) -> Response {
         async {
             let req = Request::default().with_text(Cow::Owned(line.to_string()));
             let resp = request_until_success(&req, &client).await;
-            check::ResponseWithContext::new(req.get_text().into_owned(), resp)
+            check::ResponseWithContext::new(req.get_text(), resp)
         }
     }))
     .await;

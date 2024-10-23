@@ -1,6 +1,6 @@
 //! Structures for `check` requests and responses.
 
-use std::{borrow::Cow, mem, ops::Deref};
+use std::{borrow::Cow, marker::PhantomData, mem, ops::Deref};
 
 #[cfg(feature = "annotate")]
 use annotate_snippets::{
@@ -950,28 +950,30 @@ impl Response {
 ///
 /// This structure exists to keep a link between a check response
 /// and the original text that was checked.
-#[derive(Debug, Clone, PartialEq)]
-pub struct ResponseWithContext {
+#[derive(Debug, Clone, PartialEq, IntoStatic)]
+pub struct ResponseWithContext<'source> {
     /// Original text that was checked by LT.
-    pub text: String,
+    pub text: Cow<'source, str>,
     /// Check response.
     pub response: Response,
     /// Text's length.
     pub text_length: usize,
 }
 
-impl Deref for ResponseWithContext {
+impl<'source> Deref for ResponseWithContext<'source> {
     type Target = Response;
     fn deref(&self) -> &Self::Target {
         &self.response
     }
 }
 
-impl ResponseWithContext {
+impl<'source> ResponseWithContext<'source> {
     /// Bind a check response with its original text.
     #[must_use]
-    pub fn new(text: String, response: Response) -> Self {
+    pub fn new(text: Cow<'source, str>, response: Response) -> Self {
         let text_length = text.chars().count();
+
+        // Add more context to response
         Self {
             text,
             response,
@@ -980,7 +982,7 @@ impl ResponseWithContext {
     }
 
     /// Return an iterator over matches.
-    pub fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
+    pub fn iter_matches(&'source self) -> std::slice::Iter<'source, Match> {
         self.response.iter_matches()
     }
 
@@ -992,7 +994,7 @@ impl ResponseWithContext {
     /// Return an iterator over matches and corresponding line number and line
     /// offset.
     #[must_use]
-    pub fn iter_match_positions(&self) -> MatchPositions<'_, std::slice::Iter<'_, Match>> {
+    pub fn iter_match_positions(&self) -> MatchPositions<'_, '_, std::slice::Iter<'_, Match>> {
         self.into()
     }
 
@@ -1024,43 +1026,58 @@ impl ResponseWithContext {
 
         self.response.matches.append(&mut other.response.matches);
 
-        self.text.push_str(other.text.as_str());
-        self.text_length += other.text_length;
+        self.text = Cow::Owned(self.text.into_owned() + &other.text);
+        self.text_length = other.text_length;
 
         self
     }
 }
 
-impl From<ResponseWithContext> for Response {
-    #[allow(clippy::needless_borrow)]
-    fn from(mut resp: ResponseWithContext) -> Self {
-        let iter: MatchPositions<'_, std::slice::IterMut<'_, Match>> = (&mut resp).into();
-
-        for (line_number, line_offset, m) in iter {
+impl<'source> From<ResponseWithContext<'source>> for Response {
+    fn from(mut resp: ResponseWithContext<'source>) -> Self {
+        for (line_number, line_offset, m) in MatchPositions::new(&resp.text, &mut resp.response) {
             m.more_context = Some(MoreContext {
                 line_number,
                 line_offset,
             });
         }
+
         resp.response
     }
 }
 
 /// Iterator over matches and their corresponding line number and line offset.
 #[derive(Clone, Debug)]
-pub struct MatchPositions<'source, T> {
+pub struct MatchPositions<'source, 'response, T: Iterator + 'response> {
     text_chars: std::str::Chars<'source>,
     matches: T,
     line_number: usize,
     line_offset: usize,
     offset: usize,
+    _marker: PhantomData<&'response ()>,
 }
 
-impl<'source> From<&'source ResponseWithContext>
-    for MatchPositions<'source, std::slice::Iter<'source, Match>>
+impl<'source, 'response> MatchPositions<'source, 'response, std::slice::IterMut<'response, Match>> {
+    fn new(text: &'source str, response: &'response mut Response) -> Self {
+        MatchPositions {
+            _marker: Default::default(),
+            text_chars: text.chars(),
+            matches: response.iter_matches_mut(),
+            line_number: 1,
+            line_offset: 0,
+            offset: 0,
+        }
+    }
+}
+
+impl<'source, 'response> From<&'source ResponseWithContext<'source>>
+    for MatchPositions<'source, 'response, std::slice::Iter<'response, Match>>
+where
+    'source: 'response,
 {
     fn from(response: &'source ResponseWithContext) -> Self {
         MatchPositions {
+            _marker: Default::default(),
             text_chars: response.text.chars(),
             matches: response.iter_matches(),
             line_number: 1,
@@ -1070,11 +1087,14 @@ impl<'source> From<&'source ResponseWithContext>
     }
 }
 
-impl<'source> From<&'source mut ResponseWithContext>
-    for MatchPositions<'source, std::slice::IterMut<'source, Match>>
+impl<'source, 'response> From<&'source mut ResponseWithContext<'source>>
+    for MatchPositions<'source, 'response, std::slice::IterMut<'response, Match>>
+where
+    'source: 'response,
 {
     fn from(response: &'source mut ResponseWithContext) -> Self {
         MatchPositions {
+            _marker: Default::default(),
             text_chars: response.text.chars(),
             matches: response.response.iter_matches_mut(),
             line_number: 1,
@@ -1084,8 +1104,8 @@ impl<'source> From<&'source mut ResponseWithContext>
     }
 }
 
-impl<'source, T> MatchPositions<'source, T> {
-    /// Set the line number to a give value.
+impl<'source, 'response, T: Iterator + 'response> MatchPositions<'source, 'response, T> {
+    /// Set the line number to a given value.
     ///
     /// By default, the first line number is 1.
     pub fn set_line_number(mut self, line_number: usize) -> Self {
@@ -1114,7 +1134,11 @@ impl<'source, T> MatchPositions<'source, T> {
     }
 }
 
-impl<'source> Iterator for MatchPositions<'source, std::slice::Iter<'source, Match>> {
+impl<'source, 'response> Iterator
+    for MatchPositions<'source, 'response, std::slice::Iter<'response, Match>>
+where
+    'response: 'source,
+{
     type Item = (usize, usize, &'source Match);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -1127,7 +1151,11 @@ impl<'source> Iterator for MatchPositions<'source, std::slice::Iter<'source, Mat
     }
 }
 
-impl<'source> Iterator for MatchPositions<'source, std::slice::IterMut<'source, Match>> {
+impl<'source, 'response> Iterator
+    for MatchPositions<'source, 'response, std::slice::IterMut<'response, Match>>
+where
+    'response: 'source,
+{
     type Item = (usize, usize, &'source mut Match);
 
     fn next(&mut self) -> Option<Self::Item> {

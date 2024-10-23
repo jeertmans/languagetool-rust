@@ -413,7 +413,9 @@ impl ServerClient {
     pub async fn check_multiple_and_join<'source>(
         &self,
         requests: Vec<Request<'source>>,
-    ) -> Result<check::ResponseWithContext> {
+    ) -> Result<check::ResponseWithContext<'source>> {
+        use std::borrow::Cow;
+
         let mut tasks = Vec::with_capacity(requests.len());
 
         requests
@@ -424,16 +426,13 @@ impl ServerClient {
 
                 tasks.push(tokio::spawn(async move {
                     let response = server_client.check(&request).await?;
-                    let text = request
-                        .text
-                        .ok_or_else(|| {
-                            Error::InvalidRequest(
-                                "missing text field; cannot join requests with data annotations"
-                                    .to_string(),
-                            )
-                        })?
-                        .into_owned();
-                    Result::<(String, Response)>::Ok((text, response))
+                    let text = request.text.ok_or_else(|| {
+                        Error::InvalidRequest(
+                            "missing text field; cannot join requests with data annotations"
+                                .to_string(),
+                        )
+                    })?;
+                    Result::<(Cow<'static, str>, Response)>::Ok((text, response))
                 }));
             });
 
