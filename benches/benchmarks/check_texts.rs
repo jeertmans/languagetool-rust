@@ -36,7 +36,7 @@ async fn check_text_basic(text: &'static str) -> Response {
         "Please use a local server for benchmarking, and configure the environ variables to use \
          it.",
     );
-    let req = Request::default().with_text(Cow::Borrowed(text));
+    let req = Request::default().with_text(text);
     request_until_success(&req, &client).await
 }
 
