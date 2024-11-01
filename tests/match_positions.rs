@@ -1,5 +1,4 @@
 use languagetool_rust::api::{check, server::ServerClient};
-use std::borrow::Cow;
 
 #[macro_export]
 macro_rules! test_match_positions {

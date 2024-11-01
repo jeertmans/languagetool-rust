@@ -453,9 +453,9 @@ impl ServerClient {
     /// Send a check request to the server, await for the response and annotate
     /// it.
     #[cfg(feature = "annotate")]
-    pub async fn annotate_check<'source>(
+    pub async fn annotate_check(
         &self,
-        request: &Request<'source>,
+        request: &Request<'_>,
         origin: Option<&str>,
         color: bool,
     ) -> Result<String> {

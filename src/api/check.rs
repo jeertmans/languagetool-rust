@@ -239,7 +239,7 @@ pub struct Data<'source> {
     pub annotation: Vec<DataAnnotation<'source>>,
 }
 
-impl<'source> IntoStatic for Data<'source> {
+impl IntoStatic for Data<'_> {
     type Static = Data<'static>;
     fn into_static(self) -> Self::Static {
         Data {
@@ -960,7 +960,7 @@ pub struct ResponseWithContext<'source> {
     pub text_length: usize,
 }
 
-impl<'source> Deref for ResponseWithContext<'source> {
+impl Deref for ResponseWithContext<'_> {
     type Target = Response;
     fn deref(&self) -> &Self::Target {
         &self.response
@@ -1104,7 +1104,7 @@ where
     }
 }
 
-impl<'source, 'response, T: Iterator + 'response> MatchPositions<'source, 'response, T> {
+impl<'response, T: Iterator + 'response> MatchPositions<'_, 'response, T> {
     /// Set the line number to a given value.
     ///
     /// By default, the first line number is 1.

@@ -257,7 +257,7 @@ pub struct CliRequest {
     pub level: Level,
 }
 
-impl<'source> From<CliRequest> for Request<'source> {
+impl From<CliRequest> for Request<'_> {
     fn from(val: CliRequest) -> Self {
         Request {
             text: val.text.map(Cow::Owned),
@@ -396,7 +396,7 @@ pub struct CliData {
     pub annotation: Vec<CliDataAnnotation>,
 }
 
-impl<'source> From<CliData> for Data<'source> {
+impl From<CliData> for Data<'_> {
     fn from(val: CliData) -> Self {
         Data {
             annotation: val
@@ -428,7 +428,7 @@ pub struct CliDataAnnotation {
     pub interpret_as: Option<String>,
 }
 
-impl<'source> From<CliDataAnnotation> for DataAnnotation<'source> {
+impl From<CliDataAnnotation> for DataAnnotation<'_> {
     fn from(val: CliDataAnnotation) -> Self {
         DataAnnotation {
             text: val.text.map(Cow::Owned),
