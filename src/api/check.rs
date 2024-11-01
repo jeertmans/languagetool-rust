@@ -1026,8 +1026,8 @@ impl<'source> ResponseWithContext<'source> {
 
         self.response.matches.append(&mut other.response.matches);
 
-        self.text = Cow::Owned(self.text.into_owned() + &other.text);
-        self.text_length = other.text_length;
+        self.text.to_mut().push_str(&other.text);
+        self.text_length += other.text_length;
 
         self
     }
