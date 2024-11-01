@@ -607,7 +607,7 @@ mod tests {
     #[tokio::test]
     async fn test_server_check_text() {
         let client = ServerClient::from_env_or_default();
-        let req = Request::default().with_text(Cow::Borrowed("je suis une poupee"));
+        let req = Request::default().with_text("je suis une poupee");
         assert!(client.check(&req).await.is_ok());
     }
 
