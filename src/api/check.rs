@@ -527,7 +527,7 @@ impl<'source> Request<'source> {
 
     /// Set the text to be checked and remove potential data field.
     #[must_use]
-    pub fn with_text<T: Into<Cow<'static, str>>>(mut self, text: T) -> Self {
+    pub fn with_text<T: Into<Cow<'source, str>>>(mut self, text: T) -> Self {
         self.text = Some(text.into());
         self.data = None;
         self
@@ -535,7 +535,7 @@ impl<'source> Request<'source> {
 
     /// Set the data to be checked and remove potential text field.
     #[must_use]
-    pub fn with_data(mut self, data: Data<'static>) -> Self {
+    pub fn with_data(mut self, data: Data<'source>) -> Self {
         self.data = Some(data);
         self.text = None;
         self

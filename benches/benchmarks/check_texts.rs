@@ -29,7 +29,7 @@ async fn request_until_success<'source>(req: &Request<'source>, client: &ServerC
 }
 
 #[tokio::main]
-async fn check_text_basic(text: &'static str) -> Response {
+async fn check_text_basic(text: &str) -> Response {
     let client = ServerClient::from_env().expect(
         "Please use a local server for benchmarking, and configure the environ variables to use \
          it.",
