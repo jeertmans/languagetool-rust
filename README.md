@@ -161,7 +161,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = ServerClient::from_env_or_default();
 
     let req = check::Request::default()
-        .with_text(Cow::Borrowed("Some phrase with a smal mistake"));  // # codespell:ignore smal
+        .with_text("Some phrase with a smal mistake");  // # codespell:ignore smal
 
     println!(
         "{}",
