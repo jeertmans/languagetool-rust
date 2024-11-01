@@ -593,8 +593,6 @@ impl ServerClient {
 
 #[cfg(test)]
 mod tests {
-    use std::borrow::Cow;
-
     use super::ServerClient;
     use crate::api::check::Request;
 
