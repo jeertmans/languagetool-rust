@@ -50,7 +50,7 @@ async fn check_text_split(text: &str) -> Response {
 
     let resps = join_all(lines.map(|line| {
         async {
-            let req = Request::default().with_text(Cow::Owned(line.to_string()));
+            let req = Request::default().with_text(line.to_string());
             let resp = request_until_success(&req, &client).await;
             check::ResponseWithContext::new(req.get_text(), resp)
         }
