@@ -11,7 +11,7 @@ pub mod languages;
 pub mod server;
 pub mod words;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 
 /// A HTTP client for making requests to a LanguageTool server.
 #[derive(Debug)]
@@ -48,7 +48,7 @@ impl Client {
     }
 
     /// Send a check request to the server and await for the response.
-    pub async fn check(&self, request: &check::Request) -> Result<check::Response> {
+    pub async fn check(&self, request: &check::Request<'_>) -> Result<check::Response> {
         self.client
             .post(self.url("/check"))
             .query(request)

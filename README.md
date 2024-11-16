@@ -154,13 +154,14 @@ languagetool-rust = "^2.1"
 
 ```rust
 use languagetool_rust::api::{check, server::ServerClient};
+use std::borrow::Cow;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = ServerClient::from_env_or_default();
 
     let req = check::Request::default()
-        .with_text("Some phrase with a smal mistake".to_string());  // # codespell:ignore smal
+        .with_text("Some phrase with a smal mistake");  // # codespell:ignore smal
 
     println!(
         "{}",

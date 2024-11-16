@@ -12,7 +12,9 @@ required-features = ["cli"]
 annotate-snippets = {version = "^0.9.1", optional = true}
 clap = {version = "^4.5.18", features = ["cargo", "derive", "env", "wrap_help"], optional = true}
 clap_complete = {version = "^4.5.2", optional = true}
+enum_dispatch = {version = "0.3.13", optional = true}
 is-terminal = {version = "0.4.3", optional = true}
+lifetime = {version = "0.1.0", features = ["macros"]}
 pulldown-cmark = {version = "0.10.2", optional = true}
 reqwest = {version = "^0.11", default-features = false, features = ["json"]}
 serde = {version = "^1.0", features = ["derive"]}
@@ -33,7 +35,7 @@ tokio = {version = "^1.0", features = ["macros"]}
 
 [features]
 annotate = ["dep:annotate-snippets"]
-cli = ["annotate", "color", "dep:clap", "dep:is-terminal", "multithreaded"]
+cli = ["annotate", "color", "dep:clap", "dep:enum_dispatch", "dep:is-terminal", "multithreaded"]
 cli-complete = ["cli", "clap_complete"]
 color = ["annotate-snippets?/color", "dep:termcolor"]
 default = ["cli", "native-tls"]
@@ -61,7 +63,7 @@ license = "MIT"
 name = "languagetool-rust"
 readme = "README.md"
 repository = "https://github.com/jeertmans/languagetool-rust"
-rust-version = "1.74.0"
+rust-version = "1.75.0"
 version = "2.1.4"
 
 [package.metadata.docs.rs]

@@ -14,7 +14,7 @@ static FILES: [(&str, &str); 3] = [
     ("large", include_str!("../large.txt")),
 ];
 
-async fn request_until_success(req: &Request, client: &ServerClient) -> Response {
+async fn request_until_success<'source>(req: &Request<'source>, client: &ServerClient) -> Response {
     loop {
         match client.check(req).await {
             Ok(resp) => return resp,
@@ -34,7 +34,7 @@ async fn check_text_basic(text: &str) -> Response {
         "Please use a local server for benchmarking, and configure the environ variables to use \
          it.",
     );
-    let req = Request::default().with_text(text.to_string());
+    let req = Request::default().with_text(text);
     request_until_success(&req, &client).await
 }
 

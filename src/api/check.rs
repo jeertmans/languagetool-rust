@@ -1,7 +1,6 @@
 //! Structures for `check` requests and responses.
 
-#[cfg(feature = "cli")]
-use std::path::PathBuf;
+use std::{borrow::Cow, marker::PhantomData, mem, ops::Deref};
 
 #[cfg(feature = "annotate")]
 use annotate_snippets::{
@@ -9,12 +8,13 @@ use annotate_snippets::{
     snippet::{Annotation, AnnotationType, Slice, Snippet, SourceAnnotation},
 };
 #[cfg(feature = "cli")]
-use clap::{Args, Parser, ValueEnum};
+use clap::ValueEnum;
+use lifetime::IntoStatic;
 use serde::{Deserialize, Serialize, Serializer};
 
 use crate::error::{Error, Result};
 
-/// Requests
+// REQUESTS
 
 /// Parse `v` is valid language code.
 ///
@@ -123,63 +123,77 @@ where
     }
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize, Hash)]
+/// A portion of text to be checked.
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize, Hash, IntoStatic)]
 #[non_exhaustive]
 #[serde(rename_all = "camelCase")]
-/// A portion of text to be checked.
-pub struct DataAnnotation {
+pub struct DataAnnotation<'source> {
+    /// Text that should be treated as normal text.
+    ///
+    /// This or `markup` is required.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<Cow<'source, str>>,
+    /// Text that should be treated as markup.
+    ///
+    /// This or `text` is required.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub markup: Option<Cow<'source, str>>,
     /// If set, the markup will be interpreted as this.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub interpret_as: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    /// Text that should be treated as markup.
-    pub markup: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    /// Text that should be treated as normal text.
-    pub text: Option<String>,
+    pub interpret_as: Option<Cow<'source, str>>,
 }
 
-impl Default for DataAnnotation {
-    fn default() -> Self {
-        Self {
-            interpret_as: None,
-            markup: None,
-            text: Some(String::new()),
-        }
-    }
-}
-
-impl DataAnnotation {
+impl<'source> DataAnnotation<'source> {
     /// Instantiate a new `DataAnnotation` with text only.
     #[inline]
     #[must_use]
-    pub fn new_text(text: String) -> Self {
+    pub fn new_text<T: Into<Cow<'source, str>>>(text: T) -> Self {
         Self {
-            interpret_as: None,
+            text: Some(text.into()),
             markup: None,
-            text: Some(text),
+            interpret_as: None,
         }
     }
 
     /// Instantiate a new `DataAnnotation` with markup only.
     #[inline]
     #[must_use]
-    pub fn new_markup(markup: String) -> Self {
+    pub fn new_markup<M: Into<Cow<'source, str>>>(markup: M) -> Self {
         Self {
-            interpret_as: None,
-            markup: Some(markup),
             text: None,
+            markup: Some(markup.into()),
+            interpret_as: None,
         }
     }
 
     /// Instantiate a new `DataAnnotation` with markup and its interpretation.
     #[inline]
     #[must_use]
-    pub fn new_interpreted_markup(markup: String, interpret_as: String) -> Self {
+    pub fn new_interpreted_markup<M: Into<Cow<'source, str>>, I: Into<Cow<'source, str>>>(
+        markup: M,
+        interpret_as: I,
+    ) -> Self {
         Self {
-            interpret_as: Some(interpret_as),
-            markup: Some(markup),
+            interpret_as: Some(interpret_as.into()),
+            markup: Some(markup.into()),
             text: None,
+        }
+    }
+
+    /// Return the text or markup within the data annotation.
+    ///
+    /// # Errors
+    ///
+    /// If this data annotation does not contain text or markup.
+    pub fn try_get_text(&self) -> Result<Cow<'source, str>> {
+        if let Some(ref text) = self.text {
+            Ok(text.clone())
+        } else if let Some(ref markup) = self.markup {
+            Ok(markup.clone())
+        } else {
+            Err(Error::InvalidDataAnnotation(format!(
+                "missing either text or markup field in {self:?}"
+            )))
         }
     }
 }
@@ -191,49 +205,61 @@ mod data_annotation_tests {
 
     #[test]
     fn test_text() {
-        let da = DataAnnotation::new_text("Hello".to_string());
+        let da = DataAnnotation::new_text("Hello");
 
-        assert_eq!(da.text.unwrap(), "Hello".to_string());
+        assert_eq!(da.text.unwrap(), "Hello");
         assert!(da.markup.is_none());
         assert!(da.interpret_as.is_none());
     }
 
     #[test]
     fn test_markup() {
-        let da = DataAnnotation::new_markup("<a>Hello</a>".to_string());
+        let da = DataAnnotation::new_markup("<a>Hello</a>");
 
         assert!(da.text.is_none());
-        assert_eq!(da.markup.unwrap(), "<a>Hello</a>".to_string());
+        assert_eq!(da.markup.unwrap(), "<a>Hello</a>");
         assert!(da.interpret_as.is_none());
     }
 
     #[test]
     fn test_interpreted_markup() {
-        let da =
-            DataAnnotation::new_interpreted_markup("<a>Hello</a>".to_string(), "Hello".to_string());
+        let da = DataAnnotation::new_interpreted_markup("<a>Hello</a>", "Hello");
 
         assert!(da.text.is_none());
-        assert_eq!(da.markup.unwrap(), "<a>Hello</a>".to_string());
-        assert_eq!(da.interpret_as.unwrap(), "Hello".to_string());
+        assert_eq!(da.markup.unwrap(), "<a>Hello</a>");
+        assert_eq!(da.interpret_as.unwrap(), "Hello");
     }
 }
 
 /// Alternative text to be checked.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Eq, Hash)]
 #[non_exhaustive]
-pub struct Data {
+pub struct Data<'source> {
     /// Vector of markup text, see [`DataAnnotation`].
-    pub annotation: Vec<DataAnnotation>,
+    pub annotation: Vec<DataAnnotation<'source>>,
 }
 
-impl<T: Into<DataAnnotation>> FromIterator<T> for Data {
+impl IntoStatic for Data<'_> {
+    type Static = Data<'static>;
+    fn into_static(self) -> Self::Static {
+        Data {
+            annotation: self
+                .annotation
+                .into_iter()
+                .map(IntoStatic::into_static)
+                .collect(),
+        }
+    }
+}
+
+impl<'source, T: Into<DataAnnotation<'source>>> FromIterator<T> for Data<'source> {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let annotation = iter.into_iter().map(std::convert::Into::into).collect();
         Data { annotation }
     }
 }
 
-impl Serialize for Data {
+impl Serialize for Data<'_> {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -246,7 +272,7 @@ impl Serialize for Data {
 }
 
 #[cfg(feature = "cli")]
-impl std::str::FromStr for Data {
+impl std::str::FromStr for Data<'_> {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self> {
@@ -378,6 +404,21 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
     vec
 }
 
+/// Default value for [`Request::language`].
+pub const DEFAULT_LANGUAGE: &str = "auto";
+
+/// Custom serialization for [`Request::language`].
+fn serialize_language<S>(lang: &str, s: S) -> std::result::Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    s.serialize_str(if lang.is_empty() {
+        DEFAULT_LANGUAGE
+    } else {
+        lang
+    })
+}
+
 /// LanguageTool POST check request.
 ///
 /// The main feature - check a text with LanguageTool for possible style and
@@ -385,18 +426,13 @@ pub fn split_len<'source>(s: &'source str, n: usize, pat: &str) -> Vec<&'source 
 ///
 /// The structure below tries to follow as closely as possible the JSON API
 /// described [here](https://languagetool.org/http-api/swagger-ui/#!/default/post_check).
-#[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Hash)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Hash, IntoStatic)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-pub struct Request {
+pub struct Request<'source> {
     /// The text to be checked. This or 'data' is required.
-    #[cfg_attr(
-        feature = "cli",
-        clap(short = 't', long, conflicts_with = "data", allow_hyphen_values(true))
-    )]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub text: Option<String>,
+    pub text: Option<Cow<'source, str>>,
     /// The text to be checked, given as a JSON document that specifies what's
     /// text and what's markup. This or 'text' is required.
     ///
@@ -421,49 +457,29 @@ pub struct Request {
     /// ```
     /// The 'data' feature is not limited to HTML or XML, it can be used for any
     /// kind of markup. Entities will need to be expanded in this input.
-    #[cfg_attr(feature = "cli", clap(short = 'd', long, conflicts_with = "text"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub data: Option<Data>,
+    pub data: Option<Data<'source>>,
     /// A language code like `en-US`, `de-DE`, `fr`, or `auto` to guess the
     /// language automatically (see `preferredVariants` below).
     ///
     /// For languages with variants (English, German, Portuguese) spell checking
     /// will only be activated when you specify the variant, e.g. `en-GB`
     /// instead of just `en`.
-    #[cfg_attr(
-        all(feature = "cli", feature = "cli", feature = "cli"),
-        clap(
-            short = 'l',
-            long,
-            default_value = "auto",
-            value_parser = parse_language_code
-        )
-    )]
+    #[serde(serialize_with = "serialize_language")]
     pub language: String,
     /// Set to get Premium API access: Your username/email as used to log in at
     /// languagetool.org.
-    #[cfg_attr(
-        feature = "cli",
-        clap(short = 'u', long, requires = "api_key", env = "LANGUAGETOOL_USERNAME")
-    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub username: Option<String>,
-    /// Set to get Premium API access: [your API
-    /// key](https://languagetool.org/editor/settings/api).
-    #[cfg_attr(
-        feature = "cli",
-        clap(short = 'k', long, requires = "username", env = "LANGUAGETOOL_API_KEY")
-    )]
+    /// Set to get Premium API access: your API key (see <https://languagetool.org/editor/settings/api>).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub api_key: Option<String>,
     /// Comma-separated list of dictionaries to include words from; uses special
     /// default dictionary if this is unset.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub dicts: Option<Vec<String>>,
     /// A language code of the user's native language, enabling false friends
     /// checks for some language pairs.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mother_tongue: Option<String>,
     /// Comma-separated list of preferred language variants.
@@ -475,79 +491,51 @@ pub struct Request {
     /// should set variants for at least German and English, as otherwise the
     /// spell checking will not work for those, as no spelling dictionary can be
     /// selected for just `en` or `de`.
-    #[cfg_attr(feature = "cli", clap(long, conflicts_with = "language"))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub preferred_variants: Option<Vec<String>>,
     /// IDs of rules to be enabled, comma-separated.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub enabled_rules: Option<Vec<String>>,
     /// IDs of rules to be disabled, comma-separated.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub disabled_rules: Option<Vec<String>>,
     /// IDs of categories to be enabled, comma-separated.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub enabled_categories: Option<Vec<String>>,
     /// IDs of categories to be disabled, comma-separated.
-    #[cfg_attr(feature = "cli", clap(long))]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub disabled_categories: Option<Vec<String>>,
     /// If true, only the rules and categories whose IDs are specified with
     /// `enabledRules` or `enabledCategories` are enabled.
-    #[cfg_attr(feature = "cli", clap(long))]
-    #[serde(skip_serializing_if = "is_false")]
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub enabled_only: bool,
     /// If set to `picky`, additional rules will be activated, i.e. rules that
     /// you might only find useful when checking formal text.
-    #[cfg_attr(
-        feature = "cli",
-        clap(long, default_value = "default", ignore_case = true, value_enum)
-    )]
     #[serde(skip_serializing_if = "Level::is_default")]
     pub level: Level,
 }
 
-impl Default for Request {
-    #[inline]
-    fn default() -> Request {
-        Request {
-            text: Default::default(),
-            data: Default::default(),
+impl<'source> Request<'source> {
+    /// Create a new empty request with language set to `"auto"`.
+    #[must_use]
+    pub fn new() -> Self {
+        Self {
             language: "auto".to_string(),
-            username: Default::default(),
-            api_key: Default::default(),
-            dicts: Default::default(),
-            mother_tongue: Default::default(),
-            preferred_variants: Default::default(),
-            enabled_rules: Default::default(),
-            disabled_rules: Default::default(),
-            enabled_categories: Default::default(),
-            disabled_categories: Default::default(),
-            enabled_only: Default::default(),
-            level: Default::default(),
+            ..Default::default()
         }
     }
-}
 
-#[inline]
-fn is_false(b: &bool) -> bool {
-    !(*b)
-}
-
-impl Request {
     /// Set the text to be checked and remove potential data field.
     #[must_use]
-    pub fn with_text(mut self, text: String) -> Self {
-        self.text = Some(text);
+    pub fn with_text<T: Into<Cow<'source, str>>>(mut self, text: T) -> Self {
+        self.text = Some(text.into());
         self.data = None;
         self
     }
 
     /// Set the data to be checked and remove potential text field.
     #[must_use]
-    pub fn with_data(mut self, data: Data) -> Self {
+    pub fn with_data(mut self, data: Data<'source>) -> Self {
         self.data = Some(data);
         self.text = None;
         self
@@ -556,7 +544,7 @@ impl Request {
     /// Set the data (obtained from string) to be checked and remove potential
     /// text field
     pub fn with_data_str(self, data: &str) -> serde_json::Result<Self> {
-        Ok(self.with_data(serde_json::from_str(data)?))
+        serde_json::from_str(data).map(|data| self.with_data(data))
     }
 
     /// Set the language of the text / data.
@@ -566,29 +554,29 @@ impl Request {
         self
     }
 
-    /// Return a copy of the text within the request.
+    /// Return the text within the request.
     ///
     /// # Errors
     ///
     /// If both `self.text` and `self.data` are [`None`].
     /// If any data annotation does not contain text or markup.
-    pub fn try_get_text(&self) -> Result<String> {
+    pub fn try_get_text(&self) -> Result<Cow<'source, str>> {
         if let Some(ref text) = self.text {
             Ok(text.clone())
         } else if let Some(ref data) = self.data {
-            let mut text = String::new();
-            for da in data.annotation.iter() {
-                if let Some(ref t) = da.text {
-                    text.push_str(t.as_str());
-                } else if let Some(ref t) = da.markup {
-                    text.push_str(t.as_str());
-                } else {
-                    return Err(Error::InvalidDataAnnotation(
-                        "missing either text or markup field in {da:?}".to_string(),
-                    ));
-                }
+            match data.annotation.len() {
+                0 => Ok(Default::default()),
+                1 => data.annotation[0].try_get_text(),
+                _ => {
+                    let mut text = String::new();
+
+                    for da in data.annotation.iter() {
+                        text.push_str(da.try_get_text()?.deref());
+                    }
+
+                    Ok(Cow::Owned(text))
+                },
             }
-            Ok(text)
         } else {
             Err(Error::InvalidRequest(
                 "missing either text or data field".to_string(),
@@ -604,7 +592,7 @@ impl Request {
     /// If both `self.text` and `self.data` are [`None`].
     /// If any data annotation does not contain text or markup.
     #[must_use]
-    pub fn get_text(&self) -> String {
+    pub fn get_text(&self) -> Cow<'source, str> {
         self.try_get_text().unwrap()
     }
 
@@ -614,15 +602,20 @@ impl Request {
     /// # Errors
     ///
     /// If `self.text` is none.
-    pub fn try_split(&self, n: usize, pat: &str) -> Result<Vec<Self>> {
-        let text = self
-            .text
-            .as_ref()
-            .ok_or(Error::InvalidRequest("missing text field".to_string()))?;
+    pub fn try_split(mut self, n: usize, pat: &str) -> Result<Vec<Self>> {
+        let text = mem::take(&mut self.text)
+            .ok_or_else(|| Error::InvalidRequest("missing text field".to_string()))?;
+        let string: &str = match &text {
+            Cow::Owned(s) => s.as_str(),
+            Cow::Borrowed(s) => s,
+        };
 
-        Ok(split_len(text.as_str(), n, pat)
+        Ok(split_len(string, n, pat)
             .iter()
-            .map(|text_fragment| self.clone().with_text(text_fragment.to_string()))
+            .map(|text_fragment| {
+                self.clone()
+                    .with_text(Cow::Owned(text_fragment.to_string()))
+            })
             .collect())
     }
 
@@ -634,76 +627,9 @@ impl Request {
     ///
     /// If `self.text` is none.
     #[must_use]
-    pub fn split(&self, n: usize, pat: &str) -> Vec<Self> {
+    pub fn split(self, n: usize, pat: &str) -> Vec<Self> {
         self.try_split(n, pat).unwrap()
     }
-}
-
-/// Parse a string slice into a [`PathBuf`], and error if the file does not
-/// exist.
-#[cfg(feature = "cli")]
-fn parse_filename(s: &str) -> Result<PathBuf> {
-    let path_buf: PathBuf = s.parse().unwrap();
-
-    if path_buf.is_file() {
-        Ok(path_buf)
-    } else {
-        Err(Error::InvalidFilename(s.to_string()))
-    }
-}
-
-/// Support file types.
-#[cfg(feature = "cli")]
-#[derive(Clone, Debug, Default, ValueEnum)]
-#[non_exhaustive]
-pub enum FileType {
-    /// Auto.
-    #[default]
-    Auto,
-    /// Markdown.
-    Markdown,
-    /// Typst.
-    Typst,
-}
-
-/// Check text using LanguageTool server.
-///
-/// The input can be one of the following:
-///
-/// - raw text, if `--text TEXT` is provided;
-/// - annotated data, if `--data TEXT` is provided;
-/// - raw text, if `-- [FILE]...` are provided. Note that some file types will
-///   use a
-/// - raw text, through stdin, if nothing is provided.
-#[cfg(feature = "cli")]
-#[derive(Debug, Parser)]
-pub struct CheckCommand {
-    /// If present, raw JSON output will be printed instead of annotated text.
-    /// This has no effect if `--data` is used, because it is never
-    /// annotated.
-    #[cfg(feature = "cli")]
-    #[clap(short = 'r', long)]
-    pub raw: bool,
-    /// Sets the maximum number of characters before splitting.
-    #[clap(long, default_value_t = 1500)]
-    pub max_length: usize,
-    /// If text is too long, will split on this pattern.
-    #[clap(long, default_value = "\n\n")]
-    pub split_pattern: String,
-    /// Max. number of suggestions kept. If negative, all suggestions are kept.
-    #[clap(long, default_value_t = 5, allow_negative_numbers = true)]
-    pub max_suggestions: isize,
-    /// Specify the files type to use the correct parser.
-    ///
-    /// If set to auto, the type is guessed from the filename extension.
-    #[clap(long, value_enum, default_value_t = FileType::default(), ignore_case = true)]
-    pub r#type: FileType,
-    /// Optional filenames from which input is read.
-    #[arg(conflicts_with_all(["text", "data"]), value_parser = parse_filename)]
-    pub filenames: Vec<PathBuf>,
-    /// Inner [`Request`].
-    #[command(flatten, next_help_heading = "Request options")]
-    pub request: Request,
 }
 
 #[cfg(test)]
@@ -713,22 +639,22 @@ mod request_tests {
 
     #[test]
     fn test_with_text() {
-        let req = Request::default().with_text("hello".to_string());
+        let req = Request::default().with_text("hello");
 
-        assert_eq!(req.text.unwrap(), "hello".to_string());
+        assert_eq!(req.text.unwrap(), "hello");
         assert!(req.data.is_none());
     }
 
     #[test]
     fn test_with_data() {
-        let req = Request::default().with_text("hello".to_string());
+        let req = Request::default().with_text("hello");
 
-        assert_eq!(req.text.unwrap(), "hello".to_string());
+        assert_eq!(req.text.unwrap(), "hello");
         assert!(req.data.is_none());
     }
 }
 
-/// Responses
+// RESPONSES
 
 /// Detected language from check request.
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -1024,21 +950,30 @@ impl Response {
 ///
 /// This structure exists to keep a link between a check response
 /// and the original text that was checked.
-#[derive(Debug, Clone, PartialEq)]
-pub struct ResponseWithContext {
+#[derive(Debug, Clone, PartialEq, IntoStatic)]
+pub struct ResponseWithContext<'source> {
     /// Original text that was checked by LT.
-    pub text: String,
+    pub text: Cow<'source, str>,
     /// Check response.
     pub response: Response,
     /// Text's length.
     pub text_length: usize,
 }
 
-impl ResponseWithContext {
+impl Deref for ResponseWithContext<'_> {
+    type Target = Response;
+    fn deref(&self) -> &Self::Target {
+        &self.response
+    }
+}
+
+impl<'source> ResponseWithContext<'source> {
     /// Bind a check response with its original text.
     #[must_use]
-    pub fn new(text: String, response: Response) -> Self {
+    pub fn new(text: Cow<'source, str>, response: Response) -> Self {
         let text_length = text.chars().count();
+
+        // Add more context to response
         Self {
             text,
             response,
@@ -1047,7 +982,7 @@ impl ResponseWithContext {
     }
 
     /// Return an iterator over matches.
-    pub fn iter_matches(&self) -> std::slice::Iter<'_, Match> {
+    pub fn iter_matches(&'source self) -> std::slice::Iter<'source, Match> {
         self.response.iter_matches()
     }
 
@@ -1059,7 +994,7 @@ impl ResponseWithContext {
     /// Return an iterator over matches and corresponding line number and line
     /// offset.
     #[must_use]
-    pub fn iter_match_positions(&self) -> MatchPositions<'_, std::slice::Iter<'_, Match>> {
+    pub fn iter_match_positions(&self) -> MatchPositions<'_, '_, std::slice::Iter<'_, Match>> {
         self.into()
     }
 
@@ -1090,42 +1025,59 @@ impl ResponseWithContext {
         }
 
         self.response.matches.append(&mut other.response.matches);
-        self.text.push_str(other.text.as_str());
+
+        self.text.to_mut().push_str(&other.text);
         self.text_length += other.text_length;
+
         self
     }
 }
 
-impl From<ResponseWithContext> for Response {
-    #[allow(clippy::needless_borrow)]
-    fn from(mut resp: ResponseWithContext) -> Self {
-        let iter: MatchPositions<'_, std::slice::IterMut<'_, Match>> = (&mut resp).into();
-
-        for (line_number, line_offset, m) in iter {
+impl<'source> From<ResponseWithContext<'source>> for Response {
+    fn from(mut resp: ResponseWithContext<'source>) -> Self {
+        for (line_number, line_offset, m) in MatchPositions::new(&resp.text, &mut resp.response) {
             m.more_context = Some(MoreContext {
                 line_number,
                 line_offset,
             });
         }
+
         resp.response
     }
 }
 
 /// Iterator over matches and their corresponding line number and line offset.
 #[derive(Clone, Debug)]
-pub struct MatchPositions<'source, T> {
+pub struct MatchPositions<'source, 'response, T: Iterator + 'response> {
     text_chars: std::str::Chars<'source>,
     matches: T,
     line_number: usize,
     line_offset: usize,
     offset: usize,
+    _marker: PhantomData<&'response ()>,
 }
 
-impl<'source> From<&'source ResponseWithContext>
-    for MatchPositions<'source, std::slice::Iter<'source, Match>>
+impl<'source, 'response> MatchPositions<'source, 'response, std::slice::IterMut<'response, Match>> {
+    fn new(text: &'source str, response: &'response mut Response) -> Self {
+        MatchPositions {
+            _marker: Default::default(),
+            text_chars: text.chars(),
+            matches: response.iter_matches_mut(),
+            line_number: 1,
+            line_offset: 0,
+            offset: 0,
+        }
+    }
+}
+
+impl<'source, 'response> From<&'source ResponseWithContext<'source>>
+    for MatchPositions<'source, 'response, std::slice::Iter<'response, Match>>
+where
+    'source: 'response,
 {
     fn from(response: &'source ResponseWithContext) -> Self {
         MatchPositions {
+            _marker: Default::default(),
             text_chars: response.text.chars(),
             matches: response.iter_matches(),
             line_number: 1,
@@ -1135,11 +1087,14 @@ impl<'source> From<&'source ResponseWithContext>
     }
 }
 
-impl<'source> From<&'source mut ResponseWithContext>
-    for MatchPositions<'source, std::slice::IterMut<'source, Match>>
+impl<'source, 'response> From<&'source mut ResponseWithContext<'source>>
+    for MatchPositions<'source, 'response, std::slice::IterMut<'response, Match>>
+where
+    'source: 'response,
 {
     fn from(response: &'source mut ResponseWithContext) -> Self {
         MatchPositions {
+            _marker: Default::default(),
             text_chars: response.text.chars(),
             matches: response.response.iter_matches_mut(),
             line_number: 1,
@@ -1149,8 +1104,8 @@ impl<'source> From<&'source mut ResponseWithContext>
     }
 }
 
-impl<'source, T> MatchPositions<'source, T> {
-    /// Set the line number to a give value.
+impl<'response, T: Iterator + 'response> MatchPositions<'_, 'response, T> {
+    /// Set the line number to a given value.
     ///
     /// By default, the first line number is 1.
     pub fn set_line_number(mut self, line_number: usize) -> Self {
@@ -1179,7 +1134,11 @@ impl<'source, T> MatchPositions<'source, T> {
     }
 }
 
-impl<'source> Iterator for MatchPositions<'source, std::slice::Iter<'source, Match>> {
+impl<'source, 'response> Iterator
+    for MatchPositions<'source, 'response, std::slice::Iter<'response, Match>>
+where
+    'response: 'source,
+{
     type Item = (usize, usize, &'source Match);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -1192,7 +1151,11 @@ impl<'source> Iterator for MatchPositions<'source, std::slice::Iter<'source, Mat
     }
 }
 
-impl<'source> Iterator for MatchPositions<'source, std::slice::IterMut<'source, Match>> {
+impl<'source, 'response> Iterator
+    for MatchPositions<'source, 'response, std::slice::IterMut<'response, Match>>
+where
+    'response: 'source,
+{
     type Item = (usize, usize, &'source mut Match);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -1228,11 +1191,11 @@ mod tests {
         }
     }
 
-    impl<'source> From<Token<'source>> for DataAnnotation {
+    impl<'source> From<Token<'source>> for DataAnnotation<'source> {
         fn from(token: Token<'source>) -> Self {
             match token {
-                Token::Text(s) => DataAnnotation::new_text(s.to_string()),
-                Token::Skip(s) => DataAnnotation::new_markup(s.to_string()),
+                Token::Text(s) => DataAnnotation::new_text(s),
+                Token::Skip(s) => DataAnnotation::new_markup(s),
             }
         }
     }
@@ -1244,10 +1207,10 @@ mod tests {
 
         let expected_data = Data {
             annotation: vec![
-                DataAnnotation::new_text("My".to_string()),
-                DataAnnotation::new_text("name".to_string()),
-                DataAnnotation::new_text("is".to_string()),
-                DataAnnotation::new_markup("Q34XY".to_string()),
+                DataAnnotation::new_text("My"),
+                DataAnnotation::new_text("name"),
+                DataAnnotation::new_text("is"),
+                DataAnnotation::new_markup("Q34XY"),
             ],
         };
 

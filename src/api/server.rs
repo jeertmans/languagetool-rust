@@ -9,6 +9,7 @@ use crate::{
 };
 #[cfg(feature = "cli")]
 use clap::Args;
+use lifetime::IntoStatic;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -262,6 +263,7 @@ impl Default for ServerParameters {
 /// To use your local server instead of online api, set:
 /// * `hostname` to "http://localhost"
 /// * `port` to "8081"
+///
 /// if you used the default configuration to start the server.
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
@@ -366,7 +368,7 @@ impl ServerClient {
     }
 
     /// Send a check request to the server and await for the response.
-    pub async fn check(&self, request: &Request) -> Result<Response> {
+    pub async fn check(&self, request: &Request<'_>) -> Result<Response> {
         match self
             .client
             .post(format!("{0}/check", self.api))
@@ -408,36 +410,44 @@ impl ServerClient {
     ///
     /// If any of the requests has `self.text` field which is none.
     #[cfg(feature = "multithreaded")]
-    pub async fn check_multiple_and_join(&self, requests: Vec<Request>) -> Result<Response> {
+    pub async fn check_multiple_and_join<'source>(
+        &self,
+        requests: Vec<Request<'source>>,
+    ) -> Result<check::ResponseWithContext<'source>> {
+        use std::borrow::Cow;
+
         let mut tasks = Vec::with_capacity(requests.len());
 
-        for request in requests.into_iter() {
-            let server_client = self.clone();
-            tasks.push(tokio::spawn(async move {
-                let response = server_client.check(&request).await?;
-                let text = request.text.ok_or(Error::InvalidRequest(
-                    "missing text field; cannot join requests with data annotations".to_string(),
-                ))?;
-                Result::<(String, Response)>::Ok((text, response))
-            }));
-        }
+        requests
+            .into_iter()
+            .map(|r| r.into_static())
+            .for_each(|request| {
+                let server_client = self.clone();
+
+                tasks.push(tokio::spawn(async move {
+                    let response = server_client.check(&request).await?;
+                    let text = request.text.ok_or_else(|| {
+                        Error::InvalidRequest(
+                            "missing text field; cannot join requests with data annotations"
+                                .to_string(),
+                        )
+                    })?;
+                    Result::<(Cow<'static, str>, Response)>::Ok((text, response))
+                }));
+            });
 
         let mut response_with_context: Option<check::ResponseWithContext> = None;
 
         for task in tasks {
             let (text, response) = task.await.unwrap()?;
-            match response_with_context {
-                Some(resp) => {
-                    response_with_context =
-                        Some(resp.append(check::ResponseWithContext::new(text, response)))
-                },
-                None => {
-                    response_with_context = Some(check::ResponseWithContext::new(text, response))
-                },
-            }
+
+            response_with_context = Some(match response_with_context {
+                Some(resp) => resp.append(check::ResponseWithContext::new(text, response)),
+                None => check::ResponseWithContext::new(text, response),
+            })
         }
 
-        Ok(response_with_context.unwrap().into())
+        Ok(response_with_context.unwrap())
     }
 
     /// Send a check request to the server, await for the response and annotate
@@ -445,14 +455,14 @@ impl ServerClient {
     #[cfg(feature = "annotate")]
     pub async fn annotate_check(
         &self,
-        request: &Request,
+        request: &Request<'_>,
         origin: Option<&str>,
         color: bool,
     ) -> Result<String> {
         let text = request.get_text();
         let resp = self.check(request).await?;
 
-        Ok(resp.annotate(text.as_str(), origin, color))
+        Ok(resp.annotate(text.as_ref(), origin, color))
     }
 
     /// Send a languages request to the server and await for the response.
@@ -595,7 +605,7 @@ mod tests {
     #[tokio::test]
     async fn test_server_check_text() {
         let client = ServerClient::from_env_or_default();
-        let req = Request::default().with_text("je suis une poupee".to_string());
+        let req = Request::default().with_text("je suis une poupee");
         assert!(client.check(&req).await.is_ok());
     }
 
