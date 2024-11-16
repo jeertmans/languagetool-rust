@@ -147,12 +147,9 @@ mod tests {
     }
 
     #[ignore]
-    #[ignore]
-    #[test]
-    fn test_error_reqwest() {
-        let result = std::fs::read_to_string(""); // TODO
-        assert!(result.is_err());
-
+    #[tokio::test]
+    async fn test_error_reqwest() {
+        let result = reqwest::get("").await;
         let error: Error = result.unwrap_err().into();
 
         assert!(matches!(error, Error::Reqwest(_)));
