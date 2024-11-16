@@ -571,9 +571,9 @@ impl ServerClient {
 #[cfg(test)]
 mod tests {
     use super::ServerClient;
-    use crate::{api::check::Request, error};
+    use crate::{api::check::Request, error::Error};
 
-    fn dbg_err(e: &error::Error) {
+    fn dbg_err(e: &Error) {
         eprintln!("Error: {e:?}")
     }
 
@@ -586,8 +586,16 @@ mod tests {
     #[tokio::test]
     async fn test_server_check_text() {
         let client = ServerClient::from_env_or_default();
+
         let req = Request::default().with_text("je suis une poupee");
         assert!(client.check(&req).await.inspect_err(dbg_err).is_ok());
+
+        // Too long
+        let req = Request::default().with_text("Repeat ".repeat(1500));
+        assert!(client
+            .check(&req)
+            .await
+            .is_err_and(|e| matches!(e, Error::InvalidRequest(_))));
     }
 
     #[tokio::test]
@@ -597,6 +605,18 @@ mod tests {
             .with_data_str("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
             .unwrap();
         assert!(client.check(&req).await.inspect_err(dbg_err).is_ok());
+
+        // Too long
+        let req = Request::default()
+            .with_data_str(&format!(
+                "{{\"annotation\":[{{\"text\": \"{}\"}}]}}",
+                "repeat".repeat(1500)
+            ))
+            .unwrap();
+        assert!(client
+            .check(&req)
+            .await
+            .is_err_and(|e| matches!(e, Error::InvalidRequest(_))));
     }
 
     #[tokio::test]
