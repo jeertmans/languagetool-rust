@@ -369,38 +369,35 @@ impl ServerClient {
 
     /// Send a check request to the server and await for the response.
     pub async fn check(&self, request: &Request<'_>) -> Result<Response> {
-        match self
+        let resp = self
             .client
             .post(format!("{0}/check", self.api))
             .query(request)
             .send()
             .await
-        {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<Response>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                            .map(|mut resp| {
-                                if self.max_suggestions > 0 {
-                                    let max = self.max_suggestions as usize;
-                                    resp.matches.iter_mut().for_each(|m| {
-                                        let len = m.replacements.len();
-                                        if max < len {
-                                            m.replacements[max] =
-                                                format!("... ({} not shown)", len - max).into();
-                                            m.replacements.truncate(max + 1);
-                                        }
-                                    });
+            .map_err(Error::Reqwest)?;
+
+        match resp.error_for_status_ref() {
+            Ok(_) => {
+                resp.json::<Response>()
+                    .await
+                    .map_err(Into::into)
+                    .map(|mut resp| {
+                        if self.max_suggestions > 0 {
+                            let max = self.max_suggestions as usize;
+                            resp.matches.iter_mut().for_each(|m| {
+                                let len = m.replacements.len();
+                                if max < len {
+                                    m.replacements[max] =
+                                        format!("... ({} not shown)", len - max).into();
+                                    m.replacements.truncate(max + 1);
                                 }
-                                resp
-                            })
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
+                            });
+                        }
+                        resp
+                    })
             },
-            Err(e) => Err(Error::RequestEncode(e)),
+            Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
         }
     }
 
@@ -467,69 +464,52 @@ impl ServerClient {
 
     /// Send a languages request to the server and await for the response.
     pub async fn languages(&self) -> Result<languages::Response> {
-        match self
+        let resp = self
             .client
             .get(format!("{}/languages", self.api))
             .send()
             .await
-        {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<languages::Response>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
-            },
-            Err(e) => Err(Error::RequestEncode(e)),
+            .map_err(Error::Reqwest)?;
+
+        match resp.error_for_status_ref() {
+            Ok(_) => resp.json::<languages::Response>().await.map_err(Into::into),
+            Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
         }
     }
 
     /// Send a words request to the server and await for the response.
     pub async fn words(&self, request: &words::Request) -> Result<words::Response> {
-        match self
+        let resp = self
             .client
             .get(format!("{}/words", self.api))
             .query(request)
             .send()
             .await
-        {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<words::Response>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
-            },
-            Err(e) => Err(Error::RequestEncode(e)),
+            .map_err(Error::Reqwest)?;
+
+        match resp.error_for_status_ref() {
+            Ok(_) => resp.json::<words::Response>().await.map_err(Error::Reqwest),
+            Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
         }
     }
 
     /// Send a words/add request to the server and await for the response.
     pub async fn words_add(&self, request: &words::add::Request) -> Result<words::add::Response> {
-        match self
+        let resp = self
             .client
             .post(format!("{}/words/add", self.api))
             .query(request)
             .send()
             .await
-        {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<words::add::Response>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
+            .map_err(Error::Reqwest)?;
+
+        match resp.error_for_status_ref() {
+            Ok(_) => {
+                resp.json::<words::add::Response>()
+                    .await
+                    .map_err(Error::Reqwest)
             },
-            Err(e) => Err(Error::RequestEncode(e)),
+            Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
         }
     }
 
@@ -538,24 +518,21 @@ impl ServerClient {
         &self,
         request: &words::delete::Request,
     ) -> Result<words::delete::Response> {
-        match self
+        let resp = self
             .client
             .post(format!("{}/words/delete", self.api))
             .query(request)
             .send()
             .await
-        {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<words::delete::Response>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
+            .map_err(Error::Reqwest)?;
+
+        match resp.error_for_status_ref() {
+            Ok(_) => {
+                resp.json::<words::delete::Response>()
+                    .await
+                    .map_err(Error::Reqwest)
             },
-            Err(e) => Err(Error::RequestEncode(e)),
+            Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
         }
     }
 
