@@ -594,19 +594,23 @@ impl ServerClient {
 #[cfg(test)]
 mod tests {
     use super::ServerClient;
-    use crate::api::check::Request;
+    use crate::{api::check::Request, error};
+
+    fn dbg_err(e: &error::Error) {
+        eprintln!("Error: {e:?}")
+    }
 
     #[tokio::test]
     async fn test_server_ping() {
         let client = ServerClient::from_env_or_default();
-        assert!(client.ping().await.is_ok());
+        assert!(client.ping().await.inspect_err(dbg_err).is_ok());
     }
 
     #[tokio::test]
     async fn test_server_check_text() {
         let client = ServerClient::from_env_or_default();
         let req = Request::default().with_text("je suis une poupee");
-        assert!(client.check(&req).await.is_ok());
+        assert!(client.check(&req).await.inspect_err(dbg_err).is_ok());
     }
 
     #[tokio::test]
@@ -615,12 +619,12 @@ mod tests {
         let req = Request::default()
             .with_data_str("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
             .unwrap();
-        assert!(client.check(&req).await.is_ok());
+        assert!(client.check(&req).await.inspect_err(dbg_err).is_ok());
     }
 
     #[tokio::test]
     async fn test_server_languages() {
         let client = ServerClient::from_env_or_default();
-        assert!(client.languages().await.is_ok());
+        assert!(client.languages().await.inspect_err(dbg_err).is_ok());
     }
 }
