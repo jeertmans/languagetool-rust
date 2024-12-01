@@ -52,17 +52,9 @@ pub enum Error {
     #[error("could not parse {0:?} in a Docker action")]
     ParseAction(String),
 
-    /// Error from request encoding.
-    #[error("request could not be properly encoded: {0}")]
-    RequestEncode(reqwest::Error),
-
     /// Any other error from requests (see [`reqwest::Error`]).
     #[error(transparent)]
     Reqwest(#[from] reqwest::Error),
-
-    /// Error from request decoding.
-    #[error("response could not be properly decoded: {0}")]
-    ResponseDecode(reqwest::Error),
 
     /// Error from reading environ variable (see [`std::env::VarError`]).
     #[error(transparent)]
@@ -155,33 +147,9 @@ mod tests {
     }
 
     #[ignore]
-    #[test]
-    fn test_error_request_encode() {
-        let result = std::fs::read_to_string(""); // TODO
-        assert!(result.is_err());
-
-        let error: Error = result.unwrap_err().into();
-
-        assert!(matches!(error, Error::RequestEncode(_)));
-    }
-
-    #[ignore]
-    #[test]
-    fn test_error_response_decode() {
-        let result = std::fs::read_to_string(""); // TODO
-        assert!(result.is_err());
-
-        let error: Error = result.unwrap_err().into();
-
-        assert!(matches!(error, Error::ResponseDecode(_)));
-    }
-
-    #[ignore]
-    #[test]
-    fn test_error_reqwest() {
-        let result = std::fs::read_to_string(""); // TODO
-        assert!(result.is_err());
-
+    #[tokio::test]
+    async fn test_error_reqwest() {
+        let result = reqwest::get("").await;
         let error: Error = result.unwrap_err().into();
 
         assert!(matches!(error, Error::Reqwest(_)));
