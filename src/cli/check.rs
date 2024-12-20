@@ -20,6 +20,7 @@ use crate::{
         server::ServerClient,
     },
     error::{Error, Result},
+    parsers::{parse_html, parse_markdown, parse_typst},
 };
 
 use super::ExecuteSubcommand;
@@ -74,8 +75,12 @@ pub enum FileType {
     /// Auto.
     #[default]
     Auto,
+    /// Raw text.
+    Raw,
     /// Markdown.
     Markdown,
+    /// HTML.
+    Html,
     /// Typst.
     Typst,
 }
@@ -119,10 +124,34 @@ impl ExecuteSubcommand for Command {
 
         // FILES
         for filename in self.filenames.iter() {
-            let text = std::fs::read_to_string(filename)?;
-            let requests = request
-                .clone()
-                .with_text(text)
+            let mut file_type = self.r#type.clone();
+
+            // If file type is "Auto", guess file type from extension
+            if matches!(self.r#type, FileType::Auto) {
+                file_type = match PathBuf::from(filename).extension().and_then(|e| e.to_str()) {
+                    Some(ext) => match ext {
+                        "typ" => FileType::Typst,
+                        "md" | "mkd" | "mdwn" | "mdown" | "mdtxt" | "mdtext" | "markdown" => {
+                            FileType::Markdown
+                        },
+
+                        "html" | "htm" => FileType::Html,
+                        _ => FileType::Raw,
+                    },
+                    None => FileType::Raw,
+                };
+            };
+
+            let file_content = std::fs::read_to_string(filename)?;
+            let text = match file_type {
+                FileType::Auto => unreachable!(),
+                FileType::Raw => file_content,
+                FileType::Html => parse_html(file_content),
+                FileType::Markdown => parse_markdown(file_content),
+                FileType::Typst => parse_typst(file_content),
+            };
+
+            let requests = (request.clone().with_text(text))
                 .split(self.max_length, self.split_pattern.as_str());
             let response = server_client.check_multiple_and_join(requests).await?;
 
