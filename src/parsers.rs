@@ -1,7 +1,8 @@
-//! Utilities for parsing the contents of different file types into a text representation that can
-//! be sent to the LanguageTool API.
+//! Utilities for parsing the contents of different file types into a text
+//! representation that can be sent to the LanguageTool API.
 
-/// Parse the contents of an HTML file into a text format to be sent to the LanguageTool API.
+/// Parse the contents of an HTML file into a text format to be sent to the
+/// LanguageTool API.
 #[cfg(feature = "html")]
 pub fn parse_html(file_content: impl AsRef<str>) -> String {
     use html_parser::Node;
@@ -85,7 +86,8 @@ pub fn parse_html(file_content: impl AsRef<str>) -> String {
     txt
 }
 
-/// Parse the contents of a Markdown file into a text format to be sent to the LanguageTool API.
+/// Parse the contents of a Markdown file into a text format to be sent to the
+/// LanguageTool API.
 #[cfg(feature = "markdown")]
 pub fn parse_markdown(file_content: impl AsRef<str>) -> String {
     use pulldown_cmark::{html, Options, Parser};
@@ -101,7 +103,8 @@ pub fn parse_markdown(file_content: impl AsRef<str>) -> String {
     parse_html(html)
 }
 
-/// Parse the contents of a Typst file into a text format to be sent to the LanguageTool API.
+/// Parse the contents of a Typst file into a text format to be sent to the
+/// LanguageTool API.
 #[cfg(feature = "typst")]
 pub fn parse_typst(file_content: impl AsRef<str>) -> String {
     use typst_syntax::{parse, SyntaxKind, SyntaxNode};

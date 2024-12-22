@@ -129,14 +129,16 @@ impl ExecuteSubcommand for Command {
             // If file type is "Auto", guess file type from extension
             if matches!(self.r#type, FileType::Auto) {
                 file_type = match PathBuf::from(filename).extension().and_then(|e| e.to_str()) {
-                    Some(ext) => match ext {
-                        "typ" => FileType::Typst,
-                        "md" | "mkd" | "mdwn" | "mdown" | "mdtxt" | "mdtext" | "markdown" => {
-                            FileType::Markdown
-                        },
+                    Some(ext) => {
+                        match ext {
+                            "typ" => FileType::Typst,
+                            "md" | "mkd" | "mdwn" | "mdown" | "mdtxt" | "mdtext" | "markdown" => {
+                                FileType::Markdown
+                            },
 
-                        "html" | "htm" => FileType::Html,
-                        _ => FileType::Raw,
+                            "html" | "htm" => FileType::Html,
+                            _ => FileType::Raw,
+                        }
                     },
                     None => FileType::Raw,
                 };
