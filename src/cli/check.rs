@@ -132,7 +132,7 @@ impl ExecuteSubcommand for Command {
                     Some(ext) => {
                         match ext {
                             "typ" => FileType::Typst,
-                            "md" | "mkd" | "mdwn" | "mdown" | "mdtxt" | "mdtext" | "markdown" => {
+                            "md" | "markdown" | "mdown" | "mdwn" | "mkd" | "mkdn" | "mdx" => {
                                 FileType::Markdown
                             },
 
