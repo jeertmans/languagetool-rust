@@ -129,42 +129,56 @@ impl ExecuteSubcommand for Command {
             // If file type is "Auto", guess file type from extension
             if matches!(self.r#type, FileType::Auto) {
                 file_type = match PathBuf::from(filename).extension().and_then(|e| e.to_str()) {
-                    Some(ext) => {
-                        match ext {
-                            "typ" => FileType::Typst,
-                            "md" | "markdown" | "mdown" | "mdwn" | "mkd" | "mkdn" | "mdx" => {
-                                FileType::Markdown
-                            },
+                    Some(ext) => match ext {
+                        "typ" => FileType::Typst,
+                        "md" | "markdown" | "mdown" | "mdwn" | "mkd" | "mkdn" | "mdx" => {
+                            FileType::Markdown
+                        },
 
-                            "html" | "htm" => FileType::Html,
-                            _ => FileType::Raw,
-                        }
+                        "html" | "htm" => FileType::Html,
+                        _ => FileType::Raw,
                     },
                     None => FileType::Raw,
                 };
             };
 
             let file_content = std::fs::read_to_string(filename)?;
-            let text = match file_type {
+            let (response, text): (check::Response, String) = match &file_type {
                 FileType::Auto => unreachable!(),
-                FileType::Raw => file_content,
-                FileType::Html => parse_html(file_content),
-                FileType::Markdown => parse_markdown(file_content),
-                FileType::Typst => parse_typst(file_content),
+                FileType::Raw => {
+                    let requests = (request.clone().with_text(&file_content))
+                        .split(self.max_length, self.split_pattern.as_str());
+                    let response = server_client.check_multiple_and_join(requests).await?;
+                    (response.into(), file_content)
+                },
+                FileType::Typst | FileType::Markdown | FileType::Html => {
+                    let data = match file_type {
+                        FileType::Typst => parse_typst(&file_content),
+                        FileType::Html => {
+                            let text = parse_html(&file_content);
+                            Data::from_iter([DataAnnotation::new_text(text)])
+                        },
+                        FileType::Markdown => {
+                            let text = parse_markdown(&file_content);
+                            Data::from_iter([DataAnnotation::new_text(text)])
+                        },
+                        _ => unreachable!(),
+                    };
+                    let response = server_client
+                        .check(&request.clone().with_data(data))
+                        .await?;
+                    (response, file_content)
+                },
             };
-
-            let requests = (request.clone().with_text(text))
-                .split(self.max_length, self.split_pattern.as_str());
-            let response = server_client.check_multiple_and_join(requests).await?;
 
             if !self.raw {
                 writeln!(
                     &mut stdout,
                     "{}",
-                    &response.annotate(response.text.as_ref(), filename.to_str(), color)
+                    &response.annotate(&text, filename.to_str(), color)
                 )?;
             } else {
-                writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&*response)?)?;
+                writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&response)?)?;
             }
         }
 
