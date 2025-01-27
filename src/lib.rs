@@ -21,3 +21,4 @@ pub mod api;
 #[cfg(feature = "cli")]
 pub mod cli;
 pub mod error;
+pub mod parsers;
