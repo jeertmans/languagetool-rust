@@ -18,4 +18,4 @@ pub struct Language {
 /// LanguageTool GET languages response.
 ///
 /// List of all supported languages.
-pub type LanguagesResponse = Vec<Language>;
+pub type Response = Vec<Language>;
