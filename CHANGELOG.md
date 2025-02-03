@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added support for Mardown and Typst files.
   [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- Added basic logger (e.g., increase verbosity with `ltrs -v`).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
 
 ### Chore
 

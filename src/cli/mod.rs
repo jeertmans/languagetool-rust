@@ -76,6 +76,9 @@ pub struct Cli {
     #[command(subcommand)]
     #[allow(missing_docs)]
     pub command: Command,
+    #[command(flatten)]
+    #[allow(missing_docs)]
+    pub verbose: clap_verbosity_flag::Verbosity,
 }
 
 /// All possible subcommands.

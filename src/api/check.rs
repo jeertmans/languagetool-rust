@@ -1178,9 +1178,6 @@ mod tests {
         Skip(&'source str),
     }
 
-    #[derive(Debug, Clone)]
-    struct ParseTokenError;
-
     impl<'source> From<&'source str> for Token<'source> {
         fn from(s: &'source str) -> Self {
             if s.chars().all(|c| c.is_ascii_alphabetic()) {

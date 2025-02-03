@@ -149,9 +149,10 @@ pub fn parse_typst(file_content: impl AsRef<str>) -> Data<'static> {
 
                 annotations.push(DataAnnotation::new_interpreted_markup(
                     markup,
-                    // This pattern is ignored by LanguageTool, and allows us to avoid whitespace issues.
-                    // The following sentence would give an error for repeated whitespace
-                    // otherwise: This has ``` `backticks` ``` in it
+                    // This pattern is ignored by LanguageTool, and allows us to avoid whitespace
+                    // issues. The following sentence would give an error for
+                    // repeated whitespace otherwise: This has ``` `backticks`
+                    // ``` in it
                     "_ignore_".to_string(),
                 ));
                 continue;

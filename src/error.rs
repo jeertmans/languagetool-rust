@@ -87,6 +87,7 @@ pub(crate) fn exit_status_error(exit_status: &ExitStatus) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use assert_matches::assert_matches;
 
     use crate::error::Error;
     #[cfg(feature = "cli")]
@@ -101,7 +102,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::Cli(_)));
+        assert_matches!(error, Error::Cli(_));
     }
 
     #[test]
@@ -111,7 +112,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::JSON(_)));
+        assert_matches!(error, Error::JSON(_));
     }
 
     #[test]
@@ -121,7 +122,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::IO(_)));
+        assert_matches!(error, Error::IO(_));
     }
 
     #[ignore]
@@ -132,7 +133,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::InvalidRequest(_)));
+        assert_matches!(error, Error::InvalidRequest(_));
     }
 
     #[ignore]
@@ -143,7 +144,7 @@ mod tests {
 
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::InvalidValue(_)));
+        assert_matches!(error, Error::InvalidValue(_));
     }
 
     #[ignore]
@@ -152,6 +153,6 @@ mod tests {
         let result = reqwest::get("").await;
         let error: Error = result.unwrap_err().into();
 
-        assert!(matches!(error, Error::Reqwest(_)));
+        assert_matches!(error, Error::Reqwest(_));
     }
 }

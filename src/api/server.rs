@@ -570,6 +570,8 @@ impl ServerClient {
 
 #[cfg(test)]
 mod tests {
+    use assert_matches::assert_matches;
+
     use super::ServerClient;
     use crate::{api::check::Request, error::Error};
 
@@ -592,10 +594,7 @@ mod tests {
 
         // Too long
         let req = Request::default().with_text("Repeat ".repeat(1500));
-        assert!(client
-            .check(&req)
-            .await
-            .is_err_and(|e| matches!(e, Error::InvalidRequest(_))));
+        assert_matches!(client.check(&req).await, Err(Error::InvalidRequest(_)));
     }
 
     #[tokio::test]
@@ -613,10 +612,7 @@ mod tests {
                 "repeat".repeat(1500)
             ))
             .unwrap();
-        assert!(client
-            .check(&req)
-            .await
-            .is_err_and(|e| matches!(e, Error::InvalidRequest(_))));
+        assert_matches!(client.check(&req).await, Err(Error::InvalidRequest(_)));
     }
 
     #[tokio::test]
