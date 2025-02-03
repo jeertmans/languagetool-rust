@@ -37,6 +37,8 @@ jobs:
         image: erikvl87/languagetool:${{ matrix.tag }}
         ports:
         - 8010:8010
+        env:
+          langtool_maxTextLength: 1500
     env:
       LANGUAGETOOL_HOSTNAME: http://localhost
       LANGUAGETOOL_PORT: 8010
