@@ -609,7 +609,7 @@ mod tests {
         let req = Request::default()
             .with_data_str(&format!(
                 "{{\"annotation\":[{{\"text\": \"{}\"}}]}}",
-                "repeat".repeat(1500)
+                "repeat".repeat(5000)
             ))
             .unwrap();
         assert_matches!(client.check(&req).await, Err(Error::InvalidRequest(_)));
