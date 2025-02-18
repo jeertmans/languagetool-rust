@@ -372,7 +372,7 @@ impl ServerClient {
         match self
             .client
             .post(format!("{0}/check", self.api))
-            .query(request)
+            .form(request)
             .send()
             .await
         {
