@@ -485,7 +485,7 @@ impl ServerClient {
         match self
             .client
             .get(format!("{}/words", self.api))
-            .query(request)
+            .form(request)
             .send()
             .await
         {
@@ -508,7 +508,7 @@ impl ServerClient {
         match self
             .client
             .post(format!("{}/words/add", self.api))
-            .query(request)
+            .form(request)
             .send()
             .await
         {
@@ -531,7 +531,7 @@ impl ServerClient {
         match self
             .client
             .post(format!("{}/words/delete", self.api))
-            .query(request)
+            .form(request)
             .send()
             .await
         {
