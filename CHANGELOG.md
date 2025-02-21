@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Derive `Hash` on requests types. [#114](https://github.com/jeertmans/languagetool-rust/pull/114)
 - Use Codspeed and `check-changelog` actions. [#121](https://github.com/jeertmans/languagetool-rust/pull/121)
 
+### Fixed
+
+- Fixed api calls to language tool server to adhere to spec. Pass POST calls as `application/x-www-form-urlencoded`. [#129](https://github.com/jeertmans/languagetool-rust/pull/129)
+
 ## [2.1.4](https://github.com/jeertmans/languagetool-rust/compare/v2.1.3...v2.1.4)
 
 ### Fixed
