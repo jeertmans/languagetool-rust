@@ -487,7 +487,7 @@ impl ServerClient {
             .client
             .get(format!("{}/words", self.api))
             .header(ACCEPT, HeaderValue::from_static("application/json"))
-            .form(request)
+            .query(request)
             .send()
             .await
         {
