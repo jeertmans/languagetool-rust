@@ -11,7 +11,7 @@ use crate::{
 };
 #[cfg(feature = "cli")]
 use clap::Args;
-use reqwest::Client;
+use reqwest::{header::{HeaderValue, ACCEPT}, Client};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{io, path::PathBuf, time::Instant};
@@ -372,7 +372,8 @@ impl ServerClient {
         match self
             .client
             .post(format!("{0}/check", self.api))
-            .query(request)
+            .header(ACCEPT, HeaderValue::from_static("application/json"))
+            .form(request)
             .send()
             .await
         {
@@ -485,6 +486,7 @@ impl ServerClient {
         match self
             .client
             .get(format!("{}/words", self.api))
+            .header(ACCEPT, HeaderValue::from_static("application/json"))
             .query(request)
             .send()
             .await
@@ -508,7 +510,8 @@ impl ServerClient {
         match self
             .client
             .post(format!("{}/words/add", self.api))
-            .query(request)
+            .header(ACCEPT, HeaderValue::from_static("application/json"))
+            .form(request)
             .send()
             .await
         {
@@ -531,7 +534,8 @@ impl ServerClient {
         match self
             .client
             .post(format!("{}/words/delete", self.api))
-            .query(request)
+            .header(ACCEPT, HeaderValue::from_static("application/json"))
+            .form(request)
             .send()
             .await
         {
