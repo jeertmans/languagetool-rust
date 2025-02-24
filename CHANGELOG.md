@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed some types. [#115](https://github.com/jeertmans/languagetool-rust/pull/115)
 - Derive `Hash` on requests types. [#114](https://github.com/jeertmans/languagetool-rust/pull/114)
 - Use Codspeed and `check-changelog` actions. [#121](https://github.com/jeertmans/languagetool-rust/pull/121)
+- Use `cargo release` and add `RELEASE-PROCESS.md` [#130](https://github.com/jeertmans/languagetool-rust/pull/130)
 
 ### Fixed
 
