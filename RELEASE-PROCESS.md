@@ -15,8 +15,8 @@ cargo install cargo-release
 Here are the following steps to release a new version:
 
 1. create a branch `release-x.y.z` from the `main` branch;
-2. run and commit `cargo release version --workspace <LEVEL>`;
-3. run and commit `cargo release replace --workspace`;
+2. run and commit `cargo release version <LEVEL>`;
+3. run and commit `cargo release replace`;
 4. push your branch and create a pull request;
 5. and, once your branch was merged to `main`, run the following:
    ```bash
