@@ -8,6 +8,10 @@ This project uses `cargo-release` to publish all packages with more ease.
 Note that, by default, every command runs in *dry mode*, and you need to append `--execute`
 to actually perform the action.
 
+Here are the the following steps to install `cargo-release`:
+```bash
+cargo install cargo-release
+```
 Here are the following steps to release a new version:
 
 1. create a branch `release-x.y.z` from the `main` branch;
