@@ -20,7 +20,7 @@ use crate::{
         server::ServerClient,
     },
     error::{Error, Result},
-    parsers::{parse_html, parse_markdown, parse_typst},
+    parsers::{html::parse_html, markdown::parse_markdown, typst::parse_typst},
 };
 
 use super::ExecuteSubcommand;
@@ -151,6 +151,7 @@ impl ExecuteSubcommand for Command {
             };
 
             let file_content = std::fs::read_to_string(filename)?;
+
             let (response, text): (check::Response, String) = match &file_type {
                 FileType::Auto => unreachable!(),
                 FileType::Raw => {
@@ -166,10 +167,7 @@ impl ExecuteSubcommand for Command {
                             let text = parse_html(&file_content);
                             Data::from_iter([DataAnnotation::new_text(text)])
                         },
-                        FileType::Markdown => {
-                            let text = parse_markdown(&file_content);
-                            Data::from_iter([DataAnnotation::new_text(text)])
-                        },
+                        FileType::Markdown => parse_markdown(&file_content),
                         _ => unreachable!(),
                     };
                     let response = server_client
