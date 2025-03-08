@@ -1,7 +1,10 @@
 //! Parse the contents of Markdown files into a format parseable by the
 //! LanguageTool API.
 
-use crate::api::check::{Data, DataAnnotation};
+use crate::{
+    api::check::{Data, DataAnnotation},
+    parsers::IGNORE,
+};
 
 /// Parse the contents of a Markdown file into a text format to be sent to the
 /// LanguageTool API.
@@ -101,13 +104,13 @@ pub fn parse_markdown(file_content: &str) -> Data<'_> {
 
                     // Ignored
                     Tag::CodeBlock(_) | Tag::Link { .. } | Tag::Image { .. } => {
-                        annotations.push(DataAnnotation::new_interpreted_markup(s, "_"));
+                        annotations.push(DataAnnotation::new_interpreted_markup(s, IGNORE));
                     },
                     _ => {},
                 }
             },
             Event::Code(s) => {
-                annotations.push(DataAnnotation::new_interpreted_markup(s, "_"));
+                annotations.push(DataAnnotation::new_interpreted_markup(s, IGNORE));
             },
 
             Event::HardBreak => {

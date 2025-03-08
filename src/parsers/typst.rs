@@ -1,7 +1,10 @@
 //! Parse the contents of Typst files into a format parseable by the
 //! LanguageTool API.
 
-use crate::api::check::{Data, DataAnnotation};
+use crate::{
+    api::check::{Data, DataAnnotation},
+    parsers::IGNORE,
+};
 
 /// Parse the contents of a Typst file into a text format to be sent to the
 /// LanguageTool API.
@@ -50,7 +53,7 @@ pub fn parse_typst(file_content: impl AsRef<str>) -> Data<'static> {
                     // issues. The following sentence would give an error for
                     // repeated whitespace otherwise: This has ``` `backticks`
                     // ``` in it
-                    "_ignore_".to_string(),
+                    IGNORE,
                 ));
                 continue;
             },

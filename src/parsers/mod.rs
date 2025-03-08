@@ -9,3 +9,6 @@ pub mod markdown;
 
 #[cfg(feature = "typst")]
 pub mod typst;
+
+/// Pattern that is ignored by the LanguageTool API.
+const IGNORE: &str = "_";
