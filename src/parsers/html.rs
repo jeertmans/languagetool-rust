@@ -1,86 +1,105 @@
 //! Parse the contents of HTML files into a format parseable by the LanguageTool
 //! API.
 
+use ego_tree::NodeRef;
+use scraper::{Html, Node};
+
+use crate::{
+    api::check::{Data, DataAnnotation},
+    parsers::IGNORE,
+};
+
 /// Parse the contents of an HTML file into a text format to be sent to the
 /// LanguageTool API.
-pub fn parse_html(file_content: impl AsRef<str>) -> String {
-    use html_parser::Node;
+#[must_use]
+pub fn parse_html(file_content: &str) -> Data<'static> {
+    let mut annotations: Vec<DataAnnotation> = vec![];
 
-    let mut txt = String::new();
+    fn handle_node(annotations: &mut Vec<DataAnnotation>, node: NodeRef<'_, Node>) {
+        let n = node.value();
+        match n {
+            Node::Element(el) => {
+                match el.name() {
+                    "head" | "script" | "style" => {},
 
-    let html = html_parser::Dom::parse(file_content.as_ref()).unwrap_or_default();
-    let mut children: Vec<Node> = html.children.into_iter().rev().collect();
+                    "code" => {
+                        annotations.push(DataAnnotation::new_interpreted_markup(
+                            "<code>...</code>",
+                            IGNORE,
+                        ));
+                    },
 
-    fn handle_node(txt: &mut String, node: Node) {
-        if let Some(e) = node.element() {
-            match e.name.as_str() {
-                "head" | "script" | "style" => {
-                    return;
-                },
-                "code" => {
-                    txt.push_str("_code_");
-                    return;
-                },
-                "a" => {
-                    txt.push_str("_link_");
-                    return;
-                },
-                "pre" => {
-                    txt.push_str("_pre_");
-                    txt.push_str("\n\n");
-                    return;
-                },
-                s => {
-                    let add_children = |txt: &mut String| {
-                        if !e.children.is_empty() {
-                            // Recursively handle children
-                            e.children.clone().into_iter().for_each(|n| {
-                                handle_node(txt, n);
-                            });
-                        };
-                    };
+                    "img" => {
+                        annotations.push(DataAnnotation::new_interpreted_markup("<img />", IGNORE));
+                    },
 
-                    match s {
-                        "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "li" | "td" | "th" => {
-                            while txt.chars().last().is_some_and(|c| c.is_whitespace()) {
-                                txt.pop();
-                            }
-                            txt.push_str("\n\n");
-                            add_children(txt);
-                            txt.push_str("\n\n");
-                        },
-                        _ => {
-                            add_children(txt);
-                        },
-                    }
-                },
-            }
-        }
-
-        if let Some(t) = node.text() {
-            let mut text = t.trim().to_owned();
-            if !text.is_empty() {
-                let mut chars = t.chars();
-
-                // Maintain leading/trailing white space, but only a single space
-                if chars.next().is_some_and(|c| c.is_whitespace()) {
-                    while txt.chars().last().is_some_and(|c| c.is_whitespace()) {
-                        txt.pop();
-                    }
-                    text.insert(0, ' ');
+                    s => {
+                        match s {
+                            "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "li" | "td" | "th"
+                            | "div" => {
+                                annotations.push(DataAnnotation::new_interpreted_markup(
+                                    format!("<{s}>"),
+                                    "\n\n",
+                                ));
+                                for node in node.children() {
+                                    handle_node(annotations, node);
+                                }
+                                annotations.push(DataAnnotation::new_interpreted_markup(
+                                    format!("</{s}>"),
+                                    "\n\n",
+                                ));
+                            },
+                            _ => {
+                                annotations.push(DataAnnotation::new_markup(format!("<{s}>")));
+                                for node in node.children() {
+                                    handle_node(annotations, node);
+                                }
+                                annotations.push(DataAnnotation::new_markup(format!("</{s}>")));
+                            },
+                        }
+                    },
                 }
-                if chars.last().is_some_and(|c| c.is_whitespace()) {
-                    text.push(' ');
-                }
+            },
 
-                txt.push_str(&text);
-            }
+            Node::Text(t) => {
+                let mut text = t.trim().to_owned();
+                if !text.is_empty() {
+                    let mut chars = t.chars();
+
+                    // Maintain leading/trailing white space, but only a single space
+                    if chars.next().is_some_and(|c| c.is_whitespace()) {
+                        while text.chars().last().is_some_and(|c| c.is_whitespace()) {
+                            text.pop();
+                        }
+                        text.insert(0, ' ');
+                    }
+                    if chars.last().is_some_and(|c| c.is_whitespace()) {
+                        text.push(' ');
+                    }
+
+                    annotations.push(DataAnnotation::new_text(text))
+                } else {
+                    annotations.push(DataAnnotation::new_text("\n\n"));
+                }
+            },
+
+            Node::Comment(c) => {
+                let comment = c.to_string();
+
+                annotations.push(DataAnnotation::new_interpreted_markup(
+                    format!("<!-- {comment} -->",),
+                    format!("\n\n{comment}\n\n"),
+                ));
+            },
+
+            _ => {},
         }
     }
 
-    while let Some(node) = children.pop() {
-        handle_node(&mut txt, node);
+    let document = Html::parse_document(file_content);
+    for node in document.root_element().children() {
+        handle_node(&mut annotations, node);
     }
 
-    txt
+    Data::from_iter(annotations)
 }

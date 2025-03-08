@@ -163,10 +163,7 @@ impl ExecuteSubcommand for Command {
                 FileType::Typst | FileType::Markdown | FileType::Html => {
                     let data = match file_type {
                         FileType::Typst => parse_typst(&file_content),
-                        FileType::Html => {
-                            let text = parse_html(&file_content);
-                            Data::from_iter([DataAnnotation::new_text(text)])
-                        },
+                        FileType::Html => parse_html(&file_content),
                         FileType::Markdown => parse_markdown(&file_content),
                         _ => unreachable!(),
                     };

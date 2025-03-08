@@ -51,8 +51,8 @@ pub fn parse_markdown(file_content: &str) -> Data<'_> {
             },
 
             Event::Html(s) | Event::InlineHtml(s) => {
-                let data = super::html::parse_html(s.into_string());
-                annotations.push(DataAnnotation::new_text(data));
+                let data = super::html::parse_html(s.as_ref()).annotation.into_iter();
+                annotations.extend(data);
             },
 
             Event::Text(mut s) => {
