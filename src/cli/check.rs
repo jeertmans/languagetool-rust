@@ -167,8 +167,10 @@ impl ExecuteSubcommand for Command {
                         FileType::Markdown => parse_markdown(&file_content),
                         _ => unreachable!(),
                     };
+                    let requests = (request.clone().with_data(data))
+                        .split(self.max_length, self.split_pattern.as_str());
                     let response = server_client
-                        .check(&request.clone().with_data(data))
+                        .check_multiple_and_join_without_context(requests)
                         .await?;
                     (response, file_content)
                 },

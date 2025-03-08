@@ -413,15 +413,15 @@ impl ServerClient {
     ) -> Result<check::ResponseWithContext<'source>> {
         use std::borrow::Cow;
 
-        let mut tasks = Vec::with_capacity(requests.len());
+        let mut response_with_context: Option<check::ResponseWithContext> = None;
 
-        requests
+        let tasks = requests
             .into_iter()
             .map(|r| r.into_static())
-            .for_each(|request| {
+            .map(|request| {
                 let server_client = self.clone();
 
-                tasks.push(tokio::spawn(async move {
+                tokio::spawn(async move {
                     let response = server_client.check(&request).await?;
                     let text = request.text.ok_or_else(|| {
                         Error::InvalidRequest(
@@ -430,10 +430,8 @@ impl ServerClient {
                         )
                     })?;
                     Result::<(Cow<'static, str>, Response)>::Ok((text, response))
-                }));
+                })
             });
-
-        let mut response_with_context: Option<check::ResponseWithContext> = None;
 
         for task in tasks {
             let (text, response) = task.await.unwrap()?;
@@ -445,6 +443,45 @@ impl ServerClient {
         }
 
         Ok(response_with_context.unwrap())
+    }
+
+    /// Send multiple check requests and join them into a single response,
+    /// without any context.
+    ///
+    /// # Error
+    ///
+    /// If any of the requests has `self.text` or `self.data` field which is
+    /// [`None`].
+    #[cfg(feature = "multithreaded")]
+    pub async fn check_multiple_and_join_without_context<'source>(
+        &self,
+        requests: Vec<Request<'source>>,
+    ) -> Result<check::Response> {
+        let mut response: Option<check::Response> = None;
+
+        let tasks = requests
+            .into_iter()
+            .map(|r| r.into_static())
+            .map(|request| {
+                let server_client = self.clone();
+
+                tokio::spawn(async move {
+                    let response = server_client.check(&request).await?;
+                    Result::<Response>::Ok(response)
+                })
+            });
+
+        // Make requests in sequence
+        for task in tasks {
+            let resp = task.await.unwrap()?;
+
+            response = Some(match response {
+                Some(r) => r.append(resp),
+                None => resp,
+            })
+        }
+
+        Ok(response.unwrap())
     }
 
     /// Send a check request to the server, await for the response and annotate
