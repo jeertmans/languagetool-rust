@@ -1,14 +1,17 @@
 //! Structure to communicate with some `LanguageTool` server through the API.
 
+#[cfg(feature = "multithreaded")]
+use crate::api::check;
 use crate::{
     api::{
-        check::{self, Request, Response},
+        check::{Request, Response},
         languages, words,
     },
     error::{Error, Result},
 };
 #[cfg(feature = "cli")]
 use clap::Args;
+#[cfg(feature = "multithreaded")]
 use lifetime::IntoStatic;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
