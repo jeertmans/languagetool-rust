@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed serializing of `interpretAs` in `data`. [#103](https://github.com/jeertmans/languagetool-rust/pull/103)
 
-## [2.1.3](https://github.com/jeertmans/languagetool-rust/compare/v2.1.2...v2.1.3)
+## [2.1.3](https://github.com/jeertmans/languagetool-rust/compare/v2.1.2...v2.1.3) - 2023-07-24
 
 ### Chore
 
