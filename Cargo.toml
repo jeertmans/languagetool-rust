@@ -97,6 +97,15 @@ repository = "https://github.com/jeertmans/languagetool-rust"
 rust-version = "1.77.2"
 version = "2.1.4"
 
+[package.metadata.release]
+pre-release-replacements = [
+    {file="CHANGELOG.md", search="Unreleased", replace="{{version}}", min=1},
+    {file="CHANGELOG.md", search="\\.\\.\\.HEAD\\)", replace="...{{version}}) {{date}}", exactly=1},
+    {file="CHANGELOG.md", search="<!-- next-header -->", replace="<!-- next-header -->\n\n## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v{{version}}...HEAD)", exactly=1},
+]
+tag = false
+publish = false
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
