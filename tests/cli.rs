@@ -1,5 +1,11 @@
+use std::{path::PathBuf, sync::LazyLock};
+
 use assert_cmd::Command;
 use predicates::{boolean::OrPredicate, str::contains};
+
+static PATH_ROOT: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")));
+static PATH_SAMPLE_FILES: LazyLock<PathBuf> =
+    LazyLock::new(|| PATH_ROOT.join("tests").join("sample_files"));
 
 #[test]
 fn test_basic_check_text() {
@@ -502,4 +508,46 @@ fn test_words_delete() {
         contains("AuthException"),
         contains("invalid request"),
     ));
+}
+
+#[test]
+fn test_check_file_typst() {
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    let output = cmd
+        .arg("check")
+        .arg(PATH_SAMPLE_FILES.join("example.typ"))
+        .output()
+        .unwrap();
+    insta::assert_snapshot!(
+        "autodetect_typst_file",
+        String::from_utf8(output.stdout).unwrap()
+    );
+}
+
+#[test]
+fn test_check_file_html() {
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    let output = cmd
+        .arg("check")
+        .arg(PATH_SAMPLE_FILES.join("example.html"))
+        .output()
+        .unwrap();
+    insta::assert_snapshot!(
+        "autodetect_html_file",
+        String::from_utf8(output.stdout).unwrap()
+    );
+}
+
+#[test]
+fn test_check_file_markdown() {
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    let output = cmd
+        .arg("check")
+        .arg(PATH_ROOT.join("README.md"))
+        .output()
+        .unwrap();
+    insta::assert_snapshot!(
+        "autodetect_markdown_file",
+        String::from_utf8(output.stdout).unwrap()
+    );
 }

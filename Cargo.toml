@@ -43,6 +43,7 @@ assert_matches = "1.5.0"
 codspeed-criterion-compat = "2.7.0"
 criterion = "0.5"
 futures = "0.3"
+insta = {version = "1.41.1", features = ["yaml"]}
 predicates = "3.0.3"
 tempfile = "3.5.0"
 tokio = {version = "^1.0", features = ["macros"]}
@@ -94,7 +95,7 @@ license = "MIT"
 name = "languagetool-rust"
 readme = "README.md"
 repository = "https://github.com/jeertmans/languagetool-rust"
-rust-version = "1.77.2"
+rust-version = "1.80.0"
 version = "2.1.4"
 
 [package.metadata.release]
