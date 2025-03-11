@@ -16,39 +16,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Chore
 
-- Fixed dependency declaration in README.md.
-  [#118](https://github.com/jeertmans/languagetool-rust/pull/118)
-- Fixed some types.
-  [#115](https://github.com/jeertmans/languagetool-rust/pull/115)
-- Derive `Hash` on requests types.
-  [#114](https://github.com/jeertmans/languagetool-rust/pull/114)
-- Use Codspeed and `check-changelog` actions.
-  [#121](https://github.com/jeertmans/languagetool-rust/pull/121)
-- **Breaking** Stopped (de)serializing structs that did not need.
-  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- Fixed dependency declaration in README.md. [#118](https://github.com/jeertmans/languagetool-rust/pull/118)
+- Fixed some types. [#115](https://github.com/jeertmans/languagetool-rust/pull/115)
+- Derive `Hash` on requests types. [#114](https://github.com/jeertmans/languagetool-rust/pull/114)
+- Use Codspeed and `check-changelog` actions. [#121](https://github.com/jeertmans/languagetool-rust/pull/121)
+- Use `cargo release` and add `RELEASE-PROCESS.md` [#130](https://github.com/jeertmans/languagetool-rust/pull/130)
+
+### Fixed
+
+- Fixed api calls to language tool server to adhere to spec. Pass POST calls as `application/x-www-form-urlencoded`. [#129](https://github.com/jeertmans/languagetool-rust/pull/129)
+- Fixed `RELEASE-PROCESS.md` description [#133](https://github.com/jeertmans/languagetool-rust/pull/133)
 
 ## [2.1.4](https://github.com/jeertmans/languagetool-rust/compare/v2.1.3...v2.1.4) - 2023-08-10
 
 ### Fixed
 
-- Fixed serializing of `interpretAs` in `data`.
-  [#103](https://github.com/jeertmans/languagetool-rust/pull/103)
+- Fixed serializing of `interpretAs` in `data`. [#103](https://github.com/jeertmans/languagetool-rust/pull/103)
 
 ## [2.1.3](https://github.com/jeertmans/languagetool-rust/compare/v2.1.2...v2.1.3) - 2023-07-24
 
 ### Chore
 
-- Moved LanguageTool docker image to service in GitHub action.
-  [#87](https://github.com/jeertmans/languagetool-rust/pull/87)
-- Added automatic benchmarks comparison to CI.
-  [#89](https://github.com/jeertmans/languagetool-rust/pull/89)
-- Improving test coverage.
-  [#88](https://github.com/jeertmans/languagetool-rust/pull/88)
+- Moved LanguageTool docker image to service in GitHub action. [#87](https://github.com/jeertmans/languagetool-rust/pull/87)
+- Added automatic benchmarks comparison to CI. [#89](https://github.com/jeertmans/languagetool-rust/pull/89)
+- Improving test coverage. [#88](https://github.com/jeertmans/languagetool-rust/pull/88)
 
 ### Fixed
 
-- Allow text starting with hyphens.
-  [#100](https://github.com/jeertmans/languagetool-rust/pull/100)
+- Allow text starting with hyphens. [#100](https://github.com/jeertmans/languagetool-rust/pull/100)
 
 ## [2.1.2](https://github.com/jeertmans/languagetool-rust/compare/v2.1.1...v2.1.2) - 2023-05-29
 
