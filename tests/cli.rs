@@ -1,7 +1,10 @@
 use std::{path::PathBuf, sync::LazyLock};
 
 use assert_cmd::Command;
-use predicates::{boolean::OrPredicate, str::contains};
+use predicates::{
+    boolean::OrPredicate,
+    str::{contains, is_empty, is_match},
+};
 
 static PATH_ROOT: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")));
 static PATH_SAMPLE_FILES: LazyLock<PathBuf> =
@@ -16,6 +19,24 @@ fn test_basic_check_text() {
         .arg("\"some text that is given as text\"")
         .assert();
     assert.success();
+}
+
+#[test]
+fn test_basic_check_no_errors() {
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    let assert = cmd.arg("check").arg("-t").arg("\"I am a star.\"").assert();
+    assert
+        .success()
+        .stdout(contains("No errors were found in provided text"));
+}
+
+#[test]
+fn test_basic_check_empty_text() {
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    let assert = cmd.arg("check").arg("--text=").assert();
+    assert
+        .success()
+        .stderr(is_match(r".*WARN.* No input text was provided, skipping.").unwrap());
 }
 
 #[test]
@@ -66,9 +87,23 @@ fn test_basic_check_piped() {
     let mut cmd = Command::cargo_bin("ltrs").unwrap();
     let assert = cmd
         .arg("check")
-        .write_stdin("some text that is piped")
+        .write_stdin("some text that is written to stdin")
         .assert();
     assert.success();
+}
+
+#[test]
+fn test_basic_check_stdin_verbose() {
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    let assert = cmd
+        .arg("check")
+        .arg("-v")
+        .arg("-l")
+        .arg("en-US")
+        .write_stdin("I am a starr.")
+        .assert();
+    // We only write if terminal is TTY
+    assert.success().stderr(is_empty());
 }
 
 #[test]
@@ -100,6 +135,27 @@ fn test_basic_check_files() {
         .arg(file2.path().to_str().unwrap())
         .assert();
     assert.success();
+}
+
+#[test]
+fn test_basic_check_files_with_empty_file() {
+    use std::io::Write;
+
+    let mut file1 = tempfile::NamedTempFile::new().unwrap();
+    writeln!(file1, "Some text with a error inside.").unwrap();
+
+    let file2 = tempfile::NamedTempFile::new().unwrap();
+
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    let assert = cmd
+        .arg("check")
+        .arg("-v")
+        .arg(file1.path().to_str().unwrap())
+        .arg(file2.path().to_str().unwrap())
+        .assert();
+    assert
+        .success()
+        .stderr(is_match(r".*INFO.* Skipping empty file: ").unwrap());
 }
 
 #[test]

@@ -412,15 +412,26 @@ impl ServerClient {
     ///
     /// # Error
     ///
-    /// If any of the requests has `self.text` field which is none.
+    /// If any of the requests has `self.text` field which is none, or
+    /// if zero request is provided.
     #[cfg(feature = "multithreaded")]
     pub async fn check_multiple_and_join<'source>(
         &self,
         requests: Vec<Request<'source>>,
     ) -> Result<check::ResponseWithContext<'source>> {
         use std::borrow::Cow;
+      
+      if requests.is_empty() {
+            return Err(Error::InvalidRequest(
+                "no request; cannot join zero request".to_string(),
+            ));
+        }
 
-        let mut response_with_context: Option<check::ResponseWithContext> = None;
+        if requests.is_empty() {
+            return Err(Error::InvalidRequest(
+                "no request; cannot join zero request".to_string(),
+            ));
+        }
 
         let tasks = requests
             .into_iter()
@@ -439,6 +450,8 @@ impl ServerClient {
                     Result::<(Cow<'static, str>, Response)>::Ok((text, response))
                 })
             });
+      
+        let mut response_with_context: Option<check::ResponseWithContext> = None;
 
         for task in tasks {
             let (text, response) = task.await.unwrap()?;

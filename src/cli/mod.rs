@@ -15,7 +15,6 @@ mod words;
 use std::io;
 
 use clap::{CommandFactory, Parser, Subcommand};
-#[cfg(feature = "cli")]
 use enum_dispatch::enum_dispatch;
 use is_terminal::IsTerminal;
 #[cfg(feature = "annotate")]
@@ -28,32 +27,6 @@ use crate::{
     api::server::{ServerCli, ServerClient},
     error::Result,
 };
-
-/// Read lines from standard input and write to buffer string.
-///
-/// Standard output is used when waiting for user to input text.
-fn read_from_stdin<W>(stdout: &mut W, buffer: &mut String) -> Result<()>
-where
-    W: io::Write,
-{
-    if io::stdin().is_terminal() {
-        #[cfg(windows)]
-        writeln!(
-            stdout,
-            "Reading from STDIN, press [CTRL+Z] when you're done."
-        )?;
-
-        #[cfg(unix)]
-        writeln!(
-            stdout,
-            "Reading from STDIN, press [CTRL+D] when you're done."
-        )?;
-    }
-    let stdin = std::io::stdin();
-
-    while stdin.read_line(buffer)? > 0 {}
-    Ok(())
-}
 
 /// Main command line structure. Contains every subcommand.
 #[derive(Parser, Debug)]
@@ -78,7 +51,7 @@ pub struct Cli {
     pub command: Command,
     #[command(flatten)]
     #[allow(missing_docs)]
-    pub verbose: clap_verbosity_flag::Verbosity,
+    pub verbose: clap_verbosity_flag::Verbosity<clap_verbosity_flag::WarnLevel>,
 }
 
 /// All possible subcommands.
