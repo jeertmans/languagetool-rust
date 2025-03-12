@@ -41,6 +41,8 @@ fn test_basic_check_text() {
 fn test_basic_check_no_errors() {
     let assert = get_cmd()
         .arg("check")
+        .arg("-l")
+        .arg("en-US")
         .arg("-t")
         .arg("\"I am a star.\"")
         .assert();
