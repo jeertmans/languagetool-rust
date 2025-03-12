@@ -11,6 +11,18 @@ lazy_static::lazy_static! {
     static ref PATH_SAMPLE_FILES: PathBuf = PATH_ROOT.join("tests").join("sample_files");
 }
 
+const PATH_FILTERS: [(&str, &str); 1] = [(r" --> .*[\/].*\n", " --> [path]\n")];
+macro_rules! assert_snapshot {
+    ($label: expr, $snap: expr) => {
+        insta::with_settings!({filters => PATH_FILTERS}, {
+            insta::assert_snapshot!(
+                $label,
+                $snap
+            );
+        });
+    };
+}
+
 #[test]
 fn test_basic_check_text() {
     let mut cmd = Command::cargo_bin("ltrs").unwrap();
@@ -575,7 +587,7 @@ fn test_check_file_typst() {
         .arg(PATH_SAMPLE_FILES.join("example.typ"))
         .output()
         .unwrap();
-    insta::assert_snapshot!(
+    assert_snapshot!(
         "autodetect_typst_file",
         String::from_utf8(output.stdout).unwrap()
     );
@@ -589,7 +601,7 @@ fn test_check_file_html() {
         .arg(PATH_SAMPLE_FILES.join("example.html"))
         .output()
         .unwrap();
-    insta::assert_snapshot!(
+    assert_snapshot!(
         "autodetect_html_file",
         String::from_utf8(output.stdout).unwrap()
     );
@@ -603,7 +615,7 @@ fn test_check_file_markdown() {
         .arg(PATH_ROOT.join("README.md"))
         .output()
         .unwrap();
-    insta::assert_snapshot!(
+    assert_snapshot!(
         "autodetect_markdown_file",
         String::from_utf8(output.stdout).unwrap()
     );

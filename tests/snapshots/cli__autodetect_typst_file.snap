@@ -3,14 +3,14 @@ source: tests/cli.rs
 expression: "String::from_utf8(output.stdout).unwrap()"
 ---
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake. ‘behaviour’ is British English.
- --> /home/rolv/repos/languagetool-rust/tests/sample_files/example.typ:7:44
+ --> [path]
   |
 7 | ...ow they contribute to the formation and behaviour of these natural structures.  + The cli...
   |                                            ^^^^^^^^^ Possible spelling mistake
   |                                            --------- help: behavior
   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
- --> /home/rolv/repos/languagetool-rust/tests/sample_files/example.typ:9:44
+ --> [path]
   |
 9 | ...behaviour of these natural structures.  + The climate   - Temperatre   - Precipitation + The topography + The...
   |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Possible spelling mistake

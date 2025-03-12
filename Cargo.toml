@@ -43,7 +43,7 @@ assert_matches = "1.5.0"
 codspeed-criterion-compat = "2.7.0"
 criterion = "0.5"
 futures = "0.3"
-insta = {version = "1.41.1", features = ["yaml"]}
+insta = {version = "1.41.1", features = ["filters"]}
 lazy_static = "1.5.0"
 predicates = "3.0.3"
 tempfile = "3.5.0"
@@ -120,3 +120,7 @@ required-features = ["cli"]
 [[test]]
 name = "match-positions"
 path = "tests/match_positions.rs"
+
+[profile.dev.package]
+insta.opt-level = 3
+similar.opt-level = 3

@@ -3,56 +3,56 @@ source: tests/cli.rs
 expression: "String::from_utf8(output.stdout).unwrap()"
 ---
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
- --> /home/rolv/repos/languagetool-rust/README.md:5:44
+ --> [path]
   |
 5 | ...piling LTRS. #### Default Features  - - **cli**: Adds command-line related methods for ...
   |                                            ^^^^^^^ Possible spelling mistake
   |                                            ------- help: CLI, Clip, CGI, CPI, CSI, ... (1504 not shown)
   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
- --> /home/rolv/repos/languagetool-rust/README.md:9:44
+ --> [path]
   |
 9 | ...ate**, **color**, **multithreaded**.  - **native-tls**: Enables TLS functionality provided by ...
   |                                            ^^^^^^^^^^^^^^ Possible spelling mistake
   |                                            -------------- help: natives, natively, nativists, nativeness, naivetes
   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
- --> /home/rolv/repos/languagetool-rust/README.md:3:44
+ --> [path]
   |
 3 | ...annotate results from check request.  - **cli-complete**: Adds commands to generate completion f...
   |                                            ^^^^^^^^^^^^^^^^ Possible spelling mistake
   |                                            ---------------- help: incomplete
   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
- --> /home/rolv/repos/languagetool-rust/README.md:6:44
+ --> [path]
   |
 6 | ...shells. This feature also activates the **cli** feature. Enter ltrs completions --help ...
   |                                            ^^^^^^^ Possible spelling mistake
   |                                            ------- help: CLI, clip, CGI, CPI, CSI, ... (1541 not shown)
   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
-  --> /home/rolv/repos/languagetool-rust/README.md:10:44
+  --> [path]
    |
 10 | ...es color outputting in the terminal. If **cli** feature is also enabled, the --color=<W...
    |                                            ^^^^^^^ Possible spelling mistake
    |                                            ------- help: CLI, clip, CGI, CPI, CSI, ... (1541 not shown)
    |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
-  --> /home/rolv/repos/languagetool-rust/README.md:13:44
+  --> [path]
    |
 13 | ...d**: Enables multithreaded requests.  - **native-tls-vendored**: Enables the vendored feature of native...
    |                                            ^^^^^^^^^^^^^^^^^^^^^^^ Possible spelling mistake
    |                                            ----------------------- help: native-TLS-vendored
    |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
-  --> /home/rolv/repos/languagetool-rust/README.md:14:44
+  --> [path]
    |
 14 | ...u are planning to use HTTPS servers.  - **undoc**: Adds more fields to JSON responses tha...
    |                                            ^^^^^^^^^ Possible spelling mistake
    |                                            --------- help: undo, undock, undos
    |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
-  --> /home/rolv/repos/languagetool-rust/README.md:19:44
+  --> [path]
    |
 19 | ...cases. All added fields are stored in a hashmap as JSON values.   ## Related Projects  ...
    |                                            ^^^^^^^ Possible spelling mistake
