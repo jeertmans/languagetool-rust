@@ -23,7 +23,7 @@ pub enum Error {
     #[error("invalid request: {0}")]
     InvalidDataAnnotation(String),
 
-    /// Error from checking if `filename` exists and is a actualla a file.
+    /// Error from checking if `filename` exists and is a actually a file.
     #[error("invalid filename (got '{0}', does not exist or is not a file)")]
     InvalidFilename(String),
 

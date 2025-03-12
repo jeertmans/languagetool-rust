@@ -409,7 +409,8 @@ impl ServerClient {
     ///
     /// # Error
     ///
-    /// If any of the requests has `self.text` field which is none.
+    /// If any of the requests has `self.text` field which is none, or
+    /// if zero request is provided.
     #[cfg(feature = "multithreaded")]
     pub async fn check_multiple_and_join<'source>(
         &self,
@@ -417,6 +418,11 @@ impl ServerClient {
     ) -> Result<check::ResponseWithContext<'source>> {
         use std::borrow::Cow;
 
+        if requests.is_empty() {
+            return Err(Error::InvalidRequest(
+                "no request; cannot join zero request".to_string(),
+            ));
+        }
         let mut tasks = Vec::with_capacity(requests.len());
 
         requests

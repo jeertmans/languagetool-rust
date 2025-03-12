@@ -121,7 +121,12 @@ impl ExecuteSubcommand for Command {
                 request = request.with_text(Cow::Owned(text));
             }
 
-            if request.text.is_none() {
+            if let Some(ref text) = request.text {
+                if text.is_empty() {
+                    log::warn!("No input text was provided, skipping.");
+                    return Ok(());
+                }
+            } else {
                 // Handle annotated data
                 let response = server_client.check(&request).await?;
                 writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&response)?)?;
@@ -129,6 +134,7 @@ impl ExecuteSubcommand for Command {
             };
 
             let requests = request.split(self.max_length, self.split_pattern.as_str());
+
             let response = server_client.check_multiple_and_join(requests).await?;
 
             writeln!(
@@ -162,7 +168,7 @@ impl ExecuteSubcommand for Command {
                         }
                     },
                     None => {
-                        log::debug!("No extension found for file: {:?}.", filename);
+                        log::debug!("No extension found for file: {filename:?}.");
                         FileType::Raw
                     },
                 };
@@ -174,6 +180,12 @@ impl ExecuteSubcommand for Command {
                 FileType::Raw => {
                     let requests = (request.clone().with_text(&file_content))
                         .split(self.max_length, self.split_pattern.as_str());
+
+                    if requests.is_empty() {
+                        log::info!("Skipping empty file: {filename:?}.");
+                        continue;
+                    }
+
                     let response = server_client.check_multiple_and_join(requests).await?;
                     (response.into(), file_content)
                 },
