@@ -420,12 +420,6 @@ impl ServerClient {
         requests: Vec<Request<'source>>,
     ) -> Result<check::ResponseWithContext<'source>> {
         use std::borrow::Cow;
-      
-      if requests.is_empty() {
-            return Err(Error::InvalidRequest(
-                "no request; cannot join zero request".to_string(),
-            ));
-        }
 
         if requests.is_empty() {
             return Err(Error::InvalidRequest(
