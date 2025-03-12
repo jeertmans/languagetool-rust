@@ -18,7 +18,12 @@ fn test_basic_check_text() {
 #[test]
 fn test_basic_check_no_errors() {
     let mut cmd = Command::cargo_bin("ltrs").unwrap();
-    let assert = cmd.arg("check").arg("-t").arg("\"I am a star.\"").assert();
+    let assert = cmd
+        .arg("check")
+        .arg("-t")
+        .arg("en-US")
+        .arg("\"I am a star.\"")
+        .assert();
     assert
         .success()
         .stdout(contains("No errors were found in provided text"));
