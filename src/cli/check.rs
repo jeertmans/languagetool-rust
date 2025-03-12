@@ -6,9 +6,10 @@
 //! - annotated data, if `--data TEXT` is provided;
 //! - text from file(s), if `[FILE(S)]...` are provided.
 //! - raw text through `stdin`, if nothing else is provided.
-use std::{borrow::Cow, io::Write, path::PathBuf};
+use std::{borrow::Cow, io, io::Write, path::PathBuf};
 
 use clap::{Args, Parser, ValueEnum};
+use is_terminal::IsTerminal;
 use serde::{Deserialize, Serialize};
 use termcolor::{StandardStream, WriteColor};
 
@@ -85,6 +86,23 @@ pub enum FileType {
     Typst,
 }
 
+/// Read lines from standard input and write to buffer string.
+///
+/// Standard output is used when waiting for user to input text.
+fn read_from_stdin(buffer: &mut String) -> Result<()> {
+    if io::stdin().is_terminal() {
+        #[cfg(windows)]
+        log::info!("Reading from STDIN, press [CTRL+Z] when you're done.");
+
+        #[cfg(unix)]
+        log::info!("Reading from STDIN, press [CTRL+D] when you're done.");
+    }
+    let stdin = std::io::stdin();
+
+    while stdin.read_line(buffer)? > 0 {}
+    Ok(())
+}
+
 impl ExecuteSubcommand for Command {
     /// Executes the `check` subcommand.
     async fn execute(self, mut stdout: StandardStream, server_client: ServerClient) -> Result<()> {
@@ -99,7 +117,7 @@ impl ExecuteSubcommand for Command {
             // Fallback to `stdin` if nothing else is provided
             if request.text.is_none() && request.data.is_none() {
                 let mut text = String::new();
-                super::read_from_stdin(&mut stdout, &mut text)?;
+                read_from_stdin(&mut text)?;
                 request = request.with_text(Cow::Owned(text));
             }
 

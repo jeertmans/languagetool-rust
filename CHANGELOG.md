@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added basic logger (e.g., increase verbosity with `ltrs -v`).
   [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
 
+### Changed
+
+- Changed *info* output when reading from STDIN to writing logs with INFO level,
+  instead of always writing to STDOUT.
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+
 ### Chore
 
 - Fixed dependency declaration in README.md. [#118](https://github.com/jeertmans/languagetool-rust/pull/118)
