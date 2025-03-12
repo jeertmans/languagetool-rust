@@ -92,6 +92,8 @@ fn test_basic_check_stdin_verbose() {
     let assert = cmd
         .arg("check")
         .arg("-v")
+        .arg("-l")
+        .arg("en-US")
         .write_stdin("I am a starr.")
         .assert();
     // We only write if terminal is TTY
