@@ -24,9 +24,8 @@ jobs:
         toolchain: stable
         override: true
 
-    - run: cargo publish --features full --token ${CRATES_TOKEN}
-      env:
-        CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
+    - name: Publish on crates.io
+      run: cargo publish --features full --token ${{ secrets.CRATES_TOKEN }}
   check-publish:
     name: Check Publish
     runs-on: ubuntu-latest
@@ -42,6 +41,5 @@ jobs:
         toolchain: stable
         override: true
 
-    - run: cargo publish --features cli --token ${CRATES_TOKEN} --dry-run -v
-      env:
-        CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
+    - name: Check if can publish on crates.io
+      run: cargo publish --features cli --token ${{ secrets.CRATES_TOKEN }} --dry-run -v
