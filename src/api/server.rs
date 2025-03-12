@@ -444,7 +444,7 @@ impl ServerClient {
                     Result::<(Cow<'static, str>, Response)>::Ok((text, response))
                 })
             });
-      
+
         let mut response_with_context: Option<check::ResponseWithContext> = None;
 
         for task in tasks {
