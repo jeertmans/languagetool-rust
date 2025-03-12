@@ -1116,6 +1116,7 @@ dependencies = [
  "futures",
  "insta",
  "is-terminal",
+ "lazy_static",
  "lifetime",
  "log",
  "predicates",

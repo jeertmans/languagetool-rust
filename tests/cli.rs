@@ -1,4 +1,4 @@
-use std::{path::PathBuf, sync::LazyLock};
+use std::path::PathBuf;
 
 use assert_cmd::Command;
 use predicates::{
@@ -6,9 +6,10 @@ use predicates::{
     str::{contains, is_empty, is_match},
 };
 
-static PATH_ROOT: LazyLock<PathBuf> = LazyLock::new(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")));
-static PATH_SAMPLE_FILES: LazyLock<PathBuf> =
-    LazyLock::new(|| PATH_ROOT.join("tests").join("sample_files"));
+lazy_static::lazy_static! {
+    static ref PATH_ROOT: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    static ref PATH_SAMPLE_FILES: PathBuf = PATH_ROOT.join("tests").join("sample_files");
+}
 
 #[test]
 fn test_basic_check_text() {
