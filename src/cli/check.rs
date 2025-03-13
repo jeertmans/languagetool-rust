@@ -21,7 +21,7 @@ use crate::{
         server::ServerClient,
     },
     error::{Error, Result},
-    parsers::{parse_html, parse_markdown, parse_typst},
+    parsers::{html::parse_html, markdown::parse_markdown, typst::parse_typst},
 };
 
 use super::ExecuteSubcommand;
@@ -175,6 +175,7 @@ impl ExecuteSubcommand for Command {
             };
 
             let file_content = std::fs::read_to_string(filename)?;
+
             let (response, text): (check::Response, String) = match &file_type {
                 FileType::Auto => unreachable!(),
                 FileType::Raw => {
@@ -192,18 +193,14 @@ impl ExecuteSubcommand for Command {
                 FileType::Typst | FileType::Markdown | FileType::Html => {
                     let data = match file_type {
                         FileType::Typst => parse_typst(&file_content),
-                        FileType::Html => {
-                            let text = parse_html(&file_content);
-                            Data::from_iter([DataAnnotation::new_text(text)])
-                        },
-                        FileType::Markdown => {
-                            let text = parse_markdown(&file_content);
-                            Data::from_iter([DataAnnotation::new_text(text)])
-                        },
+                        FileType::Html => parse_html(&file_content),
+                        FileType::Markdown => parse_markdown(&file_content),
                         _ => unreachable!(),
                     };
+                    let requests = (request.clone().with_data(data))
+                        .split(self.max_length, self.split_pattern.as_str());
                     let response = server_client
-                        .check(&request.clone().with_data(data))
+                        .check_multiple_and_join_without_context(requests)
                         .await?;
                     (response, file_content)
                 },
