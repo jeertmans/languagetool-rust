@@ -125,10 +125,9 @@ mod tests {
         assert_matches!(error, Error::IO(_));
     }
 
-    #[ignore]
     #[test]
     fn test_error_invalid_request() {
-        let result = std::fs::read_to_string(""); // TODO
+        let result = crate::api::check::Request::new().try_get_text();
         assert!(result.is_err());
 
         let error: Error = result.unwrap_err().into();
@@ -136,10 +135,9 @@ mod tests {
         assert_matches!(error, Error::InvalidRequest(_));
     }
 
-    #[ignore]
     #[test]
     fn test_error_invalid_value() {
-        let result = std::fs::read_to_string(""); // TODO
+        let result = crate::api::server::parse_port("test");
         assert!(result.is_err());
 
         let error: Error = result.unwrap_err().into();
@@ -147,7 +145,6 @@ mod tests {
         assert_matches!(error, Error::InvalidValue(_));
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_error_reqwest() {
         let result = reqwest::get("").await;

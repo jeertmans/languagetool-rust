@@ -82,6 +82,9 @@ pulldown-cmark = ["dep:pulldown-cmark"]
 typst = ["dep:typst-syntax"]
 unstable = []
 
+# Test features
+snapshots = []
+
 [lib]
 name = "languagetool_rust"
 path = "src/lib.rs"
