@@ -1,7 +1,7 @@
 on:
   pull_request:
     paths:
-    - src/lib/**.rs
+    - '**.rs'
     - .github/workflows/rustlib.yml
     - Cargo.toml
   workflow_dispatch:
@@ -31,6 +31,10 @@ jobs:
       fail-fast: false
       matrix:
         tag: [latest, '5.5', '5.6', '5.7', '5.8', '5.9', '6.0', '6.1', '6.2', '6.3', '6.4', '6.5']
+        features: []
+        include:
+        - tag: latest
+          features: --all-features
     runs-on: ubuntu-latest
     services:
       languagetool:
@@ -53,4 +57,4 @@ jobs:
       uses: Swatinem/rust-cache@v2
 
     - run: curl -LsSf https://get.nexte.st/latest/linux | tar zxf - -C ${CARGO_HOME:-~/.cargo}/bin
-    - run: cargo nextest run --all-features --no-capture
+    - run: cargo nextest run ${{ matrix.features }} --no-capture

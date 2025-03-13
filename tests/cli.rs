@@ -550,6 +550,7 @@ fn test_words_delete() {
     ));
 }
 
+#[cfg_attr(not(feature = "snapshots"), ignore)]
 #[test]
 fn test_check_file_typst() {
     let output = get_cmd()
@@ -563,6 +564,7 @@ fn test_check_file_typst() {
     );
 }
 
+#[cfg_attr(not(feature = "snapshots"), ignore)]
 #[test]
 fn test_check_file_html() {
     let output = get_cmd()
@@ -576,6 +578,7 @@ fn test_check_file_html() {
     );
 }
 
+#[cfg_attr(not(feature = "snapshots"), ignore)]
 #[test]
 fn test_check_file_markdown() {
     let output = get_cmd()
