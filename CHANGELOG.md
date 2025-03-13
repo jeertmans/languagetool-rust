@@ -247,7 +247,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix compilation error in `src/lib/error.rs` when `feature = "cli"` was not set.
 - Remove unused print in `src/lib/server.rs`.
 
-> **_NOTE:_** Pre v1.0.0, the changelog was generated using the `cliff` tool that is based on commits.
+> ***NOTE:*** Pre v1.0.0, the changelog was generated using the `cliff` tool that is based on commits.
 
 ## [0.0.18](https://github.com/jeertmans/languagetool-rust/compare/v0.0.17...v0.0.18) - 2022-06-22
 

@@ -145,4 +145,3 @@ The first #count numbers of the sequence are:
   ..nums.map(n => $F_#n$),
   ..nums.map(n => str(fib(n))),
 ))
-
