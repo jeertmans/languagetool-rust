@@ -54,17 +54,17 @@ annotate = ["dep:annotate-snippets"]
 clap-verbosity-flag = ["dep:clap-verbosity-flag"]
 cli = [
   "annotate",
+  "clap-verbosity-flag",
   "color",
   "dep:clap",
-  "dep:clap-verbosity-flag",
   "dep:enum_dispatch",
   "dep:is-terminal",
-  "dep:log",
-  "dep:pretty_env_logger",
-  "multithreaded",
-  "typst",
-  "markdown",
   "html",
+  "log",
+  "markdown",
+  "multithreaded",
+  "pretty_env_logger",
+  "typst",
 ]
 cli-complete = ["cli", "clap_complete"]
 color = ["annotate-snippets?/color", "dep:termcolor"]
@@ -78,7 +78,6 @@ multithreaded = ["dep:tokio"]
 native-tls = ["reqwest/native-tls"]
 native-tls-vendored = ["reqwest/native-tls-vendored"]
 pretty_env_logger = ["dep:pretty_env_logger"]
-pulldown-cmark = ["dep:pulldown-cmark"]
 snapshots = []  # Only for testing
 typst = ["dep:typst-syntax"]
 unstable = []
