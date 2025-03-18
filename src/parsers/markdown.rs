@@ -93,6 +93,15 @@ pub fn parse_markdown(file_content: &str) -> Data<'_> {
                             .push(DataAnnotation::new_interpreted_markup(format!("~{s}~"), s))
                     },
 
+                    Tag::Link {
+                        title, dest_url, ..
+                    } => {
+                        annotations.push(DataAnnotation::new_interpreted_markup(
+                            format!("[{title}]({dest_url})"),
+                            title.to_string(),
+                        ));
+                    },
+
                     // No changes necessary
                     Tag::Paragraph
                     | Tag::List(_)
@@ -102,9 +111,9 @@ pub fn parse_markdown(file_content: &str) -> Data<'_> {
                         annotations.push(DataAnnotation::new_text(s));
                     },
 
-                    // Ignored
-                    Tag::CodeBlock(_) | Tag::Link { .. } | Tag::Image { .. } => {
-                        annotations.push(DataAnnotation::new_interpreted_markup(s, IGNORE));
+                    // Just markup
+                    Tag::CodeBlock(_) | Tag::Image { .. } => {
+                        annotations.push(DataAnnotation::new_markup(s));
                     },
                     _ => {},
                 }

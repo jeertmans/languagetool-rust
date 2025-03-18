@@ -1,10 +1,7 @@
 //! Parse the contents of Typst files into a format parseable by the
 //! LanguageTool API.
 
-use crate::{
-    api::check::{Data, DataAnnotation},
-    parsers::IGNORE,
-};
+use crate::api::check::{Data, DataAnnotation};
 
 /// Parse the contents of a Typst file into a text format to be sent to the
 /// LanguageTool API.
@@ -47,14 +44,7 @@ pub fn parse_typst(file_content: impl AsRef<str>) -> Data<'static> {
                     }
                 }
 
-                annotations.push(DataAnnotation::new_interpreted_markup(
-                    markup,
-                    // This pattern is ignored by LanguageTool, and allows us to avoid whitespace
-                    // issues. The following sentence would give an error for
-                    // repeated whitespace otherwise: This has ``` `backticks`
-                    // ``` in it
-                    IGNORE,
-                ));
+                annotations.push(DataAnnotation::new_markup(markup));
                 continue;
             },
             // Markup with valid text interpretations
