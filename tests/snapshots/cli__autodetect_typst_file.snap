@@ -16,3 +16,59 @@ error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Possible spelling mistake
   |                                            ----------------------------- help: Temperature, Temperate
   |
+error[COMMA_PARENTHESIS_WHITESPACE]: Don’t put a space before the full stop.
+ --> [path]
+  |
+8 | ...he glacier melting models established in @glacier-melt.  bibliography("works.bib")  The flow ra...
+  |                                            ^^^^^^^^^^^^^^^ Use of whitespace before comma and before/after parentheses
+  |                                            --------------- help: .
+  |
+error[CONSECUTIVE_SPACES]: It seems like there are too many consecutive spaces here.
+ --> [path]
+  |
+1 | = Code blocks  Adding `rbx` to `rcx` gives the desired result.  What...
+  |                      ^^^^^^^ Two consecutive spaces
+  |                      ------- help:  
+  |
+error[CONSECUTIVE_SPACES]: It seems like there are too many consecutive spaces here.
+ --> [path]
+  |
+1 | = Code blocks  Adding `rbx` to `rcx` gives the desired result.  What is ```ru...
+  |                               ^^^^^^^ Two consecutive spaces
+  |                               ------- help:  
+  |
+error[TO_NON_BASE]: The verb after “to” should be in the base form as part of the to-infinitive. A verb can take many forms, but the base form is always used in the to-infinitive.
+ --> [path]
+  |
+2 | = Code blocks  Adding `rbx` to `rcx` gives the desired result.  What is ```rust fn...
+  |                                      ^^^^^ 'to' + non-base form
+  |                                      ----- help: give
+  |
+error[CONSECUTIVE_SPACES]: It seems like there are too many consecutive spaces here.
+ --> [path]
+  |
+4 | ...`rcx` gives the desired result.  What is ```rust fn main()``` in Rust would be ```c int main()``` in C...
+  |                                            ^^^^^^^^^^^^^^^^^^^^^^ Two consecutive spaces
+  |                                            ---------------------- help:  
+  |
+error[CONSECUTIVE_SPACES]: It seems like there are too many consecutive spaces here.
+ --> [path]
+  |
+5 | ...is ```rust fn main()``` in Rust would be ```c int main()``` in C.  ```rust fn main() {     println!(...
+  |                                            ^^^^^^^^^^^^^^^^^^^^ Two consecutive spaces
+  |                                            -------------------- help:  
+  |
+error[CONSECUTIVE_SPACES]: It seems like there are too many consecutive spaces here.
+ --> [path]
+  |
+8 | ...rintln!("Hello World!"); } ```  This has ``` `backticks` ``` in it (but the spaces are trimmed). And ...
+  |                                            ^^^^^^^^^^^^^^^^^^^^^ Two consecutive spaces
+  |                                            --------------------- help:  
+  |
+error[COMMA_PARENTHESIS_WHITESPACE]: Don’t put a space before the full stop.
+  --> [path]
+   |
+18 | ... defined through the recurrence relation $F_n = F_(n-1) + F_(n-2)$. It can also be expressed in _closed for...
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use of whitespace before comma and before/after parentheses
+   |                                            --------------------------- help: .
+   |
