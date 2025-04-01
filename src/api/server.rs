@@ -467,9 +467,9 @@ impl ServerClient {
     /// If any of the requests has `self.text` or `self.data` field which is
     /// [`None`].
     #[cfg(feature = "multithreaded")]
-    pub async fn check_multiple_and_join_without_context<'source>(
+    pub async fn check_multiple_and_join_without_context(
         &self,
-        requests: Vec<Request<'source>>,
+        requests: Vec<Request<'_>>,
     ) -> Result<check::Response> {
         let mut response: Option<check::Response> = None;
 
