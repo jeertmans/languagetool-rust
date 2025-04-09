@@ -1,0 +1,109 @@
+---
+source: tests/cli.rs
+expression: "String::from_utf8(output.stdout).unwrap()"
+---
+error[COMMA_PARENTHESIS_WHITESPACE]: Don’t put a space before the full stop.
+ --> [path]
+  |
+6 | ...ges and is free to use, more on that on_ [](https://languagetool.org/)_. __There is a public API (with a free tie...
+  |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use of whitespace before comma and before/after parentheses
+  |                                            --------------------------------- help: .
+  |
+error[WHITESPACE_RULE]: Possible typo: you repeated a whitespace
+  --> [path]
+   |
+11 | ...rs very easily via Rust code! _Crates.io docs.rs codecov- - [](#about) - [](#cli-referenc...
+   |                                            ^^^^^^^^^ Whitespace repetition (bad formatting)
+   |                                            --------- help:  
+   |
+error[COMMA_PARENTHESIS_WHITESPACE]: Don’t put a space before the full stop.
+  --> [path]
+   |
+13 | ...on. Installation guidelines can be found [](https://www.docker.com/get-started/). On Linux platforms, you might need to c...
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use of whitespace before comma and before/after parentheses
+   |                                            ----------------------------------------- help: .
+   |
+error[COMMA_PARENTHESIS_WHITESPACE]: Don’t put a space before the full stop.
+  --> [path]
+   |
+14 | ...vent the _sudo privilege issue_ by doing [](https://docs.docker.com/engine/install/linux-postinstall/). ## API Reference  
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use of whitespace before comma and before/after parentheses
+   |                                            --------------------------------------------------------------- help: .
+   |
+error[COMMA_PARENTHESIS_WHITESPACE]: Don’t put a space before the full stop.
+ --> [path]
+  |
+5 | ... or crate, then we recommend reading the [](https://docs.rs/languagetool-rust). To use LanguageTool-Rust in your Rust p...
+  |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use of whitespace before comma and before/after parentheses
+  |                                            --------------------------------------- help: .
+  |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+ --> [path]
+  |
+5 | ...piling LTRS. #### Default Features  - - **cli**: Adds command-line related methods for ...
+  |                                            ^^^^^^^ Possible spelling mistake
+  |                                            ------- help: CLI, Clip, CGI, CPI, CSI, ... (1428 not shown)
+  |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+ --> [path]
+  |
+9 | ...ate**, **color**, **multithreaded**.  - **native-tls**: Enables TLS functionality provided by ...
+  |                                            ^^^^^^^^^^^^^^ Possible spelling mistake
+  |                                            -------------- help: natives, natively, nativists
+  |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+ --> [path]
+  |
+3 | ...annotate results from check request.  - **cli-complete**: Adds commands to generate completion f...
+  |                                            ^^^^^^^^^^^^^^^^ Possible spelling mistake
+  |                                            ---------------- help: incomplete
+  |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+ --> [path]
+  |
+6 | ...shells. This feature also activates the **cli** feature. Enter ltrs completions --help ...
+  |                                            ^^^^^^^ Possible spelling mistake
+  |                                            ------- help: CLI, clip, CGI, CPI, CSI, ... (1461 not shown)
+  |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+  --> [path]
+   |
+10 | ...es color outputting in the terminal. If **cli** feature is also enabled, the --color=<W...
+   |                                            ^^^^^^^ Possible spelling mistake
+   |                                            ------- help: CLI, clip, CGI, CPI, CSI, ... (1461 not shown)
+   |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+  --> [path]
+   |
+13 | ...d**: Enables multithreaded requests.  - **native-tls-vendored**: Enables the vendored feature of native...
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^^ Possible spelling mistake
+   |                                            ----------------------- help: native-TLS-vendored
+   |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+  --> [path]
+   |
+14 | ...u are planning to use HTTPS servers.  - **undoc**: Adds more fields to JSON responses tha...
+   |                                            ^^^^^^^^^ Possible spelling mistake
+   |                                            --------- help: undo, undock, undos
+   |
+error[THE_CC]: It appears that a noun is missing after “the”.
+  --> [path]
+   |
+16 | ... JSON responses that are not present in the [](https://languagetool.org/http-api/sw...
+   |                                            ^^^ the and
+   |                                            ---
+   |
+error[CONSECUTIVE_SPACES]: It seems like there are too many consecutive spaces here.
+  --> [path]
+   |
+16 | ...ON responses that are not present in the [](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All ...
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Two consecutive spaces
+   |                                            -------------------------------------------------------------- help:  
+   |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+  --> [path]
+   |
+20 | ...cases. All added fields are stored in a hashmap as JSON values.   ## Related Projects  ...
+   |                                            ^^^^^^^ Possible spelling mistake
+   |                                            ------- help: hash map
+   |

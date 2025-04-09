@@ -239,6 +239,62 @@ pub struct Data<'source> {
     pub annotation: Vec<DataAnnotation<'source>>,
 }
 
+impl Data<'_> {
+    /// Split data into as few fragments as possible, where each fragment
+    /// contains (if possible) a maximum of `n` characters in it's
+    /// annotations' markup and text fields.
+    ///
+    /// Pattern str `pat` is used for splitting.
+    #[must_use]
+    pub fn split(self, n: usize, pat: &str) -> Vec<Self> {
+        // Build vec of breakpoints and the length of the text + markup at that
+        // potential breakpoint
+        let mut break_point_lengths = vec![];
+        let mut len = 0;
+        for (i, ann) in self.annotation.iter().enumerate() {
+            len +=
+                ann.text.as_deref().unwrap_or("").len() + ann.markup.as_deref().unwrap_or("").len();
+            if ann.text.as_ref().is_some_and(|t| t.contains(pat)) {
+                break_point_lengths.push((i, len));
+            }
+        }
+
+        // Decide which breakpoints to split the annotations at
+        let mut break_points: Vec<usize> = vec![];
+        if break_point_lengths.len() > 1 {
+            let (mut i, mut ii) = (0, 1);
+            let (mut base, mut curr) = (0, 0);
+            while ii < break_point_lengths.len() {
+                curr += break_point_lengths[i].1 - base;
+
+                if break_point_lengths[ii].1 - base + curr > n {
+                    break_points.push(break_point_lengths[i].0);
+                    base = break_point_lengths[i].1;
+                    curr = 0;
+                }
+
+                i += 1;
+                ii += 1;
+            }
+        }
+
+        // Split annotations based on calculated break points
+        let mut split = Vec::with_capacity(break_points.len());
+        let mut iter = self.into_iter();
+        let mut taken = 0;
+        let mut annotations = vec![];
+        for break_point in break_points {
+            while taken != break_point + 1 {
+                annotations.push(iter.next().unwrap());
+                taken += 1;
+            }
+            split.push(Data::from_iter(mem::take(&mut annotations)));
+        }
+
+        split
+    }
+}
+
 impl IntoStatic for Data<'_> {
     type Static = Data<'static>;
     fn into_static(self) -> Self::Static {
@@ -256,6 +312,15 @@ impl<'source, T: Into<DataAnnotation<'source>>> FromIterator<T> for Data<'source
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let annotation = iter.into_iter().map(std::convert::Into::into).collect();
         Data { annotation }
+    }
+}
+
+impl<'source> IntoIterator for Data<'source> {
+    type Item = DataAnnotation<'source>;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.annotation.into_iter()
     }
 }
 
@@ -601,10 +666,20 @@ impl<'source> Request<'source> {
     ///
     /// # Errors
     ///
-    /// If `self.text` is none.
+    /// If `self.text` is [`None`] and `self.data` is [`None`].
     pub fn try_split(mut self, n: usize, pat: &str) -> Result<Vec<Self>> {
+        // DATA ANNOTATIONS
+        if let Some(data) = mem::take(&mut self.data) {
+            return Ok(data
+                .split(n, pat)
+                .into_iter()
+                .map(|d| self.clone().with_data(d))
+                .collect());
+        }
+
+        // TEXT
         let text = mem::take(&mut self.text)
-            .ok_or_else(|| Error::InvalidRequest("missing text field".to_string()))?;
+            .ok_or_else(|| Error::InvalidRequest("missing text or data field".to_string()))?;
         let string: &str = match &text {
             Cow::Owned(s) => s.as_str(),
             Cow::Borrowed(s) => s,
@@ -943,6 +1018,29 @@ impl Response {
             annotation.push_str(&DisplayList::from(snippet).to_string());
         }
         annotation
+    }
+
+    /// Joins the given [`Request`] to the current one.
+    ///
+    /// This is especially useful when a request was split into multiple
+    /// requests.
+    #[must_use]
+    pub fn append(mut self, mut other: Self) -> Self {
+        #[cfg(feature = "unstable")]
+        if let Some(ref mut sr_other) = other.sentence_ranges {
+            match self.sentence_ranges {
+                Some(ref mut sr_self) => {
+                    sr_self.append(sr_other);
+                },
+                None => {
+                    std::mem::swap(&mut self.sentence_ranges, &mut other.sentence_ranges);
+                },
+            }
+        }
+
+        self.matches.append(&mut other.matches);
+
+        self
     }
 }
 
