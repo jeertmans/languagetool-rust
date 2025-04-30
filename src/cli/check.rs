@@ -235,7 +235,9 @@ impl ExecuteSubcommand for Command {
 #[derive(Args, Clone, Debug, Default, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub struct CliRequest {
-    /// The text to be checked. This or 'data' is required.
+    /// The text to be checked. This, `data`, or `[FILENAMES...]` cannot be
+    /// passed simultaneously. If nothing is specified, input will be read from
+    /// `stdin`
     #[clap(short = 't', long, conflicts_with = "data", allow_hyphen_values(true))]
     pub text: Option<String>,
     /// The text to be checked, given as a JSON document that specifies what's
