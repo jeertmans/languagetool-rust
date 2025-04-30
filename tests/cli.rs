@@ -30,6 +30,12 @@ fn get_cmd() -> Command {
 }
 
 #[test]
+fn test_basic_check_ping() {
+    let assert = get_cmd().arg("ping").assert();
+    assert.success().stdout(contains("PONG!"));
+}
+
+#[test]
 fn test_basic_check_text() {
     let assert = get_cmd()
         .arg("check")

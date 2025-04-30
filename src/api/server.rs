@@ -636,7 +636,11 @@ mod tests {
     #[tokio::test]
     async fn test_server_ping() {
         let client = get_testing_server_client();
-        assert!(client.ping().await.is_ok());
+        assert!(
+            client.ping().await.is_ok(),
+            "\x1b[1m \nIMPORTANT: Please ensure that there is a local LanguageTool service \
+             running on port 8010.\n\x1b[0m"
+        );
     }
 
     #[tokio::test]

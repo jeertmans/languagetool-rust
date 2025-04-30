@@ -35,7 +35,7 @@ impl Default for Client {
 }
 
 impl Client {
-    /// Construct an HTTP URL base on the current hostname, optional port,
+    /// Construct an HTTP URL based on the current hostname, optional port,
     /// and provided endpoint.
     #[inline]
     #[must_use]
@@ -69,5 +69,62 @@ impl Client {
             .json::<languages::Response>()
             .await
             .map_err(Into::into)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use reqwest::Url;
+
+    use super::*;
+
+    fn get_testing_client() -> Client {
+        Client {
+            hostname: "http://localhost".into(),
+            port: Some("8010".into()),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn test_url() {
+        // Without port
+        let client = Client::default();
+        let url = client.url("/endpoint");
+        assert!(url.contains(&client.hostname));
+        assert!(!url.contains(":80"));
+        assert!(url.ends_with("/endpoint"));
+        assert!(Url::parse(&url).is_ok());
+
+        // With port
+        let client = Client {
+            port: Some("80".to_string()),
+            ..Default::default()
+        };
+        let url = client.url("/other_endpoint");
+        assert!(url.contains(&client.hostname));
+        assert!(url.contains(":80"));
+        assert!(url.ends_with("/other_endpoint"));
+        assert!(Url::parse(&url).is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_check() {
+        let client = get_testing_client();
+        let req = check::Request::new();
+        let req = req.with_text("There are no spelling mistakes here.");
+
+        let check_res = client.check(&req).await.unwrap();
+        assert!(check_res.matches.is_empty());
+        assert_eq!(&check_res.language.code, "en-US");
+        assert_eq!(&check_res.software.name, "LanguageTool");
+    }
+
+    #[tokio::test]
+    async fn test_languages() {
+        let client = get_testing_client();
+
+        let languages_res = client.languages().await;
+        assert!(languages_res.is_ok_and(|r| !r.is_empty()));
     }
 }
