@@ -418,3 +418,25 @@ impl std::str::FromStr for CliData {
         Ok(v)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_read_from_stdin() {
+        let handle = std::thread::spawn(|| {
+            let mut buffer = String::new();
+            read_from_stdin(&mut buffer).unwrap();
+            buffer
+        });
+
+        std::thread::sleep(std::time::Duration::from_millis(100));
+
+        if std::io::stdin().is_terminal() {
+            assert!(!handle.is_finished());
+        } else {
+            assert!(handle.is_finished());
+        }
+    }
+}
