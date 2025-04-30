@@ -629,22 +629,22 @@ mod tests {
     use super::ServerClient;
     use crate::{api::check::Request, error::Error};
 
-    fn dbg_err(e: &Error) {
-        eprintln!("Error: {e:?}")
+    fn get_testing_server_client() -> ServerClient {
+        ServerClient::new("http://localhost", "8010")
     }
 
     #[tokio::test]
     async fn test_server_ping() {
-        let client = ServerClient::from_env_or_default();
-        assert!(client.ping().await.inspect_err(dbg_err).is_ok());
+        let client = get_testing_server_client();
+        assert!(client.ping().await.is_ok());
     }
 
     #[tokio::test]
     async fn test_server_check_text() {
-        let client = ServerClient::from_env_or_default();
+        let client = get_testing_server_client();
 
         let req = Request::default().with_text("je suis une poupee");
-        assert!(client.check(&req).await.inspect_err(dbg_err).is_ok());
+        assert!(client.check(&req).await.is_ok());
 
         // Too long
         let req = Request::default().with_text("Repeat ".repeat(1500));
@@ -653,11 +653,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_server_check_data() {
-        let client = ServerClient::from_env_or_default();
+        let client = get_testing_server_client();
         let req = Request::default()
             .with_data_str("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
             .unwrap();
-        assert!(client.check(&req).await.inspect_err(dbg_err).is_ok());
+        assert!(client.check(&req).await.is_ok());
 
         // Too long
         let req = Request::default()
@@ -671,7 +671,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_server_languages() {
-        let client = ServerClient::from_env_or_default();
-        assert!(client.languages().await.inspect_err(dbg_err).is_ok());
+        let client = get_testing_server_client();
+        assert!(client.languages().await.is_ok());
     }
 }
