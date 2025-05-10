@@ -373,6 +373,8 @@ impl<'source> Request<'source> {
 
 #[cfg(test)]
 mod tests {
+    use crate::api::check::DataAnnotation;
+
     use super::*;
 
     #[test]
@@ -385,9 +387,34 @@ mod tests {
 
     #[test]
     fn test_with_data() {
-        let req = Request::default().with_text("hello");
+        let req =
+            Request::default().with_data([DataAnnotation::new_text("hello")].into_iter().collect());
 
-        assert_eq!(req.text.unwrap(), "hello");
-        assert!(req.data.is_none());
+        assert_eq!(
+            req.data.unwrap().annotation[0],
+            DataAnnotation::new_text("hello")
+        );
+    }
+
+    #[test]
+    fn test_with_data_str() {
+        let req = Request::default()
+            .with_data_str("{\"annotation\":[{\"text\": \"hello\"}]}")
+            .unwrap();
+        assert_eq!(
+            req.data.unwrap().annotation[0],
+            DataAnnotation::new_text("hello")
+        );
+
+        // Not a data annotation
+        assert!(Request::default().with_data_str("hello").is_err());
+    }
+
+    #[test]
+    fn test_with_language() {
+        assert_eq!(
+            Request::default().with_language("en-US".into()).language,
+            "en-US".to_string()
+        );
     }
 }

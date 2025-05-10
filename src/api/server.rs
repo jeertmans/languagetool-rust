@@ -624,6 +624,8 @@ impl ServerClient {
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::Cow;
+
     use assert_matches::assert_matches;
 
     use super::ServerClient;
@@ -672,6 +674,94 @@ mod tests {
             ))
             .unwrap();
         assert_matches!(client.check(&req).await, Err(Error::InvalidRequest(_)));
+    }
+
+    #[tokio::test]
+    async fn test_server_check_multiple_and_join() {
+        const TEXT: &str = "I am a doll.\nBut what are you?";
+        let client = get_testing_server_client();
+
+        let requests = Request::default()
+            .with_language("en-US".into())
+            .with_text(TEXT)
+            .split(20, "\n");
+        let resp = client.check_multiple_and_join(requests).await.unwrap();
+
+        assert_eq!(resp.text, Cow::from(TEXT));
+        assert_eq!(resp.text_length, TEXT.len());
+        assert!(!resp.response.warnings.as_ref().unwrap().incomplete_results);
+        assert_eq!(resp.response.iter_matches().next(), None);
+        assert_eq!(resp.response.language.name, "English (US)");
+
+        // Fails when trying to use it without text
+        let requests = vec![Request::default().with_language("en-US".into())];
+        assert!(client.check_multiple_and_join(requests).await.is_err());
+        let requests = vec![Request::default()
+            .with_language("en-US".into())
+            .with_data_str("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
+            .unwrap()];
+        assert!(client.check_multiple_and_join(requests).await.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_server_check_multiple_and_join_without_context() {
+        let client = get_testing_server_client();
+
+        let requests = vec![Request::default()
+            .with_language("en-US".into())
+            .with_data_str("{\"annotation\":[{\"text\": \"I am a doll\"}]}")
+            .unwrap()];
+        let resp = client
+            .check_multiple_and_join_without_context(requests)
+            .await
+            .unwrap();
+
+        assert!(!resp.warnings.as_ref().unwrap().incomplete_results);
+        assert_eq!(resp.iter_matches().next(), None);
+        assert_eq!(resp.language.name, "English (US)");
+
+        let requests = vec![Request::default()
+            .with_language("en-US".into())
+            .with_text("I am a doll.")];
+        let resp = client
+            .check_multiple_and_join_without_context(requests)
+            .await
+            .unwrap();
+        assert_eq!(resp.iter_matches().next(), None);
+
+        // Fails when trying to use it without text or data
+        let requests = vec![Request::default().with_language("en-US".into())];
+        assert!(client.check_multiple_and_join(requests).await.is_err());
+    }
+
+    #[cfg(feature = "annotate")]
+    #[tokio::test]
+    async fn test_server_annotate() {
+        let client = get_testing_server_client();
+
+        let req = Request::default()
+            .with_text("Who are you?")
+            .with_language("en-US".into());
+        let annotated = client
+            .annotate_check(&req, Some("origin"), false)
+            .await
+            .unwrap();
+        assert_eq!(
+            annotated,
+            "No errors were found in provided text".to_string()
+        );
+
+        let req = Request::default()
+            .with_text("Who ar you?")
+            .with_language("en-US".into());
+        let annotated = client
+            .annotate_check(&req, Some("origin"), false)
+            .await
+            .unwrap();
+        assert!(
+            annotated.starts_with("error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.")
+        );
+        assert!(annotated.contains("^^ Possible spelling mistake"));
     }
 
     #[tokio::test]

@@ -232,6 +232,8 @@ impl std::str::FromStr for Data<'_> {
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::Cow;
+
     use super::super::{Data, DataAnnotation};
 
     #[derive(Debug)]
@@ -274,5 +276,25 @@ mod tests {
         };
 
         assert_eq!(data, expected_data);
+    }
+
+    #[test]
+    fn test_try_get_text() {
+        const TEXT: &str = "Lorem Ipsum";
+        assert_eq!(
+            DataAnnotation::new_text(TEXT).try_get_text().unwrap(),
+            Cow::from(TEXT)
+        );
+        assert_eq!(
+            DataAnnotation::new_markup(TEXT).try_get_text().unwrap(),
+            Cow::from(TEXT)
+        );
+        assert!((DataAnnotation {
+            text: None,
+            markup: None,
+            interpret_as: None
+        })
+        .try_get_text()
+        .is_err());
     }
 }
