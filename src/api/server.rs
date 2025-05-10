@@ -689,6 +689,7 @@ mod tests {
 
         assert_eq!(resp.text, Cow::from(TEXT));
         assert_eq!(resp.text_length, TEXT.len());
+        #[cfg(feature = "unstable")]
         assert!(!resp.response.warnings.as_ref().unwrap().incomplete_results);
         assert_eq!(resp.response.iter_matches().next(), None);
         assert_eq!(resp.response.language.name, "English (US)");
@@ -716,6 +717,7 @@ mod tests {
             .await
             .unwrap();
 
+        #[cfg(feature = "unstable")]
         assert!(!resp.warnings.as_ref().unwrap().incomplete_results);
         assert_eq!(resp.iter_matches().next(), None);
         assert_eq!(resp.language.name, "English (US)");
