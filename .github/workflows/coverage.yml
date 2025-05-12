@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       languagetool:
-        image: erikvl87/languagetool:${{ matrix.tag }}
+        image: erikvl87/languagetool:latest
         ports:
         - 8010:8010
         env:
