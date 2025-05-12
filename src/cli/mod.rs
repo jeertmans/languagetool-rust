@@ -122,4 +122,9 @@ mod tests {
     fn test_cli() {
         Cli::command().debug_assert();
     }
+
+    #[test]
+    fn test_cli_from_build_cli() {
+        build_cli().debug_assert();
+    }
 }

@@ -24,7 +24,15 @@ macro_rules! assert_snapshot {
 }
 
 fn get_cmd() -> Command {
-    Command::cargo_bin("ltrs").unwrap()
+    let mut cmd = Command::cargo_bin("ltrs").unwrap();
+    cmd.args(["--hostname", "http://localhost", "--port", "8010"]);
+    cmd
+}
+
+#[test]
+fn test_basic_check_ping() {
+    let assert = get_cmd().arg("ping").assert();
+    assert.success().stdout(contains("PONG!"));
 }
 
 #[test]

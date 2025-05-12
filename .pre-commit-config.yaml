@@ -5,7 +5,9 @@ repos:
   - id: check-yaml
   - id: check-toml
   - id: end-of-file-fixer
+    exclude: ^tests/
   - id: trailing-whitespace
+    exclude: ^tests/
 - repo: https://github.com/igorshubovych/markdownlint-cli
   rev: v0.35.0
   hooks:
@@ -17,6 +19,7 @@ repos:
   - id: pretty-format-yaml
     args: [--autofix]
   - id: pretty-format-toml
+    exclude: Cargo.lock
     args: [--autofix, --trailing-commas]
 - repo: https://github.com/doublify/pre-commit-rust
   rev: v1.0
@@ -33,6 +36,15 @@ repos:
     types: [rust]
     args: []
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.6
+  rev: v2.4.1
   hooks:
   - id: codespell
+    args:
+    - --ignore-words-list
+    - crate
+    exclude: |
+      (?x)(
+          \.rs$|
+          ^tests/|
+          ^benches/
+      )

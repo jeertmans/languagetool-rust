@@ -315,7 +315,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🩹 Bug Fixes
 
-- [**lib**] Avoid panicking on string slices </br> └─ This fixes the problem that occurred when the string was not made of purely utf-8 chars. E.g.: `ltrs check --text "Un essai de texte en français à controler"`
+- [**lib**] Avoid panicking on string slices </br> └─ This fixes the problem that occurred when the string was not made of purely utf-8 chars. E.g.: `ltrs check --text "Un essai de texte en français à controler"` <!-- (codespell:ignore controler) -->
 
 ## [0.0.14](https://github.com/jeertmans/languagetool-rust/compare/v0.0.13...v0.0.14) - 2022-05-31
 
