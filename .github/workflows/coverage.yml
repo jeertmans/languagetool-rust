@@ -1,6 +1,6 @@
 name: Code Coverage
 
-on: [push]
+on: [push, pull_request]
 jobs:
   test:
     name: Coverage
@@ -12,6 +12,9 @@ jobs:
         - 8010:8010
         env:
           langtool_maxTextLength: 1500
+    env:
+      LANGUAGETOOL_HOSTNAME: http://localhost
+      LANGUAGETOOL_PORT: 8010
     container:
       image: xd009642/tarpaulin:develop-nightly
       options: --security-opt seccomp=unconfined
