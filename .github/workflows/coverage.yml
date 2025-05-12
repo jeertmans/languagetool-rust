@@ -12,6 +12,7 @@ jobs:
         - 8010:8010
         env:
           langtool_maxTextLength: 1500
+          Java_Xmx: 2g
     env:
       LANGUAGETOOL_HOSTNAME: http://localhost
       LANGUAGETOOL_PORT: 8010
