@@ -5,6 +5,13 @@ jobs:
   test:
     name: Coverage
     runs-on: ubuntu-latest
+    services:
+      languagetool:
+        image: erikvl87/languagetool:${{ matrix.tag }}
+        ports:
+        - 8010:8010
+        env:
+          langtool_maxTextLength: 1500
     container:
       image: xd009642/tarpaulin:develop-nightly
       options: --security-opt seccomp=unconfined
