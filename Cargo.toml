@@ -99,7 +99,6 @@ repository = "https://github.com/jeertmans/languagetool-rust"
 rust-version = "1.77.0"
 version = "2.1.4"
 
-
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
