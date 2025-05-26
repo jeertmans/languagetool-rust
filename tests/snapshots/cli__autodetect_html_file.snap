@@ -7,7 +7,7 @@ error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   |
 4 |   <body>  <img />  <img />  <img />  <!--  First coment  -->  <!--  Feel free to change this text...
   |                                      ^^^^^^^^^^^^^^^^^^^^ Possible spelling mistake
-  |                                      -------------------- help: moment, cement, comment, comet, foment, ... (1 not shown)
+  |                                      -------------------- help: moment, cement, comment, comet, foment, ... (3 not shown)
   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
  --> [path]

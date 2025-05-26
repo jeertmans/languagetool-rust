@@ -42,14 +42,14 @@ error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   |
 5 | ...piling LTRS. #### Default Features  - - **cli**: Adds command-line related methods for ...
   |                                            ^^^^^^^ Possible spelling mistake
-  |                                            ------- help: CLI, Clip, CGI, CPI, CSI, ... (1428 not shown)
+  |                                            ------- help: CLI, Clip, CGI, CPI, CSI, ... (1506 not shown)
   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
  --> [path]
   |
 9 | ...ate**, **color**, **multithreaded**.  - **native-tls**: Enables TLS functionality provided by ...
   |                                            ^^^^^^^^^^^^^^ Possible spelling mistake
-  |                                            -------------- help: natives, natively, nativists
+  |                                            -------------- help: natives, natively, nativists, nativeness, naivetes
   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
  --> [path]
@@ -63,14 +63,14 @@ error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   |
 6 | ...shells. This feature also activates the **cli** feature. Enter ltrs completions --help ...
   |                                            ^^^^^^^ Possible spelling mistake
-  |                                            ------- help: CLI, clip, CGI, CPI, CSI, ... (1461 not shown)
+  |                                            ------- help: CLI, clip, CGI, CPI, CSI, ... (1543 not shown)
   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   --> [path]
    |
 10 | ...es color outputting in the terminal. If **cli** feature is also enabled, the --color=<W...
    |                                            ^^^^^^^ Possible spelling mistake
-   |                                            ------- help: CLI, clip, CGI, CPI, CSI, ... (1461 not shown)
+   |                                            ------- help: CLI, clip, CGI, CPI, CSI, ... (1543 not shown)
    |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   --> [path]
