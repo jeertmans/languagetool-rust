@@ -48,7 +48,7 @@ jobs:
       uses: pre-commit/action@v3.0.1
 
     - name: Apply fixes when present
-      uses: pre-commit-ci/lite-action@v1.0.2
+      uses: pre-commit-ci/lite-action@v1.1.0
       if: always()
       with:
         msg: 'chore(fmt): auto fixes from pre-commit hooks'
