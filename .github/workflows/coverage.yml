@@ -21,13 +21,13 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install nightly toolchain
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@nightly
 
     - name: Cache dependencies
       uses: Swatinem/rust-cache@v2
 
     - name: Install cargo-tarpaulin
-      run: cargo +nightly install cargo-tarpaulin --locked
+      uses: taiki-e/install-action@cargo-tarpaulin
 
     - name: Ping server
       run: cargo run -- -vv ping
