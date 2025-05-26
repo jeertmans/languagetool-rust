@@ -10,7 +10,7 @@ required-features = ["cli"]
 
 [dependencies]
 annotate-snippets = {version = "^0.9.1", optional = true}
-clap = {version = "^4.0", features = ["cargo", "derive", "env", "wrap_help"], optional = true}
+clap = {version = "^4.5", features = ["cargo", "derive", "env", "wrap_help"], optional = true}
 clap_complete = {version = "^4.0", optional = true}
 is-terminal = {version = "0.4.3", optional = true}
 reqwest = {version = "^0.11", default-features = false, features = ["json"]}
