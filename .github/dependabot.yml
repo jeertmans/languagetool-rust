@@ -1,11 +1,22 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
-
 version: 2
 updates:
-- package-ecosystem: cargo     # See documentation for possible values
-  directory: /     # Location of package manifests
+- package-ecosystem: cargo
+  directory: /
   schedule:
     interval: monthly
+  commit-message:
+    prefix: 'chore(deps):'
+  labels:
+  - dependencies
+  - rust
+  target-branch: 'v3'  # TODO: change me after merging v3
+- package-ecosystem: github-actions
+  directory: /
+  schedule:
+    interval: monthly
+  commit-message:
+    prefix: 'ci(dependabot):'
+  labels:
+  - ci
+  - dependencies
+  target-branch: 'v3'  # TODO: change me after merging v3
