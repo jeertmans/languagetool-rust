@@ -1,6 +1,6 @@
 name: Code Coverage
 
-on: [push]
+on: [push, pull_request]
 jobs:
   test:
     name: Coverage
@@ -12,12 +12,22 @@ jobs:
         - 8010:8010
         env:
           langtool_maxTextLength: 1500
-    container:
-      image: xd009642/tarpaulin:develop-nightly
-      options: --security-opt seccomp=unconfined
+          Java_Xmx: 2g
+    env:
+      LANGUAGETOOL_HOSTNAME: http://localhost
+      LANGUAGETOOL_PORT: 8010
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Install nightly toolchain
+      uses: dtolnay/rust-toolchain@nightly
+
+    - name: Cache dependencies
+      uses: Swatinem/rust-cache@v2
+
+    - name: Install cargo-tarpaulin
+      uses: taiki-e/install-action@cargo-tarpaulin
 
     - name: Generate code coverage
       run: |
