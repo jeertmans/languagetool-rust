@@ -15,7 +15,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
     - name: Checkout sources
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Install stable toolchain
       uses: actions-rs/toolchain@v1
@@ -32,7 +32,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v') != true
     steps:
     - name: Checkout sources
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Install stable toolchain
       uses: actions-rs/toolchain@v1
