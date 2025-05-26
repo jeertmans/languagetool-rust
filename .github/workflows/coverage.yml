@@ -23,6 +23,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Ping server
+      run: cargo run -- -vv ping
+
     - name: Generate code coverage
       run: |
         cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml

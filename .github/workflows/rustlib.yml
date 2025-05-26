@@ -56,5 +56,8 @@ jobs:
     - name: Cache dependencies
       uses: Swatinem/rust-cache@v2
 
+    - name: Ping server
+      run: cargo run -- -vv ping
+
     - run: curl -LsSf https://get.nexte.st/latest/linux | tar zxf - -C ${CARGO_HOME:-~/.cargo}/bin
     - run: cargo nextest run ${{ matrix.features }} --no-capture
