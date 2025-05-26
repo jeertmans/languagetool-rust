@@ -5,7 +5,7 @@ updates:
   schedule:
     interval: monthly
   commit-message:
-    prefix: 'ci(dependabot):'
+    prefix: 'chore(deps):'
   labels:
   - dependencies
   - rust
