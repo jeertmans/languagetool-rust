@@ -13,7 +13,7 @@ annotate-snippets = {version = "^0.9.1", optional = true}
 clap = {version = "^4.0", features = ["cargo", "derive", "env", "wrap_help"], optional = true}
 clap_complete = {version = "^4.0", optional = true}
 is-terminal = {version = "0.4.3", optional = true}
-reqwest = {version = "^0.11", default-features = false, features = ["json"]}
+reqwest = {version = "^0.12", default-features = false, features = ["json"]}
 serde = {version = "^1.0", features = ["derive"]}
 serde_json = "^1.0"
 termcolor = {version = "1.2.0", optional = true}
