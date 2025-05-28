@@ -44,13 +44,27 @@ error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   |                                            ^^^^^^^ Possible spelling mistake
   |                                            ------- help: CLI, Clip, CGI, CPI, CSI, ... (1506 not shown)
   |
+error[FILE_EXTENSIONS_CASE]: File types are normally capitalized.
+ --> [path]
+  |
+8 | ...wing features: **annotate**, **color**, **html**, **markdown**, **multithreaded**, **typ...
+  |                                            ^^^^^^^^ Capitalize file extensions
+  |                                            -------- help: HTML
+  |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
  --> [path]
   |
-9 | ...ate**, **color**, **multithreaded**.  - **native-tls**: Enables TLS functionality provided by ...
-  |                                            ^^^^^^^^^^^^^^ Possible spelling mistake
-  |                                            -------------- help: natives, natively, nativists, nativeness, naivetes
+9 | ...tml**, **markdown**, **multithreaded**, **typst**.  - **native-tls**: Enables TLS functio...
+  |                                            ^^^^^^^^^ Possible spelling mistake
+  |                                            --------- help: Typst, typist, type, types, test, ... (28 not shown)
   |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+  --> [path]
+   |
+10 | ...own**, **multithreaded**, **typst**.  - **native-tls**: Enables TLS functionality provided by ...
+   |                                            ^^^^^^^^^^^^^^ Possible spelling mistake
+   |                                            -------------- help: natives, natively, nativists, nativeness, naivetes
+   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
  --> [path]
   |
@@ -72,38 +86,52 @@ error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
    |                                            ^^^^^^^ Possible spelling mistake
    |                                            ------- help: CLI, clip, CGI, CPI, CSI, ... (1543 not shown)
    |
+error[FILE_EXTENSIONS_CASE]: File types are normally capitalized.
+  --> [path]
+   |
+12 | ...., cli-complete, docker, and undoc).  - **html**: Enables HTML parser utilities.  - **ma...
+   |                                            ^^^^^^^^ Capitalize file extensions
+   |                                            -------- help: HTML
+   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   --> [path]
    |
-13 | ...d**: Enables multithreaded requests.  - **native-tls-vendored**: Enables the vendored feature of native...
+14 | ...d**: Enables multithreaded requests.  - **native-tls-vendored**: Enables the vendored feature of native...
    |                                            ^^^^^^^^^^^^^^^^^^^^^^^ Possible spelling mistake
    |                                            ----------------------- help: native-TLS-vendored
    |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   --> [path]
    |
-14 | ...u are planning to use HTTPS servers.  - **undoc**: Adds more fields to JSON responses tha...
+17 | ...u are planning to use HTTPS servers.  - **typst**: Enables Typst parser utilities.  - **u...
+   |                                            ^^^^^^^^^ Possible spelling mistake
+   |                                            --------- help: Typst, typist, type, types, test, ... (28 not shown)
+   |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+  --> [path]
+   |
+19 | ...t**: Enables Typst parser utilities.  - **undoc**: Adds more fields to JSON responses tha...
    |                                            ^^^^^^^^^ Possible spelling mistake
    |                                            --------- help: undo, undock, undos
    |
 error[THE_CC]: It appears that a noun is missing after “the”.
   --> [path]
    |
-16 | ... JSON responses that are not present in the [](https://languagetool.org/http-api/sw...
+21 | ... JSON responses that are not present in the [](https://languagetool.org/http-api/sw...
    |                                            ^^^ the and
    |                                            ---
    |
 error[CONSECUTIVE_SPACES]: It seems like there are too many consecutive spaces here.
   --> [path]
    |
-16 | ...ON responses that are not present in the [](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All ...
+21 | ...ON responses that are not present in the [](https://languagetool.org/http-api/swagger-ui/#!/default/) but might be present in some cases. All ...
    |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Two consecutive spaces
    |                                            -------------------------------------------------------------- help:  
    |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   --> [path]
    |
-20 | ...cases. All added fields are stored in a hashmap as JSON values.   ## Related Projects  ...
+23 | ...cases. All added fields are stored in a hashmap as JSON values.   ## Related Projects  ...
    |                                            ^^^^^^^ Possible spelling mistake
    |                                            ------- help: hash map
    |
