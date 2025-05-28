@@ -1,7 +1,7 @@
 on:
   pull_request:
     paths:
-    - src/lib/**.rs
+    - src/**.rs
     - Cargo.toml
   workflow_dispatch:
 
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout sources
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install nightly toolchain
       uses: dtolnay/rust-toolchain@nightly

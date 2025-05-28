@@ -1,0 +1,54 @@
+# Lint code and (optionally) apply fixes
+name: Lint code
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+  - cron: 0 0 * * 1 # Every monday
+  workflow_dispatch:
+
+jobs:
+  auto-update:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install pre-commit
+      run: pip install pre-commit
+
+    - name: Run autoupdate
+      run: pre-commit autoupdate
+
+    - name: Create a pull request with updated versions
+      uses: peter-evans/create-pull-request@v6
+      with:
+        branch: update/pre-commit-hooks
+        title: 'chore(deps): update pre-commit hooks'
+        commit-message: 'chore(deps): update pre-commit hooks'
+  pre-commit:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'schedule' }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Rust nightly
+      uses: dtolnay/rust-toolchain@nightly
+      with:
+        components: clippy,rustfmt
+
+    - name: Run pre-commit hooks
+      uses: pre-commit/action@v3.0.1
+
+    - name: Apply fixes when present
+      uses: pre-commit-ci/lite-action@v1.1.0
+      if: always()
+      with:
+        msg: 'chore(fmt): auto fixes from pre-commit hooks'

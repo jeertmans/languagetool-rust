@@ -11,6 +11,14 @@ jobs:
   cargo_check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: taiki-e/install-action@cargo-hack
-    - run: cargo hack check --feature-powerset --no-dev-deps
+    - run: >
+        cargo hack check
+        --feature-powerset
+        --no-dev-deps
+        --clean-per-run
+        --group-features cli-complete,docker
+        --group-features typst,html,markdown
+        --mutually-exclusive-features native-tls,native-tls-vendored
+        --exclude-features snapshots

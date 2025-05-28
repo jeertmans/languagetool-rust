@@ -9,6 +9,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v2.1.5...HEAD)
 
+> [!IMPORTANT]
+> This new major release includes many breaking changes, all made in
+> [one large pull request (PR)](https://github.com/jeertmans/languagetool-rust/pull/117)
+> that is actually the results of multiple smaller PRs.
+>
+> This work would not have been possible without the help of [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)!
+
+### Added
+
+- Added support for custom file types (including basic Mardown, HTML, and Typst parsers)
+  (with [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- Added basic logger (e.g., increase verbosity with `ltrs -v`).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- Added `docker-compose.yml` config file for easier testing ([@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+
+### Changed
+
+- Changed *info* output when reading from STDIN to writing logs with INFO level,
+  instead of always writing to STDOUT.
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- **Breaking** Refactored the modules to make a clear separation between the library
+  in `src/lib` and the CLI in `src/cli`. This includes many movements and renames in the public API.
+  Please check out the documentation for more details (with [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- Updated GitHub workflows (with [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- Increased the code coverage ([@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- Added snapshot testing ([@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+
 ## [2.1.5](https://github.com/jeertmans/languagetool-rust/compare/v2.1.4...2.1.5) 2025-02-25
 
 ### Chore
@@ -24,13 +57,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed api calls to language tool server to adhere to spec. Pass POST calls as `application/x-www-form-urlencoded`. [#129](https://github.com/jeertmans/languagetool-rust/pull/129)
 - Fixed `RELEASE-PROCESS.md` description [#133](https://github.com/jeertmans/languagetool-rust/pull/133)
 
-## [2.1.4](https://github.com/jeertmans/languagetool-rust/compare/v2.1.3...v2.1.4)
+## [2.1.4](https://github.com/jeertmans/languagetool-rust/compare/v2.1.3...v2.1.4) - 2023-08-10
 
 ### Fixed
 
 - Fixed serializing of `interpretAs` in `data`. [#103](https://github.com/jeertmans/languagetool-rust/pull/103)
 
-## [2.1.3](https://github.com/jeertmans/languagetool-rust/compare/v2.1.2...v2.1.3)
+## [2.1.3](https://github.com/jeertmans/languagetool-rust/compare/v2.1.2...v2.1.3) - 2023-07-24
 
 ### Chore
 
@@ -42,122 +75,172 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Allow text starting with hyphens. [#100](https://github.com/jeertmans/languagetool-rust/pull/100)
 
-## [2.1.2](https://github.com/jeertmans/languagetool-rust/compare/v2.1.1...v2.1.2) 2023-05-29
+## [2.1.2](https://github.com/jeertmans/languagetool-rust/compare/v2.1.1...v2.1.2) - 2023-05-29
 
 ### Fixed
 
-- Fixed serializing of comma-separated values. [#86](https://github.com/jeertmans/languagetool-rust/pull/86)
+- Fixed serializing of comma-separated values.
+  [#86](https://github.com/jeertmans/languagetool-rust/pull/86)
 
-## [2.1.1](https://github.com/jeertmans/languagetool-rust/compare/v2.1.0...v2.1.1) 2023-04-07
+## [2.1.1](https://github.com/jeertmans/languagetool-rust/compare/v2.1.0...v2.1.1) - 2023-04-07
 
 ### Chore
 
-- Added Arch Linux installation ([@Dosx001](https://github.com/Dosx001)). [#77](https://github.com/jeertmans/languagetool-rust/pull/77)
+- Added Arch Linux installation ([@Dosx001](https://github.com/Dosx001)).
+  [#77](https://github.com/jeertmans/languagetool-rust/pull/77)
 
-## [2.1.0](https://github.com/jeertmans/languagetool-rust/compare/v2.0.0...v2.1.0) 2023-02-09
+## [2.1.0](https://github.com/jeertmans/languagetool-rust/compare/v2.0.0...v2.1.0) - 2023-02-09
 
 ### Added
 
-- Added environment variables for login arguments. [#64](https://github.com/jeertmans/languagetool-rust/pull/64)
+- Added environment variables for login arguments.
+  [#64](https://github.com/jeertmans/languagetool-rust/pull/64)
 
 ### Fixed
 
-- Fixed words requests. [#64](https://github.com/jeertmans/languagetool-rust/pull/64)
+- Fixed words requests.
+  [#64](https://github.com/jeertmans/languagetool-rust/pull/64)
 
-## [2.0.0](https://github.com/jeertmans/languagetool-rust/compare/v1.3.0...v2.0.0) 2023-02-07
+## [2.0.0](https://github.com/jeertmans/languagetool-rust/compare/v1.3.0...v2.0.0) - 2023-02-07
 
 ### Chore
 
-- Created founding link. [#19](https://github.com/jeertmans/languagetool-rust/pull/19)
-- Added two related projects. [#21](https://github.com/jeertmans/languagetool-rust/pull/21)
-- Added release dates. [#31](https://github.com/jeertmans/languagetool-rust/pull/31)
-- Added `#[must_use]` flag to most structures, to please clippy pedantic. [#29](https://github.com/jeertmans/languagetool-rust/pull/29)
-- Changed conditional compilation flags to directly point to dependency, e.g., `"clap"` instead of `"cli"`. [#28](https://github.com/jeertmans/languagetool-rust/pull/28)
-- Use `cargo-nextest` instead of `cargo test` for faster CI testing. [#32](https://github.com/jeertmans/languagetool-rust/pull/32)
-- Improve CI testing. [#41](https://github.com/jeertmans/languagetool-rust/pull/41)
-- Added issue templates. [#42](https://github.com/jeertmans/languagetool-rust/pull/42)
-- Added dependabot config. [#43](https://github.com/jeertmans/languagetool-rust/pull/43)
-- Added PR template and codecov badge. [#44](https://github.com/jeertmans/languagetool-rust/pull/44)
-- Added missing `#[must_use]`. [#50](https://github.com/jeertmans/languagetool-rust/pull/50)
-- Upgraded formatting options, using nightly, and improved documentation. [#55](https://github.com/jeertmans/languagetool-rust/pull/55)
-- Change example image to be SVG. [#57](https://github.com/jeertmans/languagetool-rust/pull/57)
-- Added more tests. [#22](https://github.com/jeertmans/languagetool-rust/pull/22)
+- Created founding link.
+  [#19](https://github.com/jeertmans/languagetool-rust/pull/19)
+- Added two related projects.
+  [#21](https://github.com/jeertmans/languagetool-rust/pull/21)
+- Added release dates.
+  [#31](https://github.com/jeertmans/languagetool-rust/pull/31)
+- Added `#[must_use]` flag to most structures, to please clippy pedantic.
+  [#29](https://github.com/jeertmans/languagetool-rust/pull/29)
+- Changed conditional compilation flags to directly point to dependency, e.g., `"clap"` instead of `"cli"`.
+  [#28](https://github.com/jeertmans/languagetool-rust/pull/28)
+- Use `cargo-nextest` instead of `cargo test` for faster CI testing.
+  [#32](https://github.com/jeertmans/languagetool-rust/pull/32)
+- Improve CI testing.
+  [#41](https://github.com/jeertmans/languagetool-rust/pull/41)
+- Added issue templates.
+  [#42](https://github.com/jeertmans/languagetool-rust/pull/42)
+- Added dependabot config.
+  [#43](https://github.com/jeertmans/languagetool-rust/pull/43)
+- Added PR template and codecov badge.
+  [#44](https://github.com/jeertmans/languagetool-rust/pull/44)
+- Added missing `#[must_use]`.
+  [#50](https://github.com/jeertmans/languagetool-rust/pull/50)
+- Upgraded formatting options, using nightly, and improved documentation.
+  [#55](https://github.com/jeertmans/languagetool-rust/pull/55)
+- Change example image to be SVG.
+  [#57](https://github.com/jeertmans/languagetool-rust/pull/57)
+- Added more tests.
+  [#22](https://github.com/jeertmans/languagetool-rust/pull/22)
 
 ### Added
 
-- Added `cli-complete` feature to generate completion files. [#23](https://github.com/jeertmans/languagetool-rust/pull/23)
-- Added message when reading from STDIN. [#25](https://github.com/jeertmans/languagetool-rust/pull/25), [#26](https://github.com/jeertmans/languagetool-rust/pull/26)
-- Added (regex) validator for language code. [#27](https://github.com/jeertmans/languagetool-rust/pull/27)
-- Added cli requirements for `username`/`api_key` pair. [#16](https://github.com/jeertmans/languagetool-rust/pull/16), [#30](https://github.com/jeertmans/languagetool-rust/pull/30)
-- Added a `CommandNotFound` error variant for when docker is not found. [#52](https://github.com/jeertmans/languagetool-rust/pull/52)
-- Added a `split_len` function. [#18](https://github.com/jeertmans/languagetool-rust/pull/18)
-- Automatically split long text into multiple fragments. [#58](https://github.com/jeertmans/languagetool-rust/pull/58), [#60](https://github.com/jeertmans/languagetool-rust/pull/60)
-- Add `try_` variants for panicking functions. [#59](https://github.com/jeertmans/languagetool-rust/pull/59)
+- Added `cli-complete` feature to generate completion files.
+  [#23](https://github.com/jeertmans/languagetool-rust/pull/23)
+- Added message when reading from STDIN.
+  [#25](https://github.com/jeertmans/languagetool-rust/pull/25), [#26](https://github.com/jeertmans/languagetool-rust/pull/26)
+- Added (regex) validator for language code.
+  [#27](https://github.com/jeertmans/languagetool-rust/pull/27)
+- Added cli requirements for `username`/`api_key` pair.
+  [#16](https://github.com/jeertmans/languagetool-rust/pull/16), [#30](https://github.com/jeertmans/languagetool-rust/pull/30)
+- Added a `CommandNotFound` error variant for when docker is not found.
+  [#52](https://github.com/jeertmans/languagetool-rust/pull/52)
+- Added a `split_len` function.
+  [#18](https://github.com/jeertmans/languagetool-rust/pull/18)
+- Automatically split long text into multiple fragments.
+  [#58](https://github.com/jeertmans/languagetool-rust/pull/58), [#60](https://github.com/jeertmans/languagetool-rust/pull/60)
+- Add `try_` variants for panicking functions.
+  [#59](https://github.com/jeertmans/languagetool-rust/pull/59)
 
 ### Changed
 
-- Cancelled effects of [#28](https://github.com/jeertmans/languagetool-rust/pull/28). [#45](https://github.com/jeertmans/languagetool-rust/pull/45)
-- Removed `regex` and `lazy_static` dependencies. [#51](https://github.com/jeertmans/languagetool-rust/pull/51)
-- **Breaking** Refactored the CLI by upgrading to Clap v4, added input from filenames and changed the library accordingly. [#53](https://github.com/jeertmans/languagetool-rust/pull/53)
+- Cancelled effects of [#28](https://github.com/jeertmans/languagetool-rust/pull/28).
+  [#45](https://github.com/jeertmans/languagetool-rust/pull/45)
+- Removed `regex` and `lazy_static` dependencies.
+  [#51](https://github.com/jeertmans/languagetool-rust/pull/51)
+- **Breaking** Refactored the CLI by upgrading to Clap v4, added input from filenames and changed the library accordingly.
+  [#53](https://github.com/jeertmans/languagetool-rust/pull/53)
 
 ### Fixed
 
-- Stopped serializing useless fields. [#17](https://github.com/jeertmans/languagetool-rust/pull/17)
+- Stopped serializing useless fields.
+  [#17](https://github.com/jeertmans/languagetool-rust/pull/17)
 
 ## [1.3.0](https://github.com/jeertmans/languagetool-rust/compare/v1.2.0...v1.3.0) - 2022-08-25
 
 ### Chore
 
-- Fixed features flag in `CI.yml` action. [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
+- Fixed features flag in `CI.yml` action.
+  [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
 
 ### Added
 
-- Added basic Docker support. [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
+- Added basic Docker support.
+  [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
 
 ### Fixed
 
-- Fixed typo in message when no error was found. [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
+- Fixed typo in message when no error was found.
+  [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
 
 ## [1.2.0](https://github.com/jeertmans/languagetool-rust/compare/v1.1.1...v1.2.0) - 2022-08-10
 
 ### Chore
 
-- Use vendored TLS for release. [#14](https://github.com/jeertmans/languagetool-rust/pull/14)
-- Fixed PR links in CHANGELOG. [#15](https://github.com/jeertmans/languagetool-rust/pull/15)
+- Use vendored TLS for release.
+  [#14](https://github.com/jeertmans/languagetool-rust/pull/14)
+- Fixed PR links in CHANGELOG.
+  [#15](https://github.com/jeertmans/languagetool-rust/pull/15)
 
 ### Added
 
-- Add 3 new features `native-tls`, `native-tls-vendored` and `full`. [#14](https://github.com/jeertmans/languagetool-rust/pull/14)
+- Add 3 new features `native-tls`, `native-tls-vendored` and `full`.
+  [#14](https://github.com/jeertmans/languagetool-rust/pull/14)
 
 ## [1.1.1](https://github.com/jeertmans/languagetool-rust/compare/v1.0.1...v1.1.1) - 2022-08-09
 
 ### Chore
 
-- Add GitHub action to automate release process. [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
+- Add GitHub action to automate release process.
+  [#12](https://github.com/jeertmans/languagetool-rust/pull/12)
 
 ## [1.1.0](https://github.com/jeertmans/languagetool-rust/compare/v1.0.0...v1.1.0) - 2022-08-08
 
 ### Chore
 
 - Add some LanguageTool context.
-- Correct some typos in the various docs ([@kianmeng](https://github.com/kianmeng)). [#4](https://github.com/jeertmans/languagetool-rust/pull/4)
-- Add lint test for Markdown files ([@kianmeng](https://github.com/kianmeng)). [#5](https://github.com/jeertmans/languagetool-rust/pull/5)
-- Add grammar check for text-like files. [#6](https://github.com/jeertmans/languagetool-rust/pull/6)
-- Add compare links to release tags in CHANGELOG. [#9](https://github.com/jeertmans/languagetool-rust/pull/9)
-- Add action to check if can publish. [#11](https://github.com/jeertmans/languagetool-rust/pull/11)
+- Correct some typos in the various docs ([@kianmeng](https://github.com/kianmeng)).
+  [#4](https://github.com/jeertmans/languagetool-rust/pull/4)
+- Add lint test for Markdown files ([@kianmeng](https://github.com/kianmeng)).
+  [#5](https://github.com/jeertmans/languagetool-rust/pull/5)
+- Add grammar check for text-like files.
+  [#6](https://github.com/jeertmans/languagetool-rust/pull/6)
+- Add compare links to release tags in CHANGELOG.
+  [#9](https://github.com/jeertmans/languagetool-rust/pull/9)
+- Add action to check if crate is publishable.
+  [#11](https://github.com/jeertmans/languagetool-rust/pull/11)
 
 ### Added
 
-- Add `get_text` method for `CheckRequest`. [#8](https://github.com/jeertmans/languagetool-rust/pull/8)
-- Create `CheckResponseWithContext` that enables keeping information about checked text. Hence, mutable and immutable iterators have been created to provide more tools to the end-user. [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
-- Add `--more-context` option flag to CLI. This enables to add more information in the JSON output. [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
-- Derive `Eq` for all structs that derive `PartialEq` and with fields that derive `Eq`. [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
-- Add `from_env` and `from_env_or_default` methods for `ServerCli` and `ServerClient`. [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
+- Add `get_text` method for `CheckRequest`.
+  [#8](https://github.com/jeertmans/languagetool-rust/pull/8)
+- Create `CheckResponseWithContext` that enables keeping information about checked text.
+  Hence, mutable and immutable iterators have been created to provide more tools to the end-user.
+  [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
+- Add `--more-context` option flag to CLI. This enables to add more information in the JSON output.
+  [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
+- Derive `Eq` for all structs that derive `PartialEq` and with fields that derive `Eq`.
+  [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
+- Add `from_env` and `from_env_or_default` methods for `ServerCli` and `ServerClient`.
+  [#10](https://github.com/jeertmans/languagetool-rust/pull/10)
 
 ### Fixed
 
-- Fixed line number in annotated responses. [#8](https://github.com/jeertmans/languagetool-rust/pull/8)
-- Fixed missing bench path in `Cargo.toml`. [#11](https://github.com/jeertmans/languagetool-rust/pull/11)
+- Fixed line number in annotated responses.
+  [#8](https://github.com/jeertmans/languagetool-rust/pull/8)
+- Fixed missing bench path in `Cargo.toml`.
+  [#11](https://github.com/jeertmans/languagetool-rust/pull/11)
 
 ## [1.0.0](https://github.com/jeertmans/languagetool-rust/compare/v0.0.18...v1.0.0) - 2022-07-24
 
@@ -186,7 +269,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix compilation error in `src/lib/error.rs` when `feature = "cli"` was not set.
 - Remove unused print in `src/lib/server.rs`.
 
-> **_NOTE:_** Pre v1.0.0, the changelog was generated using the `cliff` tool that is based on commits.
+> ***NOTE:*** Pre v1.0.0, the changelog was generated using the `cliff` tool that is based on commits.
 
 ## [0.0.18](https://github.com/jeertmans/languagetool-rust/compare/v0.0.17...v0.0.18) - 2022-06-22
 
@@ -254,7 +337,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🩹 Bug Fixes
 
-- [**lib**] Avoid panicking on string slices </br> └─ This fixes the problem that occurred when the string was not made of purely utf-8 chars. E.g.: `ltrs check --text "Un essai de texte en français à controler"`
+- [**lib**] Avoid panicking on string slices </br> └─ This fixes the problem that occurred when the string was not made of purely utf-8 chars. E.g.: `ltrs check --text "Un essai de texte en français à controler"` <!-- (codespell:ignore controler) -->
 
 ## [0.0.14](https://github.com/jeertmans/languagetool-rust/compare/v0.0.13...v0.0.14) - 2022-05-31
 
