@@ -25,3 +25,7 @@ jobs:
 
     - name: Check MSRV
       run: cargo msrv verify -- cargo check --all-features
+
+    - name: Find MSRV if above fail
+      if: failure()
+      run: cargo msrv find -- cargo check --all-features

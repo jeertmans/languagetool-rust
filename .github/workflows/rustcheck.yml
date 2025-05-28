@@ -18,7 +18,6 @@ jobs:
         --feature-powerset
         --no-dev-deps
         --clean-per-run
-        --group-features cli,log,pretty_env_logger,color,clap-verbosity-flag
         --group-features cli-complete,docker
         --group-features typst,html,markdown
         --mutually-exclusive-features native-tls,native-tls-vendored

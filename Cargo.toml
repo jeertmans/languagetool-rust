@@ -51,12 +51,11 @@ tokio = {version = "^1.0", features = ["macros"]}
 
 [features]
 annotate = ["dep:annotate-snippets"]
-clap-verbosity-flag = ["dep:clap-verbosity-flag"]
 cli = [
   "annotate",
-  "clap-verbosity-flag",
   "color",
   "dep:clap",
+  "dep:clap-verbosity-flag",
   "dep:enum_dispatch",
   "dep:is-terminal",
   "dep:log",
