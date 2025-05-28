@@ -1,0 +1,10 @@
+services:
+  languagetool:
+    image: erikvl87/languagetool:latest
+    container_name: languagetool
+    pull_policy: always
+    ports:
+    - 8010:8010
+    environment:
+      langtool_maxTextLength: 1500
+      Java_Xmx: 2g
