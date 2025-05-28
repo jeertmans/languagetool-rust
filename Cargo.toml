@@ -25,7 +25,7 @@ lifetime = {version = "0.1.0", features = ["macros"]}
 log = {version = "0.4.25", optional = true}
 pretty_env_logger = {version = "0.5.0", optional = true}
 pulldown-cmark = {version = "0.10.2", optional = true}
-reqwest = {version = "^0.11", default-features = false, features = ["json"]}
+reqwest = {version = "^0.12", default-features = false, features = ["json"]}
 scraper = {version = "0.23.1", optional = true}
 serde = {version = "^1.0", features = ["derive"]}
 serde_json = "^1.0"
