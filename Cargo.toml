@@ -59,11 +59,11 @@ cli = [
   "dep:clap",
   "dep:enum_dispatch",
   "dep:is-terminal",
+  "dep:log",
+  "dep:pretty_env_logger",
   "html",
-  "log",
   "markdown",
   "multithreaded",
-  "pretty_env_logger",
   "typst",
 ]
 cli-complete = ["cli", "clap_complete"]
@@ -72,12 +72,10 @@ default = ["cli", "native-tls"]
 docker = []
 full = ["cli-complete", "docker", "unstable"]
 html = ["dep:ego-tree", "dep:scraper"]
-log = ["dep:log"]
 markdown = ["dep:pulldown-cmark", "html"]
 multithreaded = ["dep:tokio"]
 native-tls = ["reqwest/native-tls"]
 native-tls-vendored = ["reqwest/native-tls-vendored"]
-pretty_env_logger = ["dep:pretty_env_logger"]
 snapshots = []  # Only for testing
 typst = ["dep:typst-syntax"]
 unstable = []

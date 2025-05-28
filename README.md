@@ -179,7 +179,7 @@ Below are listed the various feature flags you can enable when compiling LTRS.
 
 - **cli**: Adds command-line related methods for multiple structures.
   This feature is required to install the LTRS CLI,
-  and enables the following features: **annotate**, **color**, **multithreaded**.
+  and enables the following features: **annotate**, **color**, **html**, **markdown**, **multithreaded**, **typst**.
 - **native-tls**: Enables TLS functionality provided by `native-tls`.
 
 #### Optional Features
@@ -190,8 +190,11 @@ Below are listed the various feature flags you can enable when compiling LTRS.
 - **color**: Enables color outputting in the terminal. If **cli** feature is also enabled, the `--color=<WHEN>` option will be available.
 - **full**: Enables all features that are mutually compatible
   (i.e., `cli-complete`, `docker`, and `undoc`).
+- **html**: Enables HTML parser utilities.
+- **markdown**: Enables Markdown parser utilities (and also HTML).
 - **multithreaded**: Enables multithreaded requests.
 - **native-tls-vendored**: Enables the `vendored` feature of `native-tls`. This or `native-tls` should be activated if you are planning to use HTTPS servers.
+- **typst**: Enables Typst parser utilities.
 - **undoc**: Adds more fields to JSON responses that are not present
   in the [Model | Example Value](https://languagetool.org/http-api/swagger-ui/#!/default/)
   but might be present in some cases. All added fields are stored in a hashmap as

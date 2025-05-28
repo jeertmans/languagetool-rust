@@ -9,13 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v2.1.5...HEAD)
 
-## [2.1.5](https://github.com/jeertmans/languagetool-rust/compare/v2.1.4...2.1.5) 2025-02-25
+> [!IMPORTANT]
+> This new major release includes many breaking changes, all made in
+> [one large pull request (PR)](https://github.com/jeertmans/languagetool-rust/pull/117)
+> that is actually the results of multiple smaller PRs.
+>
+> This work would not have been possible without the help of [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)!
 
 ### Added
 
-- Added support for Mardown and Typst files.
+- Added support for custom file types (including basic Mardown, HTML, and Typst parsers)
+  (with [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
   [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
 - Added basic logger (e.g., increase verbosity with `ltrs -v`).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- Added `docker-compose.yml` config file for easier testing ([@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
   [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
 
 ### Changed
@@ -23,6 +31,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed *info* output when reading from STDIN to writing logs with INFO level,
   instead of always writing to STDOUT.
   [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- **Breaking** Refactored the modules to make a clear separation between the library
+  in `src/lib` and the CLI in `src/cli`. This includes many movements and renames in the public API.
+  Please checkout the documentation for more details (with [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- Updated GitHub workflows (with [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- Increased the code coverage ([@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+- Added snapshot testing ([@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
+
+## [2.1.5](https://github.com/jeertmans/languagetool-rust/compare/v2.1.4...2.1.5) 2025-02-25
 
 ### Chore
 
