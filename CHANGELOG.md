@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
 - **Breaking** Refactored the modules to make a clear separation between the library
   in `src/lib` and the CLI in `src/cli`. This includes many movements and renames in the public API.
-  Please checkout the documentation for more details (with [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  Please check out the documentation for more details (with [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
   [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
 - Updated GitHub workflows (with [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
   [#117](https://github.com/jeertmans/languagetool-rust/pull/117)
