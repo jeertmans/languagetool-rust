@@ -17,7 +17,7 @@ clap = {version = "^4.5.18", features = [
   "wrap_help",
 ], optional = true}
 clap-verbosity-flag = {version = "3.0.2", optional = true}
-clap_complete = {version = "^4.5.2", optional = true}
+clap_complete = {version = "^4.5.52", optional = true}
 ego-tree = {version = "0.10.0", optional = true}
 enum_dispatch = {version = "0.3.13", optional = true}
 is-terminal = {version = "0.4.3", optional = true}
