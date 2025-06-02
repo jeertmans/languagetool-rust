@@ -9,33 +9,33 @@ path = "src/main.rs"
 required-features = ["cli"]
 
 [dependencies]
-annotate-snippets = {version = "^0.9.1", optional = true}
-clap = {version = "^4.5.18", features = [
+annotate-snippets = {version = "0.9", optional = true}
+clap = {version = "4.5", features = [
   "cargo",
   "derive",
   "env",
   "wrap_help",
 ], optional = true}
-clap-verbosity-flag = {version = "3.0.2", optional = true}
-clap_complete = {version = "^4.5.2", optional = true}
-ego-tree = {version = "0.10.0", optional = true}
-enum_dispatch = {version = "0.3.13", optional = true}
-is-terminal = {version = "0.4.3", optional = true}
-lifetime = {version = "0.1.0", features = ["macros"]}
-log = {version = "0.4.25", optional = true}
-pretty_env_logger = {version = "0.5.0", optional = true}
-pulldown-cmark = {version = "0.10.2", optional = true}
-reqwest = {version = "^0.11", default-features = false, features = ["json"]}
-scraper = {version = "0.23.1", optional = true}
-serde = {version = "^1.0", features = ["derive"]}
-serde_json = "^1.0"
-termcolor = {version = "1.2.0", optional = true}
-thiserror = "^1.0"
-tokio = {version = "^1.0", features = [
+clap-verbosity-flag = {version = "3.0", optional = true}
+clap_complete = {version = "4.5", optional = true}
+ego-tree = {version = "0.10", optional = true}
+enum_dispatch = {version = "0.3", optional = true}
+is-terminal = {version = "0.4", optional = true}
+lifetime = {version = "0.1", features = ["macros"]}
+log = {version = "0.4", optional = true}
+pretty_env_logger = {version = "0.5", optional = true}
+pulldown-cmark = {version = "0.10", optional = true}
+reqwest = {version = "0.11", default-features = false, features = ["json"]}
+scraper = {version = "0.23", optional = true}
+serde = {version = "1.0", features = ["derive"]}
+serde_json = "1.0"
+termcolor = {version = "1.2", optional = true}
+thiserror = "1.0"
+tokio = {version = "1.0", features = [
   "macros",
   "rt-multi-thread",
 ], optional = true}
-typst-syntax = {version = "^0.12.0", optional = true}
+typst-syntax = {version = "0.12", optional = true}
 
 [dev-dependencies]
 assert_cmd = "2.0.11"
@@ -47,7 +47,7 @@ insta = {version = "1.41.1", features = ["filters"]}
 lazy_static = "1.5.0"
 predicates = "3.0.3"
 tempfile = "3.5.0"
-tokio = {version = "^1.0", features = ["macros"]}
+tokio = {version = "1.0", features = ["macros"]}
 
 [features]
 annotate = ["dep:annotate-snippets"]
