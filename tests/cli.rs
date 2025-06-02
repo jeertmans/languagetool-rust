@@ -598,4 +598,14 @@ fn test_check_file_markdown() {
         "autodetect_markdown_file",
         String::from_utf8(output.stdout).unwrap()
     );
+
+    let output = get_cmd()
+        .arg("check")
+        .arg(PATH_ROOT.join("CONTRIBUTING.md"))
+        .output()
+        .unwrap();
+    assert_snapshot!(
+        "autodetect_markdown_file_contributing",
+        String::from_utf8(output.stdout).unwrap()
+    );
 }

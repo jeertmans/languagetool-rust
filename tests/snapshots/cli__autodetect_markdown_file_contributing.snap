@@ -1,0 +1,39 @@
+---
+source: tests/cli.rs
+expression: "String::from_utf8(output.stdout).unwrap()"
+---
+error[COMMA_PARENTHESIS_WHITESPACE]: Put a space after the comma, but not before the comma.
+ --> [path]
+  |
+3 | ...th (1) a fast, idiomatic Rust client for [](https://languagetool.org/), supporting both HTTP and local servers,...
+  |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use of whitespace before comma and before/after parentheses
+  |                                            ------------------------------- help: ,
+  |
+error[CONSECUTIVE_SPACES]: It seems like there are too many consecutive spaces here.
+ --> [path]
+  |
+3 | ...AGETOOL_PORT. We also recommend that you [](https://dev.languagetool.org/http-server) on your machine. If you have [](https://...
+  |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Two consecutive spaces
+  |                                            ---------------------------------------------- help:  
+  |
+error[CONSECUTIVE_SPACES]: It seems like there are too many consecutive spaces here.
+ --> [path]
+  |
+3 | ...ttp-server) on your machine. If you have [](https://www.docker.com/) installed on your machine, we provide yo...
+  |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Two consecutive spaces
+  |                                            ----------------------------- help:  
+  |
+error[COMMA_PARENTHESIS_WHITESPACE]: Don’t put a space before the full stop.
+  --> [path]
+   |
+12 | ... this project uses snapshot testing with [](https://github.com/mitsuhiko/insta). If you introduce changes to the snapsho...
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use of whitespace before comma and before/after parentheses
+   |                                            ---------------------------------------- help: .
+   |
+error[COMMA_PARENTHESIS_WHITESPACE]: Don’t put a space before the full stop.
+  --> [path]
+   |
+10 | ...lic features should be documented in the [](./README.md). If some features are mutually incompati...
+   |                                            ^^^^^^^^^^^^^^^^^ Use of whitespace before comma and before/after parentheses
+   |                                            ----------------- help: .
+   |
