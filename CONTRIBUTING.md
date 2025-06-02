@@ -92,7 +92,7 @@ Two things are very important on that regards:
    and update the corresponding field in [`Cargo.toml`](./Cargo.toml)
 2. **Compatible/Incompatible Features** - All public features should be documented in the [README](./README.md).
 
-    If some features are mutually incompatible, it should also be documented (and added in the list of mutually exclusive features in [`./.github/workflows/rustlib.yml`](./.github/workflows/rustlib.yml)). We recommend using [`cargo-nextest`](https://github.com/nextest-rs/nextest) for testing compatibility with features.
+   If some features are mutually incompatible, it should also be documented (and added in the list of mutually exclusive features in [`./.github/workflows/rustlib.yml`](./.github/workflows/rustlib.yml)). We recommend using [`cargo-nextest`](https://github.com/nextest-rs/nextest) for testing compatibility with features.
 
 ## Documentation
 
