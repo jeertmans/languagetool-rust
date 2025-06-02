@@ -10,36 +10,45 @@ We welcome contributions of all kinds: bug fixes, documentation improvements, fe
 - [Development Guide](#development-guide)
 - [Testing](#testing)
 - [Documentation](#documentation)
+- [Pull Requests](#pull-requests)
 
 ---
 
 ## Getting Started
 
 1. **Fork the repository** and clone it locally:
+
    ```bash
    git clone https://github.com/your-username/languagetool-rust.git
    cd languagetool-rust
    ```
+
 2. [**Install Rust (if you haven't already)**](https://www.rust-lang.org/learn/get-started) as well as `rustfmt` and `clippy`.
 
    This project also requires the *nightly* channel for formatting the code. You can install it with:
+
    ```bash
    rustup toolchain install nightly
    ```
+
 3. **Build the project:**
+
    ```bash
    cargo build
    ```
+
 4. **Run the CLI to ensure everything works:**
+
    ```bash
-   cargo run -- check --text "This text contans one mistake."
+   cargo run -- check --text "This text contans one mistake."  # codespell:ignore contans
    ```
 
 ## Development Guide
 
 This project is organized in two parts:
-* The API library, in `src/api/`, with the bindings to connect to the LanguageTool API;
-* The command-line interface (CLI), in `src/cli/`, to provide an easy-to-use tool for checking your files.
+
+- The API library, in `src/api/`, with the bindings to connect to the LanguageTool API;
+- The command-line interface (CLI), in `src/cli/`, to provide an easy-to-use tool for checking your files.
 
 Tests are located either in the Rust modules as unit tests, or in the `tests/` folder for integration tests.
 
@@ -55,10 +64,10 @@ Then, you can run the test suite with:
 cargo test
 ```
 
-> ![IMPORTANT]
+> [!IMPORTANT]
 > Please write tests for any new features or bug fixes you introduce.
 
-# Documentation
+## Documentation
 
 Writing good documentation is as important as writing good code.
 

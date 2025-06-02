@@ -1,6 +1,12 @@
+ci:
+  autofix_commit_msg: |
+    chore(fmt): auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autoupdate_commit_msg: 'chore(deps): pre-commit autoupdate'
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.6.0
+  rev: v5.0.0
   hooks:
   - id: check-yaml
   - id: check-toml
@@ -9,12 +15,12 @@ repos:
   - id: trailing-whitespace
     exclude: ^tests/
 - repo: https://github.com/igorshubovych/markdownlint-cli
-  rev: v0.35.0
+  rev: v0.45.0
   hooks:
   - id: markdownlint-fix
     args: [--ignore, LICENSE.md]
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.13.0
+  rev: v2.14.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix]

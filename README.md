@@ -134,7 +134,7 @@ ltrs docker stop # stop the LT server
 
 > *Note:* Docker is a tool that facilitates running applications without worrying
   about local dependencies, platform-related issues, and so on.
-  Installation guidelines can be found [here](https://www.docker.com/get-started/).
+  Installation guidelines can be found [online](https://www.docker.com/get-started/).
   On Linux platforms, you might need to circumvent the *sudo privilege issue* by doing
   [this](https://docs.docker.com/engine/install/linux-postinstall/).
 
