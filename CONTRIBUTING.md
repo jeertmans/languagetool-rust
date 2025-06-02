@@ -25,7 +25,7 @@ We welcome contributions of all kinds: bug fixes, documentation improvements, fe
 
 2. [**Install Rust (if you haven't already)**](https://www.rust-lang.org/learn/get-started) as well as `rustfmt` and `clippy`.
 
-   This project also requires the *nightly* channel for formatting the code. You can install it with:
+   This project also requires the *nightly* channel for formatting the code and building the docs. You can install it with:
 
    ```bash
    rustup toolchain install nightly
@@ -54,9 +54,9 @@ Tests are located either in the Rust modules as unit tests, or in the `tests/` f
 
 ## Testing
 
-To avoid spamming the free LanguageTool API, running the tests required you to specify the LanguageTool server URL and PORT, via environment variables `LANGUAGETOOL_HOSTNAME` and `LANGUAGETOOL_PORT`. We also recommend that you [run a local server](https://dev.languagetool.org/http-server) on your machine.
+To avoid spamming the free LanguageTool API, running the tests requires you to specify the LanguageTool server URL and PORT, via environment variables `LANGUAGETOOL_HOSTNAME` and `LANGUAGETOOL_PORT`. We also recommend that you [run a local server](https://dev.languagetool.org/http-server) on your machine.
 
-If you have [Docker](https://www.docker.com/) installed on your machine, we provide you with a `docker-compose.yml` file that allows you to set up a local server for testing (or actual grammar checking) with `docker compose up`.
+If you have [Docker](https://www.docker.com/) installed on your machine, we provide you with a [`docker-compose.yml`](./docker-compose.yml) file that allows you to set up a local server for testing (or actual grammar checking) with `docker compose up`.
 
 Then, you can run the test suite with:
 
@@ -67,11 +67,37 @@ cargo test
 > [!IMPORTANT]
 > Please write tests for any new features or bug fixes you introduce.
 
+### Advanced Testing
+
+Beyond usual tests, it may be good to also check that changes do not break the package itself.
+
+Two things are very important on that regards:
+1. **The Minimal Supported Rust Version (MSRV)** - Please use [`cargo-msrv`](https://github.com/foresterre/cargo-msrv) to check that the advertised MSRV is still valid:
+   ```bash
+   cargo msrv verify -- cargo check --all-features
+   ```
+   If the above fails, please run the following to determine the new MSRV:
+   ```bash
+   cargo msrv find
+   ```
+   and update the corresponding field in [`Cargo.toml`](./Cargo.toml)
+2.  **Compatible/Incompatible Features** - All public features should be documented in the [README](./README.md).
+    
+    If some features are mutually incompatible, it should also be documented (and added in the list of mutually exclusive features in [`./.github/workflows/rustlib.yml`](./.github/workflows/rustlib.yml)). We recommend using [`cargo-nextest`](https://github.com/nextest-rs/nextest) for testing compatibility with features.
+
 ## Documentation
 
 Writing good documentation is as important as writing good code.
 
 Make sure that any addition or modification to the code results in an appropriate change in the documentation. We encourage contributors to take inspiration from existing documentation.
+
+You can preview the docs with:
+
+```bash
+RUSTDOCFLAGS='--cfg docsrs' cargo +nightly doc --all-features -Zunstable-options -Zrustdoc-scrape-examples --no-deps --open
+```
+
+Additional flags aim at making the documentation very similar to what it will look like when on https://docs.rs/.
 
 ## Pull Requests
 
