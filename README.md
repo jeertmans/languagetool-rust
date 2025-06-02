@@ -215,7 +215,7 @@ Here are listed some projects that use LTRS.
 
 Contributions are more than welcome!
 
-First, check out the [CONTRIBUTING][CHANGELOG](https://github.com/jeertmans/languagetool-rust/blob/main/CONTRIBUTING.md)
+First, check out the [CHANGELOG](https://github.com/jeertmans/languagetool-rust/blob/main/CONTRIBUTING.md)
 guide for detailed information about how to contribute to this project.
 
 Should you have any question, feel free to reach out via:
