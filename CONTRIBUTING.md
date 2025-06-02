@@ -64,6 +64,10 @@ Then, you can run the test suite with:
 cargo test
 ```
 
+Note that this project uses snapshot testing with [insta](https://github.com/mitsuhiko/insta). If you introduce changes to the snapshots when running the tests,
+run `cargo insta review` and review each change, ensuring that your modifications *should* change the output of the
+program in that way.
+
 > [!IMPORTANT]
 > Please write tests for any new features or bug fixes you introduce.
 
@@ -72,17 +76,22 @@ cargo test
 Beyond usual tests, it may be good to also check that changes do not break the package itself.
 
 Two things are very important on that regards:
+
 1. **The Minimal Supported Rust Version (MSRV)** - Please use [`cargo-msrv`](https://github.com/foresterre/cargo-msrv) to check that the advertised MSRV is still valid:
+
    ```bash
    cargo msrv verify -- cargo check --all-features
    ```
+
    If the above fails, please run the following to determine the new MSRV:
+
    ```bash
    cargo msrv find
    ```
+
    and update the corresponding field in [`Cargo.toml`](./Cargo.toml)
-2.  **Compatible/Incompatible Features** - All public features should be documented in the [README](./README.md).
-    
+2. **Compatible/Incompatible Features** - All public features should be documented in the [README](./README.md).
+
     If some features are mutually incompatible, it should also be documented (and added in the list of mutually exclusive features in [`./.github/workflows/rustlib.yml`](./.github/workflows/rustlib.yml)). We recommend using [`cargo-nextest`](https://github.com/nextest-rs/nextest) for testing compatibility with features.
 
 ## Documentation
@@ -97,7 +106,7 @@ You can preview the docs with:
 RUSTDOCFLAGS='--cfg docsrs' cargo +nightly doc --all-features -Zunstable-options -Zrustdoc-scrape-examples --no-deps --open
 ```
 
-Additional flags aim at making the documentation very similar to what it will look like when on https://docs.rs/.
+Additional flags aim at making the documentation very similar to what it will look like when on <https://docs.rs/>.
 
 ## Pull Requests
 
