@@ -17,11 +17,9 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
 
     - name: Install Cargo MSRV
-      uses: actions-rs/install@v0.1
+      uses: taiki-e/install-action@v2
       with:
-        crate: cargo-msrv
-        version: latest
-        use-tool-cache: true
+        tool: cargo-msrv
 
     - name: Check MSRV
       run: cargo msrv verify -- cargo check --all-features
