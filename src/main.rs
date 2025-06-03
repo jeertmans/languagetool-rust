@@ -10,5 +10,9 @@ async fn main() {
 }
 
 async fn try_main() -> Result<()> {
-    Cli::parse().execute().await
+    let cli = Cli::parse();
+    pretty_env_logger::formatted_builder()
+        .filter_level(cli.verbose.log_level_filter())
+        .init();
+    cli.execute().await
 }

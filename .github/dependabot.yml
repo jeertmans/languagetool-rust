@@ -9,7 +9,6 @@ updates:
   labels:
   - dependencies
   - rust
-  target-branch: 'v3'  # TODO: change me after merging v3
 - package-ecosystem: github-actions
   directory: /
   schedule:
@@ -19,4 +18,3 @@ updates:
   labels:
   - ci
   - dependencies
-  target-branch: 'v3'  # TODO: change me after merging v3

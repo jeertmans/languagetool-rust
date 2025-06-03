@@ -1,22 +1,44 @@
 name: Code Coverage
 
-on: [push]
+on:
+  push:
+    branches:
+    - main
+  pull_request:
 jobs:
   test:
     name: Coverage
     runs-on: ubuntu-latest
-    container:
-      image: xd009642/tarpaulin:develop-nightly
-      options: --security-opt seccomp=unconfined
+    services:
+      languagetool:
+        image: erikvl87/languagetool:latest
+        ports:
+        - 8010:8010
+        env:
+          langtool_maxTextLength: 1500
+          Java_Xmx: 2g
+    env:
+      LANGUAGETOOL_HOSTNAME: http://localhost
+      LANGUAGETOOL_PORT: 8010
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+
+    - name: Install nightly toolchain
+      uses: dtolnay/rust-toolchain@nightly
+
+    - name: Cache dependencies
+      uses: Swatinem/rust-cache@v2
+
+    - name: Install cargo-tarpaulin
+      uses: taiki-e/install-action@cargo-tarpaulin
 
     - name: Generate code coverage
       run: |
         cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml
 
     - name: Upload to codecov.io
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v5
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true

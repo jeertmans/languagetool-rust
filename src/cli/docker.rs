@@ -1,59 +1,52 @@
 //! Structures and methods to easily manipulate Docker images, especially for
 //! LanguageTool applications.
 
-use crate::error::{exit_status_error, Error, Result};
-#[cfg(feature = "cli")]
+use std::process::{self, Output, Stdio};
+
 use clap::{Args, Parser};
-use std::process::{Command, Output, Stdio};
+use termcolor::StandardStream;
+
+use crate::{
+    api::server::ServerClient,
+    error::{exit_status_error, Error, Result},
+};
+
+use super::ExecuteSubcommand;
 
 /// Commands to pull, start and stop a `LanguageTool` container using Docker.
-#[cfg_attr(feature = "cli", derive(Args))]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Args)]
 pub struct Docker {
     /// Image or repository from a registry.
-    #[cfg_attr(
-        feature = "cli",
-        clap(
-            default_value = "erikvl87/languagetool",
-            env = "LANGUAGETOOL_DOCKER_IMAGE"
-        )
+    #[clap(
+        default_value = "erikvl87/languagetool",
+        env = "LANGUAGETOOL_DOCKER_IMAGE"
     )]
     name: String,
     /// Path to Docker's binaries.
-    #[cfg_attr(
-        feature = "cli",
-        clap(
-            short = 'b',
-            long,
-            default_value = "docker",
-            env = "LANGUAGETOOL_DOCKER_BIN"
-        )
+    #[clap(
+        short = 'b',
+        long,
+        default_value = "docker",
+        env = "LANGUAGETOOL_DOCKER_BIN"
     )]
     bin: String,
     /// Name assigned to the container.
-    #[cfg_attr(
-        feature = "cli",
-        clap(long, default_value = "languagetool", env = "LANGUAGETOOL_DOCKER_NAME")
-    )]
+    #[clap(long, default_value = "languagetool", env = "LANGUAGETOOL_DOCKER_NAME")]
     container_name: String,
     /// Publish a container's port(s) to the host.
-    #[cfg_attr(
-        feature = "cli",
-        clap(
-            short = 'p',
-            long,
-            default_value = "8010:8010",
-            env = "LANGUAGETOOL_DOCKER_PORT"
-        )
+    #[clap(
+        short = 'p',
+        long,
+        default_value = "8010:8010",
+        env = "LANGUAGETOOL_DOCKER_PORT"
     )]
     port: String,
     /// Docker action.
-    #[cfg_attr(feature = "cli", clap(subcommand))]
+    #[clap(subcommand)]
     action: Action,
 }
 
-#[cfg_attr(feature = "cli", derive(clap::Subcommand))]
-#[derive(Clone, Debug)]
+#[derive(clap::Subcommand, Clone, Debug)]
 /// Enumerate supported Docker actions.
 enum Action {
     /// Pull a docker docker image.
@@ -74,7 +67,7 @@ enum Action {
 impl Docker {
     /// Pull a Docker image from the given repository/file/...
     pub fn pull(&self) -> Result<Output> {
-        let output = Command::new(&self.bin)
+        let output = process::Command::new(&self.bin)
             .args(["pull", &self.name])
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
@@ -88,7 +81,7 @@ impl Docker {
 
     /// Start a Docker container with given specifications.
     pub fn start(&self) -> Result<Output> {
-        let output = Command::new(&self.bin)
+        let output = process::Command::new(&self.bin)
             .args([
                 "run",
                 "--rm",
@@ -111,7 +104,7 @@ impl Docker {
 
     /// Stop the latest Docker container with the given name.
     pub fn stop(&self) -> Result<Output> {
-        let output = Command::new(&self.bin)
+        let output = process::Command::new(&self.bin)
             .args([
                 "ps",
                 "-l",
@@ -130,7 +123,7 @@ impl Docker {
             .filter(|c| c.is_alphanumeric()) // This avoids newlines
             .collect();
 
-        let output = Command::new(&self.bin)
+        let output = process::Command::new(&self.bin)
             .args(["kill", &docker_id])
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
@@ -152,21 +145,16 @@ impl Docker {
 }
 
 /// Commands to easily run a LanguageTool server with Docker.
-#[cfg(feature = "cli")]
 #[derive(Debug, Parser)]
-pub struct DockerCommand {
+pub struct Command {
     /// Actual command arguments.
     #[command(flatten)]
     pub docker: Docker,
 }
 
-#[cfg(feature = "cli")]
-impl DockerCommand {
-    /// Execute a Docker command and write output to stdout.
-    pub fn execute<W>(&self, _stdout: &mut W) -> Result<()>
-    where
-        W: std::io::Write,
-    {
+impl ExecuteSubcommand for Command {
+    /// Execute the `docker` subcommand.
+    async fn execute(self, _stdout: StandardStream, _: ServerClient) -> Result<()> {
         self.docker.run_action()?;
         Ok(())
     }

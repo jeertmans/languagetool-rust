@@ -28,10 +28,10 @@ jobs:
       LANGUAGETOOL_HOSTNAME: http://localhost
       LANGUAGETOOL_PORT: 8010
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup rust toolchain, cache and cargo-codspeed binary
-      uses: moonrepo/setup-rust@v0
+      uses: moonrepo/setup-rust@v1
       with:
         channel: stable
         cache-target: release

@@ -1,0 +1,25 @@
+---
+source: tests/cli.rs
+expression: "String::from_utf8(output.stdout).unwrap()"
+---
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+ --> [path]
+  |
+4 |   <body>  <img />  <img />  <img />  <!--  First coment  -->  <!--  Feel free to change this text...
+  |                                      ^^^^^^^^^^^^^^^^^^^^ Possible spelling mistake
+  |                                      -------------------- help: moment, cement, comment, comet, foment, ... (3 not shown)
+  |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+ --> [path]
+  |
+5 | ...ask </div>  <div>  <div>  <div> Test an incorect spling </div>  </div>  </div>  </div>  ...
+  |                                            ^^^^^^^^ Possible spelling mistake
+  |                                            -------- help: incorrect
+  |
+error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
+ --> [path]
+  |
+5 | ...>  <div>  <div>  <div> Test an incorect spling </div>  </div>  </div>  </div>  <div>  ...
+  |                                            ^^^^^^ Possible spelling mistake
+  |                                            ------ help: spring, spying, sling, spline, splint, ... (2 not shown)
+  |

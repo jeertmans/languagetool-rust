@@ -5,46 +5,83 @@ path = "benches/bench_main.rs"
 
 [[bin]]
 name = "ltrs"
-path = "src/bin.rs"
+path = "src/main.rs"
 required-features = ["cli"]
 
 [dependencies]
-annotate-snippets = {version = "^0.9.1", optional = true}
-clap = {version = "^4.0", features = ["cargo", "derive", "env", "wrap_help"], optional = true}
-clap_complete = {version = "^4.0", optional = true}
-is-terminal = {version = "0.4.3", optional = true}
-reqwest = {version = "^0.11", default-features = false, features = ["json"]}
-serde = {version = "^1.0", features = ["derive"]}
-serde_json = "^1.0"
-termcolor = {version = "1.2.0", optional = true}
-thiserror = "^1.0"
-tokio = {version = "^1.0", features = ["macros", "rt-multi-thread"], optional = true}
+annotate-snippets = {version = "0.9", optional = true}
+clap = {version = "4.5", features = [
+  "cargo",
+  "derive",
+  "env",
+  "wrap_help",
+], optional = true}
+clap-verbosity-flag = {version = "3.0", optional = true}
+clap_complete = {version = "4.5", optional = true}
+ego-tree = {version = "0.10", optional = true}
+enum_dispatch = {version = "0.3", optional = true}
+is-terminal = {version = "0.4", optional = true}
+lifetime = {version = "0.1", features = ["macros"]}
+log = {version = "0.4", optional = true}
+pretty_env_logger = {version = "0.5", optional = true}
+pulldown-cmark = {version = "0.10", optional = true}
+reqwest = {version = "0.11", default-features = false, features = ["json"]}
+scraper = {version = "0.23", optional = true}
+serde = {version = "1.0", features = ["derive"]}
+serde_json = "1.0"
+termcolor = {version = "1.2", optional = true}
+thiserror = "1.0"
+tokio = {version = "1.0", features = [
+  "macros",
+  "rt-multi-thread",
+], optional = true}
+typst-syntax = {version = "0.12", optional = true}
 
 [dev-dependencies]
 assert_cmd = "2.0.11"
+assert_matches = "1.5.0"
 codspeed-criterion-compat = "2.7.0"
 criterion = "0.5"
 futures = "0.3"
+insta = {version = "1.41.1", features = ["filters"]}
+lazy_static = "1.5.0"
 predicates = "3.0.3"
 tempfile = "3.5.0"
-tokio = {version = "^1.0", features = ["macros"]}
+tokio = {version = "1.0", features = ["macros"]}
 
 [features]
 annotate = ["dep:annotate-snippets"]
-cli = ["annotate", "color", "dep:clap", "dep:is-terminal", "multithreaded"]
+cli = [
+  "annotate",
+  "color",
+  "dep:clap",
+  "dep:clap-verbosity-flag",
+  "dep:enum_dispatch",
+  "dep:is-terminal",
+  "dep:log",
+  "dep:pretty_env_logger",
+  "html",
+  "markdown",
+  "multithreaded",
+  "typst",
+]
 cli-complete = ["cli", "clap_complete"]
 color = ["annotate-snippets?/color", "dep:termcolor"]
 default = ["cli", "native-tls"]
 docker = []
 full = ["cli-complete", "docker", "unstable"]
+html = ["dep:ego-tree", "dep:scraper"]
+markdown = ["dep:pulldown-cmark", "html"]
 multithreaded = ["dep:tokio"]
 native-tls = ["reqwest/native-tls"]
 native-tls-vendored = ["reqwest/native-tls-vendored"]
+snapshots = []  # Only for testing
+typst = ["dep:typst-syntax"]
 unstable = []
 
 [lib]
 name = "languagetool_rust"
-path = "src/lib/lib.rs"
+path = "src/lib.rs"
 
 [package]
 authors = ["Jérome Eertmans <jeertmans@icloud.com>"]
@@ -56,21 +93,25 @@ license = "MIT"
 name = "languagetool-rust"
 readme = "README.md"
 repository = "https://github.com/jeertmans/languagetool-rust"
-rust-version = "1.74.0"
-version = "2.1.5"
-
-[package.metadata.release]
-pre-release-replacements = [
-    {file="CHANGELOG.md", search="Unreleased", replace="{{version}}", min=1},
-    {file="CHANGELOG.md", search="\\.\\.\\.HEAD\\)", replace="...{{version}}) {{date}}", exactly=1},
-    {file="CHANGELOG.md", search="<!-- next-header -->", replace="<!-- next-header -->\n\n## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v{{version}}...HEAD)", exactly=1},
-]
-tag = false
-publish = false
+rust-version = "1.82.0"
+version = "2.1.4"
 
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.release]
+pre-release-replacements = [
+  {file = "CHANGELOG.md", search = "Unreleased", replace = "{{version}}", min = 1},
+  {file = "CHANGELOG.md", search = "\\.\\.\\.HEAD\\)", replace = "...{{version}}) {{date}}", exactly = 1},
+  {file = "CHANGELOG.md", search = "<!-- next-header -->", replace = "<!-- next-header -->\n\n## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v{{version}}...HEAD)", exactly = 1},
+]
+publish = false
+tag = false
+
+[profile.dev.package]
+insta.opt-level = 3
+similar.opt-level = 3
 
 [[test]]
 name = "cli"
@@ -80,5 +121,3 @@ required-features = ["cli"]
 [[test]]
 name = "match-positions"
 path = "tests/match_positions.rs"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

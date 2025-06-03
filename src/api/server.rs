@@ -1,17 +1,22 @@
 //! Structure to communicate with some `LanguageTool` server through the API.
 
+#[cfg(feature = "multithreaded")]
+use crate::api::check;
 use crate::{
-    check::{CheckRequest, CheckResponse, CheckResponseWithContext},
-    error::{Error, Result},
-    languages::LanguagesResponse,
-    words::{
-        WordsAddRequest, WordsAddResponse, WordsDeleteRequest, WordsDeleteResponse, WordsRequest,
-        WordsResponse,
+    api::{
+        check::{Request, Response},
+        languages, words,
     },
+    error::{Error, Result},
 };
 #[cfg(feature = "cli")]
 use clap::Args;
-use reqwest::{header::{HeaderValue, ACCEPT}, Client};
+#[cfg(feature = "multithreaded")]
+use lifetime::IntoStatic;
+use reqwest::{
+    header::{HeaderValue, ACCEPT},
+    Client,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{io, path::PathBuf, time::Instant};
@@ -25,7 +30,7 @@ use std::{io, path::PathBuf, time::Instant};
 /// # Examples
 ///
 /// ```
-/// # use languagetool_rust::server::parse_port;
+/// # use languagetool_rust::api::server::parse_port;
 /// assert!(parse_port("8081").is_ok());
 ///
 /// assert!(parse_port("").is_ok()); // No port specified, which is accepted
@@ -264,6 +269,7 @@ impl Default for ServerParameters {
 /// To use your local server instead of online api, set:
 /// * `hostname` to "http://localhost"
 /// * `port` to "8081"
+///
 /// if you used the default configuration to start the server.
 #[cfg_attr(feature = "cli", derive(Args))]
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
@@ -368,40 +374,37 @@ impl ServerClient {
     }
 
     /// Send a check request to the server and await for the response.
-    pub async fn check(&self, request: &CheckRequest) -> Result<CheckResponse> {
-        match self
+    pub async fn check(&self, request: &Request<'_>) -> Result<Response> {
+        let resp = self
             .client
             .post(format!("{0}/check", self.api))
             .header(ACCEPT, HeaderValue::from_static("application/json"))
             .form(request)
             .send()
             .await
-        {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<CheckResponse>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                            .map(|mut resp| {
-                                if self.max_suggestions > 0 {
-                                    let max = self.max_suggestions as usize;
-                                    resp.matches.iter_mut().for_each(|m| {
-                                        let len = m.replacements.len();
-                                        if max < len {
-                                            m.replacements[max] =
-                                                format!("... ({} not shown)", len - max).into();
-                                            m.replacements.truncate(max + 1);
-                                        }
-                                    });
+            .map_err(Error::Reqwest)?;
+
+        match resp.error_for_status_ref() {
+            Ok(_) => {
+                resp.json::<Response>()
+                    .await
+                    .map_err(Into::into)
+                    .map(|mut resp| {
+                        if self.max_suggestions > 0 {
+                            let max = self.max_suggestions as usize;
+                            resp.matches.iter_mut().for_each(|m| {
+                                let len = m.replacements.len();
+                                if max < len {
+                                    m.replacements[max] =
+                                        format!("... ({} not shown)", len - max).into();
+                                    m.replacements.truncate(max + 1);
                                 }
-                                resp
-                            })
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
+                            });
+                        }
+                        resp
+                    })
             },
-            Err(e) => Err(Error::RequestEncode(e)),
+            Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
         }
     }
 
@@ -409,39 +412,90 @@ impl ServerClient {
     ///
     /// # Error
     ///
-    /// If any of the requests has `self.text` field which is none.
+    /// If any of the requests has `self.text` field which is none, or
+    /// if zero request is provided.
     #[cfg(feature = "multithreaded")]
-    pub async fn check_multiple_and_join(
+    pub async fn check_multiple_and_join<'source>(
         &self,
-        requests: Vec<CheckRequest>,
-    ) -> Result<CheckResponse> {
-        let mut tasks = Vec::with_capacity(requests.len());
+        requests: Vec<Request<'source>>,
+    ) -> Result<check::ResponseWithContext<'source>> {
+        use std::borrow::Cow;
 
-        for request in requests.into_iter() {
-            let server_client = self.clone();
-            tasks.push(tokio::spawn(async move {
-                let response = server_client.check(&request).await?;
-                let text = request.text.ok_or(Error::InvalidRequest(
-                    "missing text field; cannot join requests with data annotations".to_string(),
-                ))?;
-                Result::<(String, CheckResponse)>::Ok((text, response))
-            }));
+        if requests.is_empty() {
+            return Err(Error::InvalidRequest(
+                "no request; cannot join zero request".to_string(),
+            ));
         }
 
-        let mut response_with_context: Option<CheckResponseWithContext> = None;
+        let tasks = requests
+            .into_iter()
+            .map(|r| r.into_static())
+            .map(|request| {
+                let server_client = self.clone();
+
+                tokio::spawn(async move {
+                    let response = server_client.check(&request).await?;
+                    let text = request.text.ok_or_else(|| {
+                        Error::InvalidRequest(
+                            "missing text field; cannot join requests with data annotations"
+                                .to_string(),
+                        )
+                    })?;
+                    Result::<(Cow<'static, str>, Response)>::Ok((text, response))
+                })
+            });
+
+        let mut response_with_context: Option<check::ResponseWithContext> = None;
 
         for task in tasks {
             let (text, response) = task.await.unwrap()?;
-            match response_with_context {
-                Some(resp) => {
-                    response_with_context =
-                        Some(resp.append(CheckResponseWithContext::new(text, response)))
-                },
-                None => response_with_context = Some(CheckResponseWithContext::new(text, response)),
-            }
+
+            response_with_context = Some(match response_with_context {
+                Some(resp) => resp.append(check::ResponseWithContext::new(text, response)),
+                None => check::ResponseWithContext::new(text, response),
+            })
         }
 
-        Ok(response_with_context.unwrap().into())
+        Ok(response_with_context.unwrap())
+    }
+
+    /// Send multiple check requests and join them into a single response,
+    /// without any context.
+    ///
+    /// # Error
+    ///
+    /// If any of the requests has `self.text` or `self.data` field which is
+    /// [`None`].
+    #[cfg(feature = "multithreaded")]
+    pub async fn check_multiple_and_join_without_context(
+        &self,
+        requests: Vec<Request<'_>>,
+    ) -> Result<check::Response> {
+        let mut response: Option<check::Response> = None;
+
+        let tasks = requests
+            .into_iter()
+            .map(|r| r.into_static())
+            .map(|request| {
+                let server_client = self.clone();
+
+                tokio::spawn(async move {
+                    let response = server_client.check(&request).await?;
+                    Result::<Response>::Ok(response)
+                })
+            });
+
+        // Make requests in sequence
+        for task in tasks {
+            let resp = task.await.unwrap()?;
+
+            response = Some(match response {
+                Some(r) => r.append(resp),
+                None => resp,
+            })
+        }
+
+        Ok(response.unwrap())
     }
 
     /// Send a check request to the server, await for the response and annotate
@@ -449,107 +503,90 @@ impl ServerClient {
     #[cfg(feature = "annotate")]
     pub async fn annotate_check(
         &self,
-        request: &CheckRequest,
+        request: &Request<'_>,
         origin: Option<&str>,
         color: bool,
     ) -> Result<String> {
         let text = request.get_text();
         let resp = self.check(request).await?;
 
-        Ok(resp.annotate(text.as_str(), origin, color))
+        Ok(resp.annotate(text.as_ref(), origin, color))
     }
 
     /// Send a languages request to the server and await for the response.
-    pub async fn languages(&self) -> Result<LanguagesResponse> {
-        match self
+    pub async fn languages(&self) -> Result<languages::Response> {
+        let resp = self
             .client
             .get(format!("{}/languages", self.api))
             .send()
             .await
-        {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<LanguagesResponse>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
-            },
-            Err(e) => Err(Error::RequestEncode(e)),
+            .map_err(Error::Reqwest)?;
+
+        match resp.error_for_status_ref() {
+            Ok(_) => resp.json::<languages::Response>().await.map_err(Into::into),
+            Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
         }
     }
 
     /// Send a words request to the server and await for the response.
-    pub async fn words(&self, request: &WordsRequest) -> Result<WordsResponse> {
-        match self
+    pub async fn words(&self, request: &words::Request) -> Result<words::Response> {
+        let resp = self
             .client
             .get(format!("{}/words", self.api))
             .header(ACCEPT, HeaderValue::from_static("application/json"))
             .query(request)
             .send()
             .await
-        {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<WordsResponse>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
-            },
-            Err(e) => Err(Error::RequestEncode(e)),
+            .map_err(Error::Reqwest)?;
+
+        match resp.error_for_status_ref() {
+            Ok(_) => resp.json::<words::Response>().await.map_err(Error::Reqwest),
+            Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
         }
     }
 
     /// Send a words/add request to the server and await for the response.
-    pub async fn words_add(&self, request: &WordsAddRequest) -> Result<WordsAddResponse> {
-        match self
+    pub async fn words_add(&self, request: &words::add::Request) -> Result<words::add::Response> {
+        let resp = self
             .client
             .post(format!("{}/words/add", self.api))
             .header(ACCEPT, HeaderValue::from_static("application/json"))
             .form(request)
             .send()
             .await
-        {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<WordsAddResponse>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
+            .map_err(Error::Reqwest)?;
+
+        match resp.error_for_status_ref() {
+            Ok(_) => {
+                resp.json::<words::add::Response>()
+                    .await
+                    .map_err(Error::Reqwest)
             },
-            Err(e) => Err(Error::RequestEncode(e)),
+            Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
         }
     }
 
     /// Send a words/delete request to the server and await for the response.
-    pub async fn words_delete(&self, request: &WordsDeleteRequest) -> Result<WordsDeleteResponse> {
-        match self
+    pub async fn words_delete(
+        &self,
+        request: &words::delete::Request,
+    ) -> Result<words::delete::Response> {
+        let resp = self
             .client
             .post(format!("{}/words/delete", self.api))
             .header(ACCEPT, HeaderValue::from_static("application/json"))
             .form(request)
             .send()
             .await
-        {
-            Ok(resp) => {
-                match resp.error_for_status_ref() {
-                    Ok(_) => {
-                        resp.json::<WordsDeleteResponse>()
-                            .await
-                            .map_err(Error::ResponseDecode)
-                    },
-                    Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
-                }
+            .map_err(Error::Reqwest)?;
+
+        match resp.error_for_status_ref() {
+            Ok(_) => {
+                resp.json::<words::delete::Response>()
+                    .await
+                    .map_err(Error::Reqwest)
             },
-            Err(e) => Err(Error::RequestEncode(e)),
+            Err(_) => Err(Error::InvalidRequest(resp.text().await?)),
         }
     }
 
@@ -587,33 +624,151 @@ impl ServerClient {
 
 #[cfg(test)]
 mod tests {
-    use crate::{check::CheckRequest, ServerClient};
+    use std::borrow::Cow;
+
+    use assert_matches::assert_matches;
+
+    use super::ServerClient;
+    use crate::{api::check::Request, error::Error};
+
+    fn get_testing_server_client() -> ServerClient {
+        ServerClient::new("http://localhost", "8010")
+    }
 
     #[tokio::test]
     async fn test_server_ping() {
-        let client = ServerClient::from_env_or_default();
-        assert!(client.ping().await.is_ok());
+        let client = get_testing_server_client();
+        assert!(
+            client.ping().await.is_ok(),
+            "\n----------------------------------------------------------------------------------------------\n\
+            IMPORTANT: Please ensure that there is a local LanguageTool service running on port 8010.\n\
+            ----------------------------------------------------------------------------------------------\n"
+        );
     }
 
     #[tokio::test]
     async fn test_server_check_text() {
-        let client = ServerClient::from_env_or_default();
-        let req = CheckRequest::default().with_text("je suis une poupee".to_string());
+        let client = get_testing_server_client();
+
+        let req = Request::default().with_text("je suis une poupee");
         assert!(client.check(&req).await.is_ok());
+
+        // Too long
+        let req = Request::default().with_text("Repeat ".repeat(1500));
+        assert_matches!(client.check(&req).await, Err(Error::InvalidRequest(_)));
     }
 
     #[tokio::test]
     async fn test_server_check_data() {
-        let client = ServerClient::from_env_or_default();
-        let req = CheckRequest::default()
+        let client = get_testing_server_client();
+        let req = Request::default()
             .with_data_str("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
             .unwrap();
         assert!(client.check(&req).await.is_ok());
+
+        // Too long
+        let req = Request::default()
+            .with_data_str(&format!(
+                "{{\"annotation\":[{{\"text\": \"{}\"}}]}}",
+                "repeat".repeat(5000)
+            ))
+            .unwrap();
+        assert_matches!(client.check(&req).await, Err(Error::InvalidRequest(_)));
+    }
+
+    #[tokio::test]
+    async fn test_server_check_multiple_and_join() {
+        const TEXT: &str = "I am a doll.\nBut what are you?";
+        let client = get_testing_server_client();
+
+        let requests = Request::default()
+            .with_language("en-US".into())
+            .with_text(TEXT)
+            .split(20, "\n");
+        let resp = client.check_multiple_and_join(requests).await.unwrap();
+
+        assert_eq!(resp.text, Cow::from(TEXT));
+        assert_eq!(resp.text_length, TEXT.len());
+        #[cfg(feature = "unstable")]
+        assert!(!resp.response.warnings.as_ref().unwrap().incomplete_results);
+        assert_eq!(resp.response.iter_matches().next(), None);
+        assert_eq!(resp.response.language.name, "English (US)");
+
+        // Fails when trying to use it without text
+        let requests = vec![Request::default().with_language("en-US".into())];
+        assert!(client.check_multiple_and_join(requests).await.is_err());
+        let requests = vec![Request::default()
+            .with_language("en-US".into())
+            .with_data_str("{\"annotation\":[{\"text\": \"je suis une poupee\"}]}")
+            .unwrap()];
+        assert!(client.check_multiple_and_join(requests).await.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_server_check_multiple_and_join_without_context() {
+        let client = get_testing_server_client();
+
+        let requests = vec![Request::default()
+            .with_language("en-US".into())
+            .with_data_str("{\"annotation\":[{\"text\": \"I am a doll\"}]}")
+            .unwrap()];
+        let resp = client
+            .check_multiple_and_join_without_context(requests)
+            .await
+            .unwrap();
+
+        #[cfg(feature = "unstable")]
+        assert!(!resp.warnings.as_ref().unwrap().incomplete_results);
+        assert_eq!(resp.iter_matches().next(), None);
+        assert_eq!(resp.language.name, "English (US)");
+
+        let requests = vec![Request::default()
+            .with_language("en-US".into())
+            .with_text("I am a doll.")];
+        let resp = client
+            .check_multiple_and_join_without_context(requests)
+            .await
+            .unwrap();
+        assert_eq!(resp.iter_matches().next(), None);
+
+        // Fails when trying to use it without text or data
+        let requests = vec![Request::default().with_language("en-US".into())];
+        assert!(client.check_multiple_and_join(requests).await.is_err());
+    }
+
+    #[cfg(feature = "annotate")]
+    #[tokio::test]
+    async fn test_server_annotate() {
+        let client = get_testing_server_client();
+
+        let req = Request::default()
+            .with_text("Who are you?")
+            .with_language("en-US".into());
+        let annotated = client
+            .annotate_check(&req, Some("origin"), false)
+            .await
+            .unwrap();
+        assert_eq!(
+            annotated,
+            "No errors were found in provided text".to_string()
+        );
+
+        let req = Request::default()
+            .with_text("Who ar you?")
+            .with_language("en-US".into());
+        let annotated = client
+            .annotate_check(&req, Some("origin"), false)
+            .await
+            .unwrap();
+        assert!(
+            annotated.starts_with("error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.")
+        );
+        assert!(annotated.contains("^^ Possible spelling mistake"));
     }
 
     #[tokio::test]
     async fn test_server_languages() {
-        let client = ServerClient::from_env_or_default();
+        let client = get_testing_server_client();
         assert!(client.languages().await.is_ok());
     }
 }
