@@ -106,7 +106,7 @@ pub fn parse_markdown(file_content: &str) -> Data<'_> {
                     Tag::Paragraph
                     | Tag::List(_)
                     | Tag::Item
-                    | Tag::BlockQuote?(_)
+                    | Tag::BlockQuote
                     | Tag::TableCell => {
                         annotations.push(DataAnnotation::new_text(s));
                     },
