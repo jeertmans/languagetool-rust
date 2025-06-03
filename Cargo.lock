@@ -1096,7 +1096,7 @@ dependencies = [
 
 [[package]]
 name = "languagetool-rust"
-version = "2.1.4"
+version = "3.0.0-rc.1"
 dependencies = [
  "annotate-snippets",
  "assert_cmd",
