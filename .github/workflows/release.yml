@@ -81,7 +81,7 @@ jobs:
         target: ${{ matrix.target }}
 
     - name: Install cross
-      if: matrix.cross
+      if: matrix.cross == true
       uses: taiki-e/install-action@v2
       with:
         tool: cross
@@ -98,11 +98,11 @@ jobs:
         echo "target dir is: ${{ env.TARGET_DIR }}"
 
     - name: Build release binary (with cross)
-      if: matrix.cross
+      if: matrix.cross == true
       run: cross build --verbose --release --no-default-features --features full,native-tls-vendored ${{ env.TARGET_FLAGS }}
 
     - name: Build release binary (with cargo)
-      if: !matrix.cross
+      if: matrix.cross == false
       run: cargo build --verbose --release --no-default-features --features full,native-tls-vendored ${{ env.TARGET_FLAGS }}
 
     - name: Strip release binary (linux and macos)
