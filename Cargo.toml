@@ -24,7 +24,7 @@ is-terminal = {version = "0.4", optional = true}
 lifetime = {version = "0.1", features = ["macros"]}
 log = {version = "0.4", optional = true}
 pretty_env_logger = {version = "0.5", optional = true}
-pulldown-cmark = {version = "0.10", optional = true}
+pulldown-cmark = {version = "0.13", optional = true}
 reqwest = {version = "0.12", default-features = false, features = ["json"]}
 scraper = {version = "0.23", optional = true}
 serde = {version = "1.0", features = ["derive"]}
