@@ -63,11 +63,11 @@ jobs:
           target: x86_64-apple-darwin
           cross: false
         - build: win-msvc
-          os: windows-2019
+          os: windows-2025
           target: x86_64-pc-windows-msvc
           cross: false
         - build: win-gnu
-          os: windows-2019
+          os: windows-2025
           target: x86_64-pc-windows-gnu
           cross: false
 
