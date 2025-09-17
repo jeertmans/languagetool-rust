@@ -8,7 +8,7 @@ This project uses `cargo-release` to bump the version number and update the chan
 Note that, by default, every command runs in *dry mode*, and you need to append `--execute`
 to actually perform the action.
 
-Here are the the following steps to install `cargo-release`:
+Here are the following steps to install `cargo-release`:
 
 ```bash
 cargo install cargo-release
