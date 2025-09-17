@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next-header -->
 
-## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v2.1.5...HEAD)
+## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v3.0.0...HEAD)
+
+## [3.0.0](https://github.com/jeertmans/languagetool-rust/compare/v2.1.5...3.0.0) 2025-09-17
 
 > [!IMPORTANT]
 > This new major release includes many breaking changes, all made in
