@@ -56,7 +56,7 @@ error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   |
 9 | ...tml**, **markdown**, **multithreaded**, **typst**.  - **native-tls**: Enables TLS functio...
   |                                            ^^^^^^^^^ Possible spelling mistake
-  |                                            --------- help: Typst, typist, type, types, test, ... (28 not shown)
+  |                                            --------- help: Typst, typist, type, types, test, ... (29 not shown)
   |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   --> [path]
@@ -105,7 +105,7 @@ error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
    |
 17 | ...u are planning to use HTTPS servers.  - **typst**: Enables Typst parser utilities.  - **u...
    |                                            ^^^^^^^^^ Possible spelling mistake
-   |                                            --------- help: Typst, typist, type, types, test, ... (28 not shown)
+   |                                            --------- help: Typst, typist, type, types, test, ... (29 not shown)
    |
 error[MORFOLOGIK_RULE_EN_US]: Possible spelling mistake found.
   --> [path]

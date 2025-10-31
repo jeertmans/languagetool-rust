@@ -8,12 +8,12 @@ on:
 name: Rustdoc
 
 jobs:
-  publish:
-    name: Publish
+  rustdoc:
+    name: Rustdoc
     runs-on: ubuntu-latest
     steps:
     - name: Checkout sources
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Install nightly toolchain
       uses: dtolnay/rust-toolchain@nightly
@@ -22,4 +22,4 @@ jobs:
       uses: Swatinem/rust-cache@v2
 
     - name: Check rustdoc build
-      run: RUSTDOCFLAGS='--cfg docsrs' cargo +nightly doc --all-features -Zunstable-options -Zrustdoc-scrape-examples
+      run: RUSTDOCFLAGS='--cfg docsrs' cargo +nightly doc --all-features -Zunstable-options -Zrustdoc-scrape-examples --no-deps

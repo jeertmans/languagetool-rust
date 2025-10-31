@@ -22,7 +22,7 @@ jobs:
       LANGUAGETOOL_PORT: 8010
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Install nightly toolchain
       uses: dtolnay/rust-toolchain@nightly
