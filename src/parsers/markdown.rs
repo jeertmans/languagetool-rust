@@ -55,6 +55,10 @@ pub fn parse_markdown(file_content: &str) -> Data<'_> {
                 annotations.extend(data);
             },
 
+            Event::InlineMath(s) | Event::DisplayMath(s) => {
+                annotations.push(DataAnnotation::new_markup(s));
+            },
+
             Event::Text(mut s) => {
                 // Add space between sentences
                 if s.chars()
@@ -106,7 +110,7 @@ pub fn parse_markdown(file_content: &str) -> Data<'_> {
                     Tag::Paragraph
                     | Tag::List(_)
                     | Tag::Item
-                    | Tag::BlockQuote
+                    | Tag::BlockQuote(_)
                     | Tag::TableCell => {
                         annotations.push(DataAnnotation::new_text(s));
                     },
