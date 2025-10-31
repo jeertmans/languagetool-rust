@@ -8,8 +8,8 @@ on:
 name: Rustdoc
 
 jobs:
-  publish:
-    name: Publish
+  rustdoc:
+    name: Rustdoc
     runs-on: ubuntu-latest
     steps:
     - name: Checkout sources
