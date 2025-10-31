@@ -28,7 +28,7 @@ jobs:
       LANGUAGETOOL_HOSTNAME: http://localhost
       LANGUAGETOOL_PORT: 8010
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Setup rust toolchain, cache and cargo-codspeed binary
       uses: moonrepo/setup-rust@v1
@@ -41,6 +41,6 @@ jobs:
       run: cargo codspeed build
 
     - name: Run the benchmarks
-      uses: CodSpeedHQ/action@v3
+      uses: CodSpeedHQ/action@v4
       with:
         run: cargo codspeed run
