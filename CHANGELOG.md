@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/jeertmans/languagetool-rust/compare/v3.0.0...HEAD)
 
+### Changed
+
+- Bump MSRV to 1.88 (with [@Rolv-Apneseth](https://github.com/Rolv-Apneseth)).
+  [#180](https://github.com/jeertmans/languagetool-rust/pull/180)
+
 ## [3.0.0](https://github.com/jeertmans/languagetool-rust/compare/v2.1.5...3.0.0) 2025-09-17
 
 > [!IMPORTANT]
