@@ -126,22 +126,34 @@ impl ExecuteSubcommand for Command {
                     log::warn!("No input text was provided, skipping.");
                     return Ok(());
                 }
+                // Split text into multiple parts to be checked
+                let requests = request.split(self.max_length, self.split_pattern.as_str());
+
+                if self.raw {
+                    // RAW JSON output does not carry 'context' information
+                    let response = server_client
+                        .check_multiple_and_join_without_context(requests)
+                        .await?;
+                    writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&response)?)?;
+                } else {
+                    let response_with_context =
+                        server_client.check_multiple_and_join(requests).await?;
+
+                    writeln!(
+                        &mut stdout,
+                        "{}",
+                        &response_with_context.annotate(
+                            response_with_context.text.as_ref(),
+                            None,
+                            color
+                        )
+                    )?;
+                }
             } else {
                 // Handle annotated data
                 let response = server_client.check(&request).await?;
                 writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&response)?)?;
-                return Ok(());
             };
-
-            let requests = request.split(self.max_length, self.split_pattern.as_str());
-
-            let response = server_client.check_multiple_and_join(requests).await?;
-
-            writeln!(
-                &mut stdout,
-                "{}",
-                &response.annotate(response.text.as_ref(), None, color)
-            )?;
 
             return Ok(());
         }
@@ -186,6 +198,9 @@ impl ExecuteSubcommand for Command {
                         log::info!("Skipping empty file: {filename:?}.");
                         continue;
                     }
+                    // TODO: see if we can keep the ResponseWithContext and use this for better
+                    // annotation, or if it doesn't change anything become into() preserves
+                    // all the important information.
 
                     let response = server_client.check_multiple_and_join(requests).await?;
                     (response.into(), file_content)
@@ -206,14 +221,14 @@ impl ExecuteSubcommand for Command {
                 },
             };
 
-            if !self.raw {
+            if self.raw {
+                writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&response)?)?;
+            } else {
                 writeln!(
                     &mut stdout,
                     "{}",
                     &response.annotate(&text, filename.to_str(), color)
                 )?;
-            } else {
-                writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&response)?)?;
             }
         }
 
