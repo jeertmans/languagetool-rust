@@ -27,7 +27,7 @@ jobs:
       run: pre-commit autoupdate
 
     - name: Create a pull request with updated versions
-      uses: peter-evans/create-pull-request@v6
+      uses: peter-evans/create-pull-request@v8
       with:
         branch: update/pre-commit-hooks
         title: 'chore(deps): update pre-commit hooks'
