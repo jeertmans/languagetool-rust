@@ -127,13 +127,21 @@ impl ExecuteSubcommand for Command {
                     return Ok(());
                 }
                 // Split text into multiple parts to be checked
+                let more_context = request.more_context;
                 let requests = request.split(self.max_length, self.split_pattern.as_str());
 
                 if self.raw {
                     // RAW JSON output does not carry 'context' information
-                    let response = server_client
-                        .check_multiple_and_join_without_context(requests)
-                        .await?;
+                    let response = if more_context {
+                        server_client
+                            .check_multiple_and_join(requests)
+                            .await?
+                            .into()
+                    } else {
+                        server_client
+                            .check_multiple_and_join_without_context(requests)
+                            .await?
+                    };
                     writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&response)?)?;
                 } else {
                     let response_with_context =
@@ -222,6 +230,11 @@ impl ExecuteSubcommand for Command {
             };
 
             if self.raw {
+                let response = if request.more_context {
+                    check::ResponseWithContext::new(Cow::from(text), response).into()
+                } else {
+                    response
+                };
                 writeln!(&mut stdout, "{}", serde_json::to_string_pretty(&response)?)?;
             } else {
                 writeln!(
@@ -352,6 +365,10 @@ pub struct CliRequest {
         clap(long, default_value = "default", ignore_case = true, value_enum)
     )]
     pub level: Level,
+    /// If present, more context (i.e., line number and line offset) will be
+    /// added to the response.
+    #[clap(short = 'm', long)]
+    pub more_context: bool,
 }
 
 impl From<CliRequest> for Request<'_> {
@@ -371,6 +388,7 @@ impl From<CliRequest> for Request<'_> {
             disabled_categories: val.disabled_categories,
             enabled_only: val.enabled_only,
             level: val.level,
+            more_context: val.more_context,
         }
     }
 }
