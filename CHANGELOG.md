@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Bring back --more-context flag
+- Bring back --more-context flag ([@Dosx001](https://github.com/Dosx001)). [#210](https://github.com/jeertmans/languagetool-rust/pull/210)
 
 ## [3.0.1](https://github.com/jeertmans/languagetool-rust/compare/v3.0.0...3.0.1) 2025-12-31
 
