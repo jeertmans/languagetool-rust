@@ -496,6 +496,33 @@ fn test_check_with_unexisting_level() {
 }
 
 #[test]
+fn test_check_with_more_context() {
+    let assert = get_cmd()
+        .arg("check")
+        .arg("--more-context")
+        .arg("--raw")
+        .arg("--text")
+        .arg("\"some text that is given as text\"")
+        .assert();
+    assert.success().stdout(contains("line_number"));
+}
+
+#[test]
+fn test_check_with_more_context_and_file() {
+    use std::io::Write;
+    let mut file = tempfile::NamedTempFile::new().unwrap();
+    writeln!(file, "Some text with a error inside.").unwrap();
+
+    let assert = get_cmd()
+        .arg("check")
+        .arg("--more-context")
+        .arg("--raw")
+        .arg(file.path().to_str().unwrap())
+        .assert();
+    assert.success().stdout(contains("line_number"));
+}
+
+#[test]
 fn test_languages() {
     let assert = get_cmd().arg("languages").assert();
     assert.success();

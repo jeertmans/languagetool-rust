@@ -242,6 +242,10 @@ pub struct Request<'source> {
     /// you might only find useful when checking formal text.
     #[serde(skip_serializing_if = "Level::is_default")]
     pub level: Level,
+    /// If present, more context (i.e., line number and line offset) will be
+    /// added to the response.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub more_context: bool,
 }
 
 impl<'source> Request<'source> {
