@@ -72,6 +72,13 @@ pub fn parse_typst(file_content: impl AsRef<str>) -> Data<'static> {
                     full_text,
                     interpreted_as,
                 ));
+
+                // Separate list entries so LanguageTool does not merge
+                // consecutive items into a single sentence.
+                if matches!(kind, SyntaxKind::ListItem | SyntaxKind::EnumItem) {
+                    annotations.push(DataAnnotation::new_text("\n"));
+                }
+
                 continue;
             },
             _ => {},
