@@ -15,12 +15,12 @@ repos:
   - id: trailing-whitespace
     exclude: ^tests/
 - repo: https://github.com/igorshubovych/markdownlint-cli
-  rev: v0.47.0
+  rev: v0.48.0
   hooks:
   - id: markdownlint-fix
     args: [--ignore, LICENSE.md]
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.15.0
+  rev: v2.16.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix]
@@ -42,7 +42,7 @@ repos:
     types: [rust]
     args: []
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.4.1
+  rev: v2.4.2
   hooks:
   - id: codespell
     args:
